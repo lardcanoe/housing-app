@@ -3,6 +3,8 @@ defmodule HousingAppWeb.Router do
   use Pow.Phoenix.Router
   use Pow.Extension.Phoenix.Router, extensions: [PowResetPassword, PowEmailConfirmation]
 
+  import HousingAppWeb.AuthPlug
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -28,7 +30,7 @@ defmodule HousingAppWeb.Router do
   end
 
   scope "/", HousingAppWeb do
-    pipe_through :browser
+    pipe_through [:browser, :require_authenticated_user]
 
     get "/", PageController, :home
   end
