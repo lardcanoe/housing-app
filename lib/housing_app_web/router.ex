@@ -1,5 +1,6 @@
 defmodule HousingAppWeb.Router do
   use HousingAppWeb, :router
+  use Pow.Phoenix.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -12,6 +13,16 @@ defmodule HousingAppWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+  end
+
+  pipeline :admin do
+    plug HousingAppWeb.EnsureRolePlug, :admin
+  end
+
+  scope "/" do
+    pipe_through :browser
+
+    pow_routes()
   end
 
   scope "/", HousingAppWeb do

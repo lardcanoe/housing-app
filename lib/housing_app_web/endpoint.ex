@@ -47,5 +47,6 @@ defmodule HousingAppWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+  plug Pow.Plug.Session, otp_app: :housing_app
   plug HousingAppWeb.Router
 end

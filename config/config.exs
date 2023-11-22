@@ -7,9 +7,12 @@
 # General application configuration
 import Config
 
+# https://dev.to/talk2megooseman/using-phoenix-channels-high-memory-usage-save-money-with-erlfullsweepafter-3edl
+:erlang.system_flag(:fullsweep_after, 20)
+
 config :housing_app,
   ecto_repos: [HousingApp.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime, binary_id: true]
 
 # Configures the endpoint
 config :housing_app, HousingAppWeb.Endpoint,
@@ -60,6 +63,10 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+config :housing_app, :pow,
+  user: HousingApp.Users.User,
+  repo: HousingApp.Repo
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
