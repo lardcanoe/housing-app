@@ -3,6 +3,7 @@ defmodule HousingApp.Accounts.User do
 
   use Ecto.Schema
   use Pow.Ecto.Schema
+  use Pow.Extension.Ecto.Schema, extensions: [PowResetPassword, PowEmailConfirmation]
   import Ecto.Changeset
   import HousingAppWeb.Gettext
 
@@ -22,10 +23,9 @@ defmodule HousingApp.Accounts.User do
   @spec registration_changeset(Ecto.Schema.t(), map(), Keyword.t()) :: Ecto.Changeset.t()
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [
-      :email,
-      :role
-    ])
+    |> pow_changeset(attrs)
+    |> pow_extension_changeset(attrs)
+    |> cast(attrs, [:role])
     |> validate_user_email(opts)
     |> validate_inclusion(:role, ~w(user platform_admin))
   end

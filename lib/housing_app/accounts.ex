@@ -106,7 +106,7 @@ defmodule HousingApp.Accounts do
 
   def create_user(attrs \\ %{}) do
     %User{}
-    |> User.changeset(attrs)
+    |> User.registration_changeset(attrs)
     |> Repo.insert()
   end
 

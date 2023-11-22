@@ -1,6 +1,7 @@
 defmodule HousingAppWeb.Router do
   use HousingAppWeb, :router
   use Pow.Phoenix.Router
+  use Pow.Extension.Phoenix.Router, extensions: [PowResetPassword, PowEmailConfirmation]
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -23,6 +24,7 @@ defmodule HousingAppWeb.Router do
     pipe_through :browser
 
     pow_routes()
+    pow_extension_routes()
   end
 
   scope "/", HousingAppWeb do

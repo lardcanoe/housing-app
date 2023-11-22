@@ -65,8 +65,13 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 config :housing_app, :pow,
-  user: HousingApp.Users.User,
-  repo: HousingApp.Repo
+  web_mailer_module: HousingAppWeb,
+  web_module: HousingAppWeb,
+  user: HousingApp.Accounts.User,
+  repo: HousingApp.Repo,
+  mailer_backend: HousingAppWeb.Mailer.Pow,
+  extensions: [PowResetPassword, PowEmailConfirmation],
+  controller_callbacks: Pow.Extension.Phoenix.ControllerCallbacks
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

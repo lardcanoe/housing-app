@@ -1,4 +1,3 @@
-<.flash_group flash={@flash} />
 <div class="antialiased bg-gray-50 dark:bg-gray-900">
   <nav class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
     <div class="flex flex-wrap justify-between items-center">
@@ -681,12 +680,13 @@
           </ul>
           <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
             <li>
-              <a
-                href="#"
+              <.link
+                method="delete"
+                href={~p"/session"}
                 class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >
                 Sign out
-              </a>
+              </.link>
             </li>
           </ul>
         </div>

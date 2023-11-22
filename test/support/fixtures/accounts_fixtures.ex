@@ -1,7 +1,7 @@
 defmodule HousingApp.AccountsFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `HousingApp.Tenants` context.
+  entities via the `HousingApp.Accounts` context.
   """
 
   @doc """
