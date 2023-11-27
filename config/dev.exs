@@ -81,4 +81,8 @@ config :phoenix_live_view, :debug_heex_annotations, true
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
 
+# ONLY IN DEV, can leak info
+# https://hexdocs.pm/ash/policies.html#logging
+config :ash, :policies, show_policy_breakdowns?: true
+
 import_config "#{config_env()}.local.exs"

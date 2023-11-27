@@ -8,6 +8,8 @@ defmodule HousingApp.Management do
     otp_app: :housing_app,
     extensions: [AshAdmin.Api]
 
+  # https://hexdocs.pm/ash/dsl-ash-api.html#authorization
+  # https://hexdocs.pm/ash/security.html#authorization-configuration
   authorization do
     authorize :by_default
   end
@@ -20,15 +22,16 @@ defmodule HousingApp.Management do
     registry HousingApp.Management.Registry
   end
 
-  def create_profile(attrs, tenant_id) do
+  def create_profile(attrs, tenant_id, opts \\ []) do
     HousingApp.Management.Profile
-    |> Ash.Changeset.for_create(:create, attrs)
+    |> Ash.Changeset.for_create(:create, attrs, opts)
     |> Ash.Changeset.set_tenant("tenant_" <> tenant_id)
     |> HousingApp.Management.create()
   end
 
-  def list_profiles(tenant_id) do
+  def list_profiles(tenant_id, opts \\ []) do
     HousingApp.Management.Profile
+    |> Ash.Query.set_actor(opts)
     |> Ash.Query.set_tenant("tenant_" <> tenant_id)
     |> HousingApp.Management.read!()
   end

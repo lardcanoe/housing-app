@@ -7,7 +7,9 @@ defmodule HousingApp.Repo do
 
   def all_tenants do
     for t <- HousingApp.Accounts.all_tenants!() do
-      t.schema
+      # This is broken sadly:
+      # t.schema
+      "tenant_#{t.id}"
     end
   end
 end

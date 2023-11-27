@@ -109,8 +109,6 @@ defmodule HousingAppWeb.Router do
   end
 
   def require_authenticated_platform_admin(conn, _opts) do
-    IO.inspect(conn.assigns[:current_user])
-
     if conn.assigns[:current_user] && conn.assigns[:current_user].role == :platform_admin do
       conn
     else

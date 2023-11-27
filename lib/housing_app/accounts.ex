@@ -20,6 +20,22 @@ defmodule HousingApp.Accounts do
     registry HousingApp.Accounts.Registry
   end
 
+  def register_user_with_password(attrs) do
+    HousingApp.Accounts.User
+    |> Ash.Changeset.for_create(:register_with_password, attrs)
+    |> HousingApp.Accounts.create!()
+  end
+
+  def get_user!(id) do
+    HousingApp.Accounts.User
+    |> Ash.Query.filter(id == ^id)
+    |> HousingApp.Accounts.read_one!()
+  end
+
+  def list_users do
+    HousingApp.Accounts.User |> HousingApp.Accounts.read!()
+  end
+
   def create_tenant(attrs) do
     HousingApp.Accounts.Tenant
     |> Ash.Changeset.for_create(:create, attrs)
@@ -54,6 +70,7 @@ defmodule HousingApp.Accounts do
   def create_user_tenant(attrs) do
     HousingApp.Accounts.UserTenant
     |> Ash.Changeset.for_create(:create, attrs)
+    |> Ash.Changeset.load([:user, :tenant])
     |> HousingApp.Accounts.create()
   end
 
@@ -70,6 +87,7 @@ defmodule HousingApp.Accounts do
   def get_user_tenant!(id) do
     HousingApp.Accounts.UserTenant
     |> Ash.Query.filter(id == ^id)
+    |> Ash.Query.load([:user, :tenant])
     |> HousingApp.Accounts.read_one!()
   end
 end

@@ -35,4 +35,8 @@ defmodule HousingApp.Accounts.UserTenant do
       allow_nil? false
     end
   end
+
+  identities do
+    identity :unique_user_and_tenant, [:user_id, :tenant_id]
+  end
 end
