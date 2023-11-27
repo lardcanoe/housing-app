@@ -26,4 +26,8 @@ defmodule HousingApp.Accounts.Tenant do
   relationships do
     has_many :user_tenants, HousingApp.Accounts.UserTenant
   end
+
+  validations do
+    validate string_length(:name, min: 1, max: 128)
+  end
 end

@@ -25,14 +25,12 @@ defmodule HousingApp.Accounts.UserTenant do
 
   relationships do
     belongs_to :user, HousingApp.Accounts.User do
-      api HousingApp.Accounts
-      writable? true
+      attribute_writable? true
       allow_nil? false
     end
 
     belongs_to :tenant, HousingApp.Accounts.Tenant do
-      api HousingApp.Accounts
-      writable? true
+      attribute_writable? true
       allow_nil? false
     end
   end

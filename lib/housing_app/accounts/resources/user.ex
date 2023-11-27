@@ -42,6 +42,11 @@ defmodule HousingApp.Accounts.User do
     update_timestamp(:updated_at)
   end
 
+  validations do
+    validate match(:email, ~r/@/)
+    validate string_length(:email, min: 6, max: 200)
+  end
+
   relationships do
     has_many :user_tenants, HousingApp.Accounts.UserTenant
   end
