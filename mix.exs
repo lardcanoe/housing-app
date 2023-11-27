@@ -44,6 +44,7 @@ defmodule HousingApp.MixProject do
       {:ash_authentication, "~> 3.12"},
       {:ash_authentication_phoenix, "~> 1.9"},
       {:ash_admin, "~> 0.9.8"},
+      {:ash_archival, "~> 0.1"},
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.2"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},

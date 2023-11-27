@@ -2,7 +2,8 @@ defmodule HousingApp.Accounts.UserTenant do
   @moduledoc false
 
   use Ash.Resource,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshArchival.Resource]
 
   postgres do
     table "user_tenants"
