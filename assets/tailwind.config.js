@@ -10,7 +10,8 @@ module.exports = {
     "./js/**/*.js",
     "../lib/housing_app_web.ex",
     "../lib/housing_app_web/**/*.*ex",
-    './node_modules/flowbite/**/*.js'
+    './node_modules/flowbite/**/*.js',
+    '../deps/ash_authentication_phoenix/**/*.ex'
   ],
   theme: {
     extend: {

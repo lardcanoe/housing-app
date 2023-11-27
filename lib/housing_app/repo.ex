@@ -1,5 +1,7 @@
 defmodule HousingApp.Repo do
-  use Ecto.Repo,
-    otp_app: :housing_app,
-    adapter: Ecto.Adapters.Postgres
+  use AshPostgres.Repo, otp_app: :housing_app
+
+  def installed_extensions() do
+    ["uuid-ossp", "citext"]
+  end
 end

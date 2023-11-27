@@ -17,7 +17,8 @@ defmodule HousingApp.Application do
       # Start a worker by calling: HousingApp.Worker.start_link(arg)
       # {HousingApp.Worker, arg},
       # Start to serve requests, typically the last entry
-      HousingAppWeb.Endpoint
+      HousingAppWeb.Endpoint,
+      {AshAuthentication.Supervisor, otp_app: :housing_app}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

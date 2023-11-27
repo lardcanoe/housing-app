@@ -19,17 +19,9 @@ defmodule HousingAppWeb do
 
   def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
 
-  def mail do
-    quote do
-      use Pow.Phoenix.Mailer.Component
-
-      unquote(html_helpers())
-    end
-  end
-
   def router do
     quote do
-      use Phoenix.Router, helpers: false
+      use Phoenix.Router, helpers: true
 
       # Import common connection and controller functions to use in pipelines
       import Plug.Conn
@@ -52,8 +44,30 @@ defmodule HousingAppWeb do
 
       import Plug.Conn
       import HousingAppWeb.Gettext
+      alias HousingAppWeb.Router.Helpers, as: Routes
 
       unquote(verified_routes())
+    end
+  end
+
+  @doc false
+  def view do
+    quote do
+      use Phoenix.View,
+        # root: "lib/housing_app_web/components",
+        root: "lib/housing_app_web/templates",
+        namespace: HousingAppWeb
+
+      # Import convenience functions from controllers
+      import Phoenix.Controller,
+        only: [get_csrf_token: 0, view_module: 1, view_template: 1]
+
+      use Phoenix.Component
+
+      import Phoenix.View
+
+      # Include shared imports and aliases for views
+      unquote(html_helpers())
     end
   end
 
@@ -97,6 +111,10 @@ defmodule HousingAppWeb do
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
+
+      # import HousingAppWeb.ErrorHelpers
+      alias HousingAppWeb.Router.Helpers, as: Routes
+      import HousingAppWeb.LiveHelpers
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())

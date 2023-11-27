@@ -8,45 +8,33 @@ defmodule HousingApp.AccountsFixtures do
   Generate a tenant.
   """
   def tenant_fixture(attrs \\ %{}) do
-    {:ok, tenant} =
-      attrs
-      |> Enum.into(%{
-        name: "some name"
-      })
-      |> HousingApp.Accounts.create_tenant()
-
-    tenant
+    HousingApp.Accounts.Tenant
+    |> Ash.Changeset.for_create(:create, %{name: "some name"})
+    |> HousingApp.Accounts.create!()
   end
 
   @doc """
   Generate a user.
   """
   def user_fixture(attrs \\ %{}) do
-    {:ok, user} =
-      attrs
-      |> Enum.into(%{
-        email: "foo@bar.com",
-        role: "user",
-        password: "Password123!",
-        password_confirmation: "Password123!"
-      })
-      |> HousingApp.Accounts.create_user()
-
-    user
+    HousingApp.Accounts.User
+    |> Ash.Changeset.for_create(:register_with_password, %{
+      email: "foo@bar.com",
+      password: "Password123!",
+      password_confirmation: "Password123!"
+    })
+    |> HousingApp.Accounts.create!()
   end
 
   @doc """
   Generate a user_tenant.
   """
   def user_tenant_fixture(attrs \\ %{}) do
-    {:ok, user_tenant} =
-      attrs
-      # |> Enum.into(%{
-      #   tenant_id: Ecto.UUID.cast!("601d74e4-a8d3-4b6e-8365-eddb4c893327"),
-      #   user_id: Ecto.UUID.cast!("801d74e4-a8d3-4b6e-8365-eddb4c893327")
-      # })
-      |> HousingApp.Accounts.create_user_tenant()
-
-    user_tenant
+    HousingApp.Accounts.UserTenant
+    |> Ash.Changeset.for_create(:create, %{
+      tenant_id: Ecto.UUID.cast!("601d74e4-a8d3-4b6e-8365-eddb4c893327"),
+      user_id: Ecto.UUID.cast!("801d74e4-a8d3-4b6e-8365-eddb4c893327")
+    })
+    |> HousingApp.Accounts.create!()
   end
 end

@@ -39,6 +39,11 @@ defmodule HousingApp.MixProject do
       {:phoenix_html, "~> 3.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 0.20.1"},
+      {:ash, "~> 2.17.3"},
+      {:ash_postgres, "~> 1.3.6"},
+      {:ash_authentication, "~> 3.12"},
+      {:ash_authentication_phoenix, "~> 1.9"},
+      {:ash_admin, "~> 0.9.8"},
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.2"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
@@ -54,8 +59,7 @@ defmodule HousingApp.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:plug_content_security_policy, "~> 0.2.1"},
       {:remote_ip, "~> 1.1"},
-      {:credo, "~> 1.7.1", only: [:dev, :test], runtime: false},
-      {:pow, "~> 1.0.34"}
+      {:credo, "~> 1.7.1", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -68,9 +72,10 @@ defmodule HousingApp.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.setup": ["ash_postgres.create", "ash_postgres.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      test: ["ash_postgres.create --quiet", "ash_postgres.migrate --quiet", "test"],
+      test_ecto: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
