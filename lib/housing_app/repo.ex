@@ -4,4 +4,10 @@ defmodule HousingApp.Repo do
   def installed_extensions() do
     ["uuid-ossp", "citext"]
   end
+
+  def all_tenants do
+    for t <- HousingApp.Accounts.all_tenants!() do
+      t.schema
+    end
+  end
 end

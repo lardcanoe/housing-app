@@ -40,6 +40,11 @@ defmodule HousingApp.Accounts do
     HousingApp.Accounts.Tenant |> HousingApp.Accounts.read!()
   end
 
+  ### ONLY USED FOR TENANT MIGRATIONS
+  def all_tenants!() do
+    %Ash.Query{resource: HousingApp.Accounts.Tenant} |> HousingApp.Accounts.read!()
+  end
+
   def get_tenant!(id) do
     HousingApp.Accounts.Tenant
     |> Ash.Query.filter(id == ^id)

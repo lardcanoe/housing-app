@@ -12,6 +12,10 @@ defmodule HousingApp.Accounts.Tenant do
     references do
       reference :user_tenants, on_delete: :delete
     end
+
+    manage_tenant do
+      template ["tenant_", :id]
+    end
   end
 
   actions do
