@@ -36,8 +36,7 @@ defmodule HousingAppWeb.AuthLive.AuthForm do
         {:noreply, redirect(socket, to: path)}
 
       {:error, form} ->
-        {:noreply,
-         assign(socket, :form, Form.clear_value(form, [:password, :password_confirmation]))}
+        {:noreply, assign(socket, :form, Form.clear_value(form, [:password, :password_confirmation]))}
     end
   end
 end
