@@ -6,25 +6,12 @@ defmodule HousingApp.Management.Profile do
     extensions: [AshArchival.Resource, AshAdmin.Api],
     authorizers: [Ash.Policy.Authorizer]
 
-  admin do
-    show?(true)
-  end
-
-  postgres do
-    table "profiles"
-    repo HousingApp.Repo
-  end
-
-  multitenancy do
-    strategy :context
-  end
-
-  actions do
-    defaults [:create, :read, :update, :destroy]
-  end
-
   attributes do
     uuid_primary_key :id
+  end
+
+  admin do
+    show?(true)
   end
 
   relationships do
@@ -42,10 +29,6 @@ defmodule HousingApp.Management.Profile do
     end
   end
 
-  identities do
-    identity :unique_user_tenant, [:user_tenant_id]
-  end
-
   policies do
     bypass always() do
       authorize_if HousingApp.Checks.IsPlatformAdmin
@@ -59,5 +42,22 @@ defmodule HousingApp.Management.Profile do
       authorize_if HousingApp.Checks.IsTenantAdmin
       authorize_if relates_to_actor_via(:user_tenant)
     end
+  end
+
+  postgres do
+    table "profiles"
+    repo HousingApp.Repo
+  end
+
+  actions do
+    defaults [:create, :read, :update, :destroy]
+  end
+
+  identities do
+    identity :unique_user_tenant, [:user_tenant_id]
+  end
+
+  multitenancy do
+    strategy :context
   end
 end

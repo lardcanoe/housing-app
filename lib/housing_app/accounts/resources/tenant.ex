@@ -5,6 +5,16 @@ defmodule HousingApp.Accounts.Tenant do
     data_layer: AshPostgres.DataLayer,
     extensions: [AshArchival.Resource]
 
+  attributes do
+    uuid_primary_key :id
+
+    attribute :name, :string, allow_nil?: false
+  end
+
+  relationships do
+    has_many :user_tenants, HousingApp.Accounts.UserTenant
+  end
+
   postgres do
     table "tenants"
     repo HousingApp.Repo
@@ -20,16 +30,6 @@ defmodule HousingApp.Accounts.Tenant do
 
   actions do
     defaults [:create, :read, :update, :destroy]
-  end
-
-  attributes do
-    uuid_primary_key :id
-
-    attribute :name, :string, allow_nil?: false
-  end
-
-  relationships do
-    has_many :user_tenants, HousingApp.Accounts.UserTenant
   end
 
   validations do

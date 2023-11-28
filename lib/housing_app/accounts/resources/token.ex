@@ -4,11 +4,11 @@ defmodule HousingApp.Accounts.Token do
     extensions: [AshAuthentication.TokenResource]
 
   token do
-    api(HousingApp.Accounts)
+    api HousingApp.Accounts
   end
 
   postgres do
-    table("tokens")
-    repo(HousingApp.Repo)
+    table "tokens"
+    repo HousingApp.Repo
   end
 end
