@@ -3,7 +3,7 @@ defmodule HousingAppWeb.AuthController do
   use AshAuthentication.Phoenix.Controller
 
   def success(conn, _activity, user, _token) do
-    return_to = get_session(conn, :return_to) || Routes.page_path(conn, :home)
+    return_to = get_session(conn, :return_to) || ~p"/"
 
     conn
     |> delete_session(:return_to)
@@ -19,10 +19,8 @@ defmodule HousingAppWeb.AuthController do
   end
 
   def sign_out(conn, _params) do
-    return_to = get_session(conn, :return_to) || Routes.page_path(conn, :home)
-
     conn
     |> clear_session()
-    |> redirect(to: return_to)
+    |> redirect(to: ~p"/sign-in")
   end
 end

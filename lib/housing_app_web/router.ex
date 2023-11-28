@@ -53,13 +53,9 @@ defmodule HousingAppWeb.Router do
 
     sign_out_route(AuthController)
 
-    get "/", PageController, :home
-
     ash_authentication_live_session :authentication_required,
       on_mount: {HousingAppWeb.LiveUserAuth, :live_user_required} do
-      # live "/editor", EditorLive.Index, :new
-      # live "/editor/:slug", EditorLive.Index, :edit
-      # live "/settings", SettingsLive.Index, :index
+      live "/", Live.DashboardLive, :home
     end
   end
 

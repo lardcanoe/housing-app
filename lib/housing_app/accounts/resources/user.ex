@@ -44,6 +44,9 @@ defmodule HousingApp.Accounts.User do
       allow_nil? false
     end
 
+    attribute :name, :string
+    attribute :avatar, :string
+
     create_timestamp :created_at
     update_timestamp :updated_at
   end

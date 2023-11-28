@@ -580,6 +580,61 @@ defmodule HousingAppWeb.CoreComponents do
     """
   end
 
+  @doc """
+  Renders a gravatar icon
+  """
+
+  attr(:email, :string, default: nil)
+  attr(:alternate, :string, default: nil)
+  attr(:alt, :string, default: nil)
+  attr(:class, :string, default: nil)
+  attr(:rest, :global)
+
+  def gravatar(assigns) do
+    src =
+      cond do
+        !is_nil(assigns.email) ->
+          hash =
+            assigns.email
+            |> String.trim()
+            |> String.downcase()
+            |> :erlang.md5()
+            |> Base.encode16(case: :lower)
+
+          "https://www.gravatar.com/avatar/#{hash}?s=150&d=#{default_gravatar(assigns.alternate)}"
+
+        !is_nil(assigns.alternate) ->
+          assigns.alternate
+
+        true ->
+          nil
+      end
+
+    assigns =
+      assigns
+      |> assign(src: src)
+
+    ~H"""
+    <img
+      :if={@src}
+      class={[
+        "h-8 w-8 rounded-full",
+        @class
+      ]}
+      src={@src}
+      title={@alt}
+      {@rest}
+    />
+    """
+  end
+
+  defp default_gravatar(""), do: "identicon"
+  defp default_gravatar(avatar) when is_nil(avatar), do: "identicon"
+
+  defp default_gravatar(avatar) do
+    URI.encode(avatar)
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do
