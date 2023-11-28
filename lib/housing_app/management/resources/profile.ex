@@ -28,6 +28,13 @@ defmodule HousingApp.Management.Profile do
   end
 
   relationships do
+    # Tenant is duplicate data, but makes it safer and easier to do data dumps
+    belongs_to :tenant, HousingApp.Accounts.Tenant do
+      api HousingApp.Accounts
+      attribute_writable? true
+      allow_nil? false
+    end
+
     belongs_to :user_tenant, HousingApp.Accounts.UserTenant do
       api HousingApp.Accounts
       attribute_writable? true

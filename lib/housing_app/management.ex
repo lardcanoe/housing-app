@@ -23,6 +23,8 @@ defmodule HousingApp.Management do
   end
 
   def create_profile(attrs, tenant_id, opts \\ []) do
+    attrs = Enum.into(attrs, %{"tenant_id" => tenant_id})
+
     HousingApp.Management.Profile
     |> Ash.Changeset.for_create(:create, attrs, opts)
     |> Ash.Changeset.set_tenant("tenant_" <> tenant_id)
@@ -34,5 +36,13 @@ defmodule HousingApp.Management do
     |> Ash.Query.set_actor(opts)
     |> Ash.Query.set_tenant("tenant_" <> tenant_id)
     |> HousingApp.Management.read!()
+  end
+
+  def get_profile!(id, tenant_id, opts \\ []) do
+    HousingApp.Management.Profile
+    |> Ash.Query.filter(id == ^id)
+    |> Ash.Query.set_actor(opts)
+    |> Ash.Query.set_tenant("tenant_" <> tenant_id)
+    |> HousingApp.Management.read_one!()
   end
 end
