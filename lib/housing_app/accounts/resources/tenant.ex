@@ -8,7 +8,7 @@ defmodule HousingApp.Accounts.Tenant do
   attributes do
     uuid_primary_key :id
 
-    attribute :name, :string, allow_nil?: false
+    attribute :name, :string, allow_nil?: false, constraints: [trim?: true, min_length: 1, max_length: 128]
   end
 
   relationships do
@@ -30,9 +30,5 @@ defmodule HousingApp.Accounts.Tenant do
 
   actions do
     defaults [:create, :read, :update, :destroy]
-  end
-
-  validations do
-    validate string_length(:name, min: 1, max: 128)
   end
 end
