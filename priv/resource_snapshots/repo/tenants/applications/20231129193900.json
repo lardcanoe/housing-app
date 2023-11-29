@@ -1,0 +1,135 @@
+{
+  "attributes": [
+    {
+      "default": "nil",
+      "size": null,
+      "type": "utc_datetime_usec",
+      "source": "archived_at",
+      "references": null,
+      "allow_nil?": true,
+      "primary_key?": false,
+      "generated?": false
+    },
+    {
+      "default": "fragment(\"uuid_generate_v4()\")",
+      "size": null,
+      "type": "uuid",
+      "source": "id",
+      "references": null,
+      "allow_nil?": false,
+      "primary_key?": true,
+      "generated?": false
+    },
+    {
+      "default": "nil",
+      "size": null,
+      "type": "text",
+      "source": "name",
+      "references": null,
+      "allow_nil?": false,
+      "primary_key?": false,
+      "generated?": false
+    },
+    {
+      "default": "\"\"",
+      "size": null,
+      "type": "text",
+      "source": "description",
+      "references": null,
+      "allow_nil?": false,
+      "primary_key?": false,
+      "generated?": false
+    },
+    {
+      "default": "\"draft\"",
+      "size": null,
+      "type": "text",
+      "source": "status",
+      "references": null,
+      "allow_nil?": false,
+      "primary_key?": false,
+      "generated?": false
+    },
+    {
+      "default": "nil",
+      "size": null,
+      "type": "text",
+      "source": "json_schema",
+      "references": null,
+      "allow_nil?": false,
+      "primary_key?": false,
+      "generated?": false
+    },
+    {
+      "default": "1",
+      "size": null,
+      "type": "bigint",
+      "source": "version",
+      "references": null,
+      "allow_nil?": false,
+      "primary_key?": false,
+      "generated?": false
+    },
+    {
+      "default": "fragment(\"now()\")",
+      "size": null,
+      "type": "utc_datetime_usec",
+      "source": "created_at",
+      "references": null,
+      "allow_nil?": false,
+      "primary_key?": false,
+      "generated?": false
+    },
+    {
+      "default": "fragment(\"now()\")",
+      "size": null,
+      "type": "utc_datetime_usec",
+      "source": "updated_at",
+      "references": null,
+      "allow_nil?": false,
+      "primary_key?": false,
+      "generated?": false
+    },
+    {
+      "default": "nil",
+      "size": null,
+      "type": "uuid",
+      "source": "tenant_id",
+      "references": {
+        "name": "applications_tenant_id_fkey",
+        "table": "tenants",
+        "multitenancy": {
+          "global": null,
+          "attribute": null,
+          "strategy": null
+        },
+        "primary_key?": true,
+        "schema": "public",
+        "destination_attribute": "id",
+        "on_delete": null,
+        "on_update": null,
+        "deferrable": false,
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null
+      },
+      "allow_nil?": false,
+      "primary_key?": false,
+      "generated?": false
+    }
+  ],
+  "table": "applications",
+  "hash": "BBE12F655624F76ABE648B794BECF784EDB2E5162C9E6CDFB392CF47ADE5762D",
+  "repo": "Elixir.HousingApp.Repo",
+  "multitenancy": {
+    "global": false,
+    "attribute": null,
+    "strategy": "context"
+  },
+  "schema": null,
+  "check_constraints": [],
+  "identities": [],
+  "custom_indexes": [],
+  "base_filter": "archived_at IS NULL",
+  "custom_statements": [],
+  "has_create_action": true
+}

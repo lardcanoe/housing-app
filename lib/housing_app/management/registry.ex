@@ -3,5 +3,6 @@ defmodule HousingApp.Management.Registry do
 
   entries do
     entry HousingApp.Management.Profile
+    entry HousingApp.Management.Application
   end
 end
