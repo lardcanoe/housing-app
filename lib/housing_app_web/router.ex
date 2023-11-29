@@ -55,7 +55,9 @@ defmodule HousingAppWeb.Router do
 
     ash_authentication_live_session :authentication_required,
       on_mount: {HousingAppWeb.LiveUserAuth, :live_user_required} do
-      live "/", Live.DashboardLive, :home
+      live "/", Live.HomeLive, :index
+      live "/settings/profile", Live.UserSettingsLive, :index
+      live "/settings/account", Live.UserSettingsLive, :index
     end
   end
 

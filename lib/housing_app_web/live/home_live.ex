@@ -1,7 +1,7 @@
-defmodule HousingAppWeb.Live.DashboardLive do
+defmodule HousingAppWeb.Live.HomeLive do
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
-  def render(assigns) do
+  def render(%{live_action: :index} = assigns) do
     ~H"""
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
       <div class="border-2 border-dashed border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
