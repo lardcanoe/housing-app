@@ -36,8 +36,8 @@ defmodule HousingApp.AccountsFixtures do
   @doc """
   Generate a user_tenant.
   """
-  def user_tenant_fixture(attrs) do
-    {:ok, ut} = HousingApp.Accounts.create_user_tenant(attrs)
+  def user_tenant_fixture(params, attrs) do
+    {:ok, ut} = HousingApp.Accounts.create_user_tenant(params, attrs)
     ut
   end
 end

@@ -1,12 +1,33 @@
 defmodule HousingAppWeb.Live.HomeLive do
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
-  def render(%{live_action: :index} = assigns) do
+  def render(%{live_action: :index, current_user_tenant: %{role: :user}} = assigns) do
     ~H"""
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-      <div class="border-2 border-dashed border-gray-300 rounded-lg dark:border-gray-600 h-32 md:h-64">
-        <.button>Hello</.button>
+      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64">
+        Student stuff
       </div>
+      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64"></div>
+      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64"></div>
+    </div>
+    """
+  end
+
+  def render(%{live_action: :index, current_user_tenant: %{role: :staff}} = assigns) do
+    ~H"""
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64">
+        Staff Stuff
+      </div>
+      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64"></div>
+      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64"></div>
+    </div>
+    """
+  end
+
+  def render(%{live_action: :index, current_user_tenant: %{role: :admin}} = assigns) do
+    ~H"""
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
       <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64">
         <.simple_form for={@create_form} phx-change="validate" phx-submit="submit">
           <.input field={@create_form[:name]} label="Name" />
@@ -19,20 +40,6 @@ defmodule HousingAppWeb.Live.HomeLive do
       </div>
       <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64"></div>
       <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64"></div>
-    </div>
-    <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4"></div>
-    <div class="grid grid-cols-2 gap-4 mb-4">
-      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72"></div>
-      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72"></div>
-      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72"></div>
-      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72"></div>
-    </div>
-    <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4"></div>
-    <div class="grid grid-cols-2 gap-4">
-      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72"></div>
-      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72"></div>
-      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72"></div>
-      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72"></div>
     </div>
     """
   end
@@ -63,10 +70,20 @@ defmodule HousingAppWeb.Live.HomeLive do
   def handle_event("submit", %{"form" => params}, socket) do
     case AshPhoenix.Form.submit(socket.assigns.create_form, params: params) do
       {:ok, tenant} ->
+        {:ok, _ut} =
+          HousingApp.Accounts.create_user_tenant(
+            %{
+              tenant_id: tenant.id,
+              user_id: socket.assigns.current_user.id,
+              role: :admin
+            },
+            actor: socket.assigns.current_user
+          )
+
         {:noreply,
          socket
          |> put_flash(:info, "Saved tenant for #{tenant.name}!")
-         |> push_navigate(to: ~p"/")}
+         |> push_navigate(to: ~p"/switch-tenant/#{tenant.id}")}
 
       {:error, create_form} ->
         {:noreply, assign(socket, create_form: create_form)}

@@ -53,6 +53,8 @@ defmodule HousingAppWeb.Router do
 
     sign_out_route(AuthController)
 
+    get "/switch-tenant/:tenant_id", AuthController, :switch_tenant
+
     ash_authentication_live_session :authentication_required,
       on_mount: {HousingAppWeb.LiveUserAuth, :live_user_required} do
       live "/", Live.HomeLive, :index

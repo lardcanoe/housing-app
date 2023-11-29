@@ -3,7 +3,8 @@ defmodule HousingApp.Accounts.UserTenant do
 
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshArchival.Resource]
+    extensions: [AshArchival.Resource],
+    authorizers: [Ash.Policy.Authorizer]
 
   attributes do
     uuid_primary_key :id
@@ -27,6 +28,25 @@ defmodule HousingApp.Accounts.UserTenant do
     belongs_to :tenant, HousingApp.Accounts.Tenant do
       attribute_writable? true
       allow_nil? false
+    end
+  end
+
+  policies do
+    bypass always() do
+      authorize_if HousingApp.Checks.IsPlatformAdmin
+    end
+
+    policy action_type(:read) do
+      authorize_if HousingApp.Checks.IsTenantAdmin
+      authorize_if relates_to_actor_via(:user)
+    end
+
+    policy action_type(:create) do
+      authorize_if always()
+    end
+
+    policy action_type(:update) do
+      authorize_if HousingApp.Checks.IsTenantAdmin
     end
   end
 

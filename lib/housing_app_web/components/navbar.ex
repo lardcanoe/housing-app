@@ -9,6 +9,7 @@ defmodule HousingAppWeb.Components.Navbar do
 
   attr :current_user, :any, required: true
   attr :current_user_tenant, :any, required: true
+  attr :available_user_tenants, :any, required: true
 
   def navbar(assigns) do
     ~H"""
@@ -45,7 +46,7 @@ defmodule HousingAppWeb.Components.Navbar do
               Housing App
             </span>
           </a>
-          <form action="#" method="GET" class="hidden md:block md:pl-2">
+          <form :if={@current_user_tenant.role != :user} action="#" method="GET" class="hidden md:block md:pl-2">
             <label for="topbar-search" class="sr-only">Search</label>
             <div class="relative md:w-64 md:w-96">
               <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
@@ -70,6 +71,7 @@ defmodule HousingAppWeb.Components.Navbar do
         </div>
         <div class="flex items-center lg:order-2">
           <button
+            :if={@current_user_tenant.role != :user}
             type="button"
             data-drawer-toggle="drawer-navigation"
             aria-controls="drawer-navigation"
@@ -320,6 +322,23 @@ defmodule HousingAppWeb.Components.Navbar do
                 </a>
               </li>
             </ul>
+
+            <ul :if={Enum.any?(@available_user_tenants)} class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
+              <li>
+                <span class="block py-2 px-4 font-semibold text-gray-900 dark:text-white">
+                  Switch Current School:
+                </span>
+              </li>
+              <li :for={ut <- @available_user_tenants |> Enum.reject(&(&1.tenant_id == @current_user_tenant.tenant_id))}>
+                <a
+                  href={~p"/switch-tenant/#{ut.tenant_id}"}
+                  class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
+                >
+                  <%= ut.tenant.name %>
+                </a>
+              </li>
+            </ul>
+
             <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
               <li>
                 <.link href={~p"/sign-out"} class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">

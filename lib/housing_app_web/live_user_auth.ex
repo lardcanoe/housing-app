@@ -14,23 +14,29 @@ defmodule HousingAppWeb.LiveUserAuth do
     end
   end
 
-  def on_mount(:live_user_required, _params, %{"user" => user}, %{assigns: %{current_user: current_user}} = socket) when is_binary(user) do
-    case HousingApp.Accounts.get_default_user_tenant_for!(current_user.id) do
+  def on_mount(
+        :live_user_required,
+        _params,
+        %{"user" => user, "user_tenant_id" => user_tenant_id},
+        %{assigns: %{current_user: current_user}} = socket
+      )
+      when is_binary(user) and not is_nil(current_user) do
+    case HousingApp.Accounts.get_user_tenant!(user_tenant_id, actor: current_user) do
       nil ->
         {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
 
       user_tenant ->
-        # Replicate assigns in lib/housing_app_web/controllers/auth_controller.ex
-        # But do NOT copy them, perform our own database queries
+        {:cont, socket |> mount_user_success(current_user, user_tenant)}
+    end
+  end
 
-        Ash.set_tenant("tenant_#{user_tenant.tenant_id}")
+  def on_mount(:live_user_required, _params, %{"user" => user}, %{assigns: %{current_user: current_user}} = socket) when is_binary(user) do
+    case HousingApp.Accounts.get_default_user_tenant_for!(current_user.id, actor: current_user) do
+      nil ->
+        {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
 
-        socket =
-          socket
-          |> assign(:current_user_tenant, user_tenant)
-          |> assign(:current_tenant, "tenant_#{user_tenant.tenant_id}")
-
-        {:cont, socket}
+      user_tenant ->
+        {:cont, socket |> mount_user_success(current_user, user_tenant)}
     end
   end
 
@@ -44,5 +50,19 @@ defmodule HousingAppWeb.LiveUserAuth do
 
   def on_mount(:live_no_user, _params, _session, socket) do
     {:cont, assign(socket, :current_user, nil)}
+  end
+
+  # Replicate assigns in lib/housing_app_web/controllers/auth_controller.ex
+  # But do NOT copy them, perform our own database queries
+
+  def mount_user_success(socket, current_user, user_tenant) do
+    Ash.set_tenant("tenant_#{user_tenant.tenant_id}")
+
+    available_user_tenants = HousingApp.Accounts.list_user_tenants!(current_user.id, actor: current_user)
+
+    socket
+    |> assign(:current_user_tenant, user_tenant)
+    |> assign(:current_tenant, "tenant_#{user_tenant.tenant_id}")
+    |> assign(:available_user_tenants, available_user_tenants)
   end
 end

@@ -52,18 +52,18 @@ defmodule HousingApp.AccountsTest do
 
     @invalid_user_tenant_attrs %{"user_id" => nil, "tenant_id" => nil, "role" => "foo"}
 
-    test "list_user_tenants/0 returns all user_tenants" do
+    test "list_user_tenants!/0 returns all user_tenants" do
       tenant = tenant_fixture()
       user = user_fixture()
-      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id})
-      assert Accounts.list_user_tenants() |> Enum.map(& &1.id) == [user_tenant.id]
+      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id}, actor: user)
+      assert Accounts.list_user_tenants!() |> Enum.map(& &1.id) == [user_tenant.id]
     end
 
     test "get_user_tenant!/1 returns the user_tenant with given id" do
       tenant = tenant_fixture()
       user = user_fixture()
-      user_tenant = user_tenant_fixture(%{tenant_id: tenant.id, user_id: user.id})
-      fetched = Accounts.get_user_tenant!(user_tenant.id)
+      user_tenant = user_tenant_fixture(%{tenant_id: tenant.id, user_id: user.id}, actor: user)
+      fetched = Accounts.get_user_tenant!(user_tenant.id, actor: user)
       assert fetched.id == user_tenant.id
       assert fetched.user_id == user.id
       assert fetched.tenant_id == tenant.id
@@ -71,16 +71,34 @@ defmodule HousingApp.AccountsTest do
 
     test "create_user_tenant/1 with invalid data returns error changeset" do
       assert {:error, %Ash.Error.Invalid{}} =
-               Accounts.create_user_tenant(@invalid_user_tenant_attrs)
+               Accounts.create_user_tenant(@invalid_user_tenant_attrs, actor: nil)
     end
 
-    test "change_user_tenant/1 returns a user_tenant changeset" do
+    test "change_user_tenant/1 user cannot promote self to admin" do
       tenant = tenant_fixture()
       user = user_fixture()
-      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id})
+      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "role" => :user}, actor: user)
       assert user_tenant.role == :user
-      Accounts.update_user_tenant(user_tenant, %{"role" => :admin})
-      assert Accounts.get_user_tenant!(user_tenant.id).role == :admin
+      {:error, %Ash.Error.Forbidden{}} = Accounts.update_user_tenant(user_tenant, %{"role" => :admin}, actor: user_tenant)
+      assert Accounts.get_user_tenant!(user_tenant.id, actor: user).role == :user
+    end
+
+    test "change_user_tenant/1 staff cannot promote self to admin" do
+      tenant = tenant_fixture()
+      user = user_fixture()
+      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "role" => :staff}, actor: user)
+      assert user_tenant.role == :staff
+      {:error, %Ash.Error.Forbidden{}} = Accounts.update_user_tenant(user_tenant, %{"role" => :admin}, actor: user_tenant)
+      assert Accounts.get_user_tenant!(user_tenant.id, actor: user).role == :staff
+    end
+
+    test "change_user_tenant/1 admin downgrade to staff" do
+      tenant = tenant_fixture()
+      user = user_fixture()
+      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "role" => :admin}, actor: user)
+      assert user_tenant.role == :admin
+      {:ok, _} = Accounts.update_user_tenant(user_tenant, %{"role" => :staff}, actor: user_tenant)
+      assert Accounts.get_user_tenant!(user_tenant.id, actor: user).role == :staff
     end
   end
 end
