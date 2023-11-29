@@ -9,6 +9,9 @@ defmodule HousingApp.Accounts.Tenant do
     uuid_primary_key :id
 
     attribute :name, :string, allow_nil?: false, constraints: [trim?: true, min_length: 1, max_length: 128]
+
+    create_timestamp :created_at
+    update_timestamp :updated_at
   end
 
   relationships do

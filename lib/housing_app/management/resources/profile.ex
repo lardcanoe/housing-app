@@ -8,6 +8,9 @@ defmodule HousingApp.Management.Profile do
 
   attributes do
     uuid_primary_key :id
+
+    create_timestamp :created_at
+    update_timestamp :updated_at
   end
 
   admin do

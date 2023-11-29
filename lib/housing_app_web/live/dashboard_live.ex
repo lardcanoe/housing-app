@@ -52,7 +52,7 @@ defmodule HousingAppWeb.Live.DashboardLive do
       )
       |> to_form()
 
-    {:ok, assign(socket, create_form: form)}
+    {:ok, assign(socket, create_form: form, page_title: "Dashboard")}
   end
 
   def handle_event("validate", %{"form" => params}, socket) do

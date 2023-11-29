@@ -90,4 +90,13 @@ defmodule HousingApp.Accounts do
     |> Ash.Query.load([:user, :tenant])
     |> HousingApp.Accounts.read_one!()
   end
+
+  def get_default_user_tenant_for!(user_id) do
+    HousingApp.Accounts.UserTenant
+    |> Ash.Query.filter(user_id == ^user_id)
+    |> Ash.Query.sort(created_at: :asc)
+    |> Ash.Query.limit(1)
+    |> Ash.Query.load([:user, :tenant])
+    |> HousingApp.Accounts.read_one!()
+  end
 end

@@ -110,26 +110,19 @@ defmodule HousingAppWeb do
 
   defp html_helpers do
     quote do
-      # HTML escaping functionality
       import Phoenix.HTML
       import Phoenix.HTML.Form
-
-      # Core UI components and translation
       import HousingAppWeb.CoreComponents
       import HousingAppWeb.Gettext
 
-      # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
-
-      # import HousingAppWeb.ErrorHelpers
       alias HousingAppWeb.Router.Helpers, as: Routes
-      import HousingAppWeb.LiveHelpers
 
-      # Routes generation with the ~p sigil
       unquote(verified_routes())
     end
   end
 
+  # Routes generation with the ~p sigil
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,
