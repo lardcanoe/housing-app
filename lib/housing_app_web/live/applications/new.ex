@@ -14,12 +14,18 @@ defmodule HousingAppWeb.Live.Applications.New do
     """
   end
 
-  def mount(_params, _session, socket) do
+  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
     form =
       HousingApp.Management.Application
       |> AshPhoenix.Form.for_create(:new,
         api: HousingApp.Management,
-        forms: [auto?: true]
+        forms: [auto?: true],
+        prepare_params: fn p, _ ->
+          p
+          |> Map.put("tenant_id", current_user_tenant.tenant_id)
+        end,
+        actor: current_user_tenant,
+        tenant: tenant
       )
       |> to_form()
 
@@ -31,30 +37,19 @@ defmodule HousingAppWeb.Live.Applications.New do
     {:noreply, assign(socket, form: form)}
   end
 
-  def handle_event("submit", %{"form" => params}, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
-    with %{valid?: true} = form <-
-           HousingApp.Management.Application
-           |> AshPhoenix.Form.for_create(:new,
-             api: HousingApp.Management,
-             prepare_params: fn p, _ ->
-               p
-               |> Map.put("tenant_id", current_user_tenant.tenant_id)
-             end,
-             actor: current_user_tenant,
-             tenant: tenant
-           )
-           |> AshPhoenix.Form.validate(params),
+  def handle_event("submit", %{"form" => params}, socket) do
+    with %{source: %{valid?: true}} = form <- AshPhoenix.Form.validate(socket.assigns.form, params),
          {:ok, _app} <- AshPhoenix.Form.submit(form) do
       {:noreply,
        socket
        |> put_flash(:info, "Successfully created the application.")
        |> push_navigate(to: ~p"/applications")}
     else
-      %{valid?: false} = form ->
-        {:noreply, assign(socket, form: form |> to_form())}
+      %{source: %{valid?: false}} = form ->
+        {:noreply, assign(socket, form: form)}
 
       {:error, form} ->
-        {:noreply, assign(socket, form: form |> to_form())}
+        {:noreply, assign(socket, form: form)}
     end
   end
 end
