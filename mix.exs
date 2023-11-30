@@ -57,6 +57,7 @@ defmodule HousingApp.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
+      {:ex_json_schema, "~> 0.10.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:plug_cowboy, "~> 2.5"},
       {:plug_content_security_policy, "~> 0.2.1"},

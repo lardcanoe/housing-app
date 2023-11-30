@@ -34,4 +34,19 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   def handle_event("load-schema", _params, socket) do
     {:reply, %{schema: socket.assigns.json_schema}, socket}
   end
+
+  def handle_event("submit", data, socket) do
+    ref_schema = ExJsonSchema.Schema.resolve(socket.assigns.json_schema)
+
+    case ExJsonSchema.Validator.validate(ref_schema, data) do
+      :ok ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Thank you for your submission!")
+         |> push_navigate(to: ~p"/applications")}
+
+      {:error, _errors} ->
+        {:noreply, socket |> put_flash(:error, "Errors present in form submission.")}
+    end
+  end
 end
