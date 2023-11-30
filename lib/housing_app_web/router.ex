@@ -59,8 +59,9 @@ defmodule HousingAppWeb.Router do
       on_mount: {HousingAppWeb.LiveUserAuth, :live_user_required} do
       live "/", Live.HomeLive, :index
       live "/applications", Live.Applications.Index, :index
-      live "/applications/:id/edit", Live.Applications.Edit, :edit
       live "/applications/new", Live.Applications.New, :new
+      live "/applications/:id", Live.Applications.Submit, :submit
+      live "/applications/:id/edit", Live.Applications.Edit, :edit
       live "/settings/profile", Live.UserSettingsLive, :index
       live "/settings/account", Live.UserSettingsLive, :index
     end

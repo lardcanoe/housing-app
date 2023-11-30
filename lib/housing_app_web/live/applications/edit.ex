@@ -4,8 +4,9 @@ defmodule HousingAppWeb.Live.Applications.Edit do
   def render(%{live_action: :edit} = assigns) do
     ~H"""
     <.simple_form for={@form} phx-change="validate" phx-submit="submit">
-      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update profile</h2>
+      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update application</h2>
       <.input field={@form[:name]} label="Name" />
+      <.input type="textarea" field={@form[:json_schema]} label="Schema" />
       <:actions>
         <.button>Save</.button>
         <.button :if={false} type="delete">Delete</.button>
