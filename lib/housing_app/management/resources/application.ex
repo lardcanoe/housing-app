@@ -10,6 +10,7 @@ defmodule HousingApp.Management.Application do
     uuid_primary_key :id
 
     attribute :name, :string do
+      constraints min_length: 1, trim?: true
       allow_nil? false
     end
 

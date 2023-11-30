@@ -33,6 +33,7 @@ defmodule HousingApp.Management do
 
   def list_profiles(tenant_id, opts \\ []) do
     HousingApp.Management.Profile
+    |> Ash.Query.filter(tenant_id == ^tenant_id)
     |> Ash.Query.set_actor(opts)
     |> Ash.Query.set_tenant("tenant_" <> tenant_id)
     |> HousingApp.Management.read!()
@@ -40,9 +41,25 @@ defmodule HousingApp.Management do
 
   def get_profile!(id, tenant_id, opts \\ []) do
     HousingApp.Management.Profile
-    |> Ash.Query.filter(id == ^id)
+    |> Ash.Query.filter(id == ^id and tenant_id == ^tenant_id)
     |> Ash.Query.set_actor(opts)
     |> Ash.Query.set_tenant("tenant_" <> tenant_id)
     |> HousingApp.Management.read_one!()
+  end
+
+  def get_application!(id, tenant_id, opts \\ []) do
+    HousingApp.Management.Application
+    |> Ash.Query.filter(id == ^id and tenant_id == ^tenant_id)
+    |> Ash.Query.set_actor(opts)
+    |> Ash.Query.set_tenant("tenant_" <> tenant_id)
+    |> HousingApp.Management.read_one!()
+  end
+
+  def list_applications!(tenant_id, opts \\ []) do
+    HousingApp.Management.Application
+    |> Ash.Query.filter(tenant_id == ^tenant_id)
+    |> Ash.Query.set_actor(opts)
+    |> Ash.Query.set_tenant("tenant_" <> tenant_id)
+    |> HousingApp.Management.read!()
   end
 end

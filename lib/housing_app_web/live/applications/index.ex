@@ -1,4 +1,4 @@
-defmodule HousingAppWeb.Live.Applications.IndexLive do
+defmodule HousingAppWeb.Live.Applications.Index do
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :index, current_user_tenant: %{role: :user}} = assigns) do
@@ -9,12 +9,14 @@ defmodule HousingAppWeb.Live.Applications.IndexLive do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <.table id="applications" rows={@applications} pagination={false}>
+    <.table id="applications" rows={@applications} pagination={false} row_id={fn row -> "applications-row-#{row.id}" end}>
       <:button>
         <svg class="h-3.5 w-3.5 mr-2" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path clip-rule="evenodd" fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
         </svg>
-        Add application
+        <a href={~p"/applications/new"}>
+          Add application
+        </a>
       </:button>
       <:col :let={application} label="name">
         <a href={~p"/applications/#{application.id}"}><%= application.name %></a>
@@ -39,16 +41,15 @@ defmodule HousingAppWeb.Live.Applications.IndexLive do
           Archived
         </span>
       </:col>
+      <:action :let={application}>
+        <a href={~p"/applications/#{application.id}/edit"} class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Edit</a>
+      </:action>
     </.table>
     """
   end
 
-  def mount(_params, _session, socket) do
-    applications = [
-      %{id: 1, name: "Application 1", status: :draft},
-      %{id: 2, name: "Application 2", status: :approved},
-      %{id: 3, name: "Application 3", status: :archived}
-    ]
+  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant}} = socket) do
+    applications = HousingApp.Management.list_applications!(current_user_tenant.tenant_id, actor: current_user_tenant)
 
     {:ok, assign(socket, applications: applications, page_title: "Applications")}
   end

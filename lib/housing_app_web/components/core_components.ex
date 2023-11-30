@@ -695,9 +695,7 @@ defmodule HousingAppWeb.CoreComponents do
                 >
                   <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby={@row_id && "#{@row_id.(row)}-dropdown-button"}>
                     <li :for={action <- @action}>
-                      <a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                        <%= render_slot(action, @row_item.(row)) %>
-                      </a>
+                      <%= render_slot(action, @row_item.(row)) %>
                     </li>
                   </ul>
                 </div>
