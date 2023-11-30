@@ -69,6 +69,20 @@ defmodule HousingApp.Management.Application do
 
   actions do
     defaults [:create, :read, :update, :destroy]
+
+    create :new do
+      accept [:name, :description, :json_schema]
+
+      argument :tenant_id, :uuid do
+        allow_nil? false
+      end
+
+      change manage_relationship(:tenant_id, :tenant, type: :append_and_remove)
+    end
+  end
+
+  validations do
+    validate {HousingApp.Validations.IsJsonSchema, attribute: :json_schema}
   end
 
   multitenancy do
