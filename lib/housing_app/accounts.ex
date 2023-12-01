@@ -95,30 +95,4 @@ defmodule HousingApp.Accounts do
     |> Ash.Query.load(tenant: [:id, :name])
     |> HousingApp.Accounts.read!()
   end
-
-  def get_user_tenant!(id, opts) do
-    HousingApp.Accounts.UserTenant
-    |> Ash.Query.for_read(:read, %{}, opts)
-    |> Ash.Query.filter(id == ^id)
-    |> Ash.Query.load([:user, :tenant])
-    |> HousingApp.Accounts.read_one!()
-  end
-
-  def get_user_tenant!(user_id, tenant_id, opts) do
-    HousingApp.Accounts.UserTenant
-    |> Ash.Query.for_read(:read, %{}, opts)
-    |> Ash.Query.filter(user_id == ^user_id and tenant_id == ^tenant_id)
-    |> Ash.Query.load([:user, :tenant])
-    |> HousingApp.Accounts.read_one!()
-  end
-
-  def get_default_user_tenant_for!(user_id, opts) do
-    HousingApp.Accounts.UserTenant
-    |> Ash.Query.for_read(:read, %{}, opts)
-    |> Ash.Query.filter(user_id == ^user_id)
-    |> Ash.Query.sort(created_at: :asc)
-    |> Ash.Query.limit(1)
-    |> Ash.Query.load([:user, :tenant])
-    |> HousingApp.Accounts.read_one!()
-  end
 end

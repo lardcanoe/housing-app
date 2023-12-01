@@ -59,14 +59,25 @@ defmodule HousingApp.AccountsTest do
       assert Accounts.list_user_tenants!() |> Enum.map(& &1.id) == [user_tenant.id]
     end
 
-    test "get_user_tenant!/1 returns the user_tenant with given id" do
+    test "UserTenant.get_by_id!/1 returns the user_tenant with given id" do
       tenant = tenant_fixture()
       user = user_fixture()
       user_tenant = user_tenant_fixture(%{tenant_id: tenant.id, user_id: user.id}, actor: user)
-      fetched = Accounts.get_user_tenant!(user_tenant.id, actor: user)
+      fetched = Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user)
       assert fetched.id == user_tenant.id
       assert fetched.user_id == user.id
       assert fetched.tenant_id == tenant.id
+    end
+
+    test "UserTenant.get_by_id!/1 fails for different user" do
+      tenant = tenant_fixture()
+      user = user_fixture()
+      user2 = user_fixture(%{"email" => "foo2@bar.com"})
+      user_tenant = user_tenant_fixture(%{tenant_id: tenant.id, user_id: user.id}, actor: user)
+
+      assert_raise Ash.Error.Query.NotFound, fn ->
+        Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user2)
+      end
     end
 
     test "create_user_tenant/1 with invalid data returns error changeset" do
@@ -80,7 +91,7 @@ defmodule HousingApp.AccountsTest do
       user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "role" => :user}, actor: user)
       assert user_tenant.role == :user
       {:error, %Ash.Error.Forbidden{}} = Accounts.update_user_tenant(user_tenant, %{"role" => :admin}, actor: user_tenant)
-      assert Accounts.get_user_tenant!(user_tenant.id, actor: user).role == :user
+      assert Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).role == :user
     end
 
     test "change_user_tenant/1 staff cannot promote self to admin" do
@@ -89,7 +100,7 @@ defmodule HousingApp.AccountsTest do
       user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "role" => :staff}, actor: user)
       assert user_tenant.role == :staff
       {:error, %Ash.Error.Forbidden{}} = Accounts.update_user_tenant(user_tenant, %{"role" => :admin}, actor: user_tenant)
-      assert Accounts.get_user_tenant!(user_tenant.id, actor: user).role == :staff
+      assert Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).role == :staff
     end
 
     test "change_user_tenant/1 admin downgrade to staff" do
@@ -98,7 +109,7 @@ defmodule HousingApp.AccountsTest do
       user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "role" => :admin}, actor: user)
       assert user_tenant.role == :admin
       {:ok, _} = Accounts.update_user_tenant(user_tenant, %{"role" => :staff}, actor: user_tenant)
-      assert Accounts.get_user_tenant!(user_tenant.id, actor: user).role == :staff
+      assert Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).role == :staff
     end
   end
 end

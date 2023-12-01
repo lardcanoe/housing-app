@@ -5,14 +5,14 @@ defmodule HousingAppWeb.AuthController do
   # Replicate assigns in lib/housing_app_web/live_user_auth.ex
 
   def success(conn, _activity, user, _token) do
-    case HousingApp.Accounts.get_default_user_tenant_for!(user.id, actor: user) do
-      nil ->
+    case HousingApp.Accounts.UserTenant.get_default(actor: user) do
+      {:error, _} ->
         conn
         |> clear_session()
         |> put_flash(:error, "You do not have access to any accounts.")
         |> redirect(to: ~p"/sign-in")
 
-      user_tenant ->
+      {:ok, user_tenant} ->
         return_to = get_session(conn, :return_to) || ~p"/"
 
         Ash.set_tenant("tenant_#{user_tenant.tenant_id}")
@@ -27,12 +27,12 @@ defmodule HousingAppWeb.AuthController do
   end
 
   def switch_tenant(conn, %{"tenant_id" => tenant_id}) do
-    case HousingApp.Accounts.get_user_tenant!(conn.assigns[:current_user].id, tenant_id, actor: conn.assigns[:current_user]) do
-      nil ->
+    case HousingApp.Accounts.UserTenant.get_for_tenant(tenant_id, actor: conn.assigns[:current_user]) do
+      {:error, _} ->
         conn
         |> redirect(to: ~p"/")
 
-      user_tenant ->
+      {:ok, user_tenant} ->
         return_to = get_session(conn, :return_to) || ~p"/"
 
         Ash.set_tenant("tenant_#{user_tenant.tenant_id}")

@@ -50,12 +50,15 @@ defmodule HousingAppWeb.Live.Applications.Edit do
   end
 
   def handle_event("submit", %{"form" => params}, socket) do
-    case AshPhoenix.Form.submit(socket.assigns.form, params: params) do
-      {:ok, _app} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Successfully updated the application.")
-         |> push_navigate(to: ~p"/applications")}
+    with %{source: %{valid?: true}} = form <- AshPhoenix.Form.validate(socket.assigns.form, params),
+         {:ok, _app} <- AshPhoenix.Form.submit(form) do
+      {:noreply,
+       socket
+       |> put_flash(:info, "Successfully updated the application.")
+       |> push_navigate(to: ~p"/applications")}
+    else
+      %{source: %{valid?: false}} = form ->
+        {:noreply, assign(socket, form: form)}
 
       {:error, form} ->
         {:noreply, assign(socket, form: form)}
