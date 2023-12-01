@@ -58,10 +58,23 @@ defmodule HousingAppWeb.Router do
     ash_authentication_live_session :authentication_required,
       on_mount: {HousingAppWeb.LiveUserAuth, :live_user_required} do
       live "/", Live.HomeLive, :index
-      live "/applications", Live.Applications.Index, :index
-      live "/applications/new", Live.Applications.New, :new
-      live "/applications/:id", Live.Applications.Submit, :submit
-      live "/applications/:id/edit", Live.Applications.Edit, :edit
+
+      scope "/applications", Live.Applications do
+        live "/", Index, :index
+        live "/new", New, :new
+        live "/:id/edit", Edit, :edit
+        live "/:id", Submit, :submit
+      end
+
+      scope "/forms", Live.Forms do
+        # TODO: pipe_through [:require_authenticated_non_end_user]
+
+        live "/", Index, :index
+        live "/new", New, :new
+        live "/:id/edit", Edit, :edit
+        live "/:id", View, :view
+      end
+
       live "/settings/profile", Live.UserSettingsLive, :index
       live "/settings/account", Live.UserSettingsLive, :index
     end
@@ -120,6 +133,18 @@ defmodule HousingAppWeb.Router do
       |> put_flash(:error, dgettext("auth", "You are not authorized to access this page."))
       |> redirect(to: "/sign-in")
       |> halt()
+    end
+  end
+
+  def require_authenticated_non_end_user(conn, _opts) do
+    # current_user_tenant isn't available?
+    if is_nil(conn.assigns[:current_user_tenant]) || conn.assigns[:current_user_tenant].role == :user do
+      conn
+      |> put_flash(:error, dgettext("auth", "You are not authorized to access this page."))
+      |> redirect(to: "/")
+      |> halt()
+    else
+      conn
     end
   end
 end

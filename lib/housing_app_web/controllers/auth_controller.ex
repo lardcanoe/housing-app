@@ -22,6 +22,7 @@ defmodule HousingAppWeb.AuthController do
         |> store_in_session(user)
         |> put_session(:user_tenant_id, user_tenant.id)
         |> assign(:current_user, user)
+        |> assign(:current_user_tenant, user_tenant)
         |> redirect(to: return_to)
     end
   end
@@ -40,6 +41,7 @@ defmodule HousingAppWeb.AuthController do
         conn
         |> delete_session(:return_to)
         |> put_session(:user_tenant_id, user_tenant.id)
+        |> assign(:current_user_tenant, user_tenant)
         |> redirect(to: return_to)
     end
   end
