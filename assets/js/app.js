@@ -23,11 +23,13 @@ import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import "flowbite/dist/flowbite.phoenix.js"
 import JSONSchemaForm from "./hooks/json_schema_form"
+import AgGrid from "./hooks/ag-grid"
 
 let Hooks = {}
 
 // FUTURE: Load hooks dynamically, https://aswinmohan.me/pagewise-js-liveview
 Hooks.JSONSchemaForm = JSONSchemaForm
+Hooks.AgGrid = AgGrid
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, { params: { _csrf_token: csrfToken }, hooks: Hooks })
