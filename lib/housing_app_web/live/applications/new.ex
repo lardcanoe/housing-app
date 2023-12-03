@@ -3,10 +3,10 @@ defmodule HousingAppWeb.Live.Applications.New do
 
   def render(%{live_action: :new} = assigns) do
     ~H"""
-    <.simple_form for={@form} phx-change="validate" phx-submit="submit">
+    <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Application</h2>
-      <.input field={@form[:name]} label="Name" />
-      <.input type="textarea" field={@form[:json_schema]} label="Schema" />
+      <.input field={@ash_form[:name]} label="Name" />
+      <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
       <:actions>
         <.button>Create</.button>
       </:actions>
@@ -15,41 +15,40 @@ defmodule HousingAppWeb.Live.Applications.New do
   end
 
   def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
-    form =
+    ash_form =
       HousingApp.Management.Application
       |> AshPhoenix.Form.for_create(:new,
         api: HousingApp.Management,
         forms: [auto?: true],
-        prepare_params: fn p, _ ->
-          p
-          |> Map.put("tenant_id", current_user_tenant.tenant_id)
-        end,
         actor: current_user_tenant,
         tenant: tenant
       )
       |> to_form()
 
-    {:ok, assign(socket, form: form, page_title: "New Application")}
+    forms = HousingApp.Management.Form.list!(actor: current_user_tenant, tenant: tenant) |> Enum.map(&{&1.name, &1.id})
+
+    {:ok, assign(socket, ash_form: ash_form, forms: forms, page_title: "New Application")}
   end
 
   def handle_event("validate", %{"form" => params}, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form, params)
-    {:noreply, assign(socket, form: form)}
+    ash_form = AshPhoenix.Form.validate(socket.assigns.ash_form, params)
+    {:noreply, assign(socket, ash_form: ash_form)}
   end
 
   def handle_event("submit", %{"form" => params}, socket) do
-    with %{source: %{valid?: true}} = form <- AshPhoenix.Form.validate(socket.assigns.form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(form) do
+    # Database constraints will validate that :form_id is a valid form for the current tenant
+    with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
+         {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
       {:noreply,
        socket
        |> put_flash(:info, "Successfully created the application.")
        |> push_navigate(to: ~p"/applications")}
     else
-      %{source: %{valid?: false}} = form ->
-        {:noreply, assign(socket, form: form)}
+      %{source: %{valid?: false}} = ash_form ->
+        {:noreply, assign(socket, ash_form: ash_form)}
 
-      {:error, form} ->
-        {:noreply, assign(socket, form: form)}
+      {:error, ash_form} ->
+        {:noreply, assign(socket, ash_form: ash_form)}
     end
   end
 end

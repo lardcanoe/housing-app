@@ -56,7 +56,7 @@ defmodule HousingApp.Accounts do
     HousingApp.Accounts.Tenant |> HousingApp.Accounts.read!()
   end
 
-  ### ONLY USED FOR TENANT MIGRATIONS
+  ### ONLY USED FOR TENANT MIGRATIONS, it bypasses the AshArchive filter
   def all_tenants!() do
     %Ash.Query{resource: HousingApp.Accounts.Tenant} |> HousingApp.Accounts.read!()
   end

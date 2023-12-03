@@ -3,10 +3,10 @@ defmodule HousingAppWeb.Live.Applications.Edit do
 
   def render(%{live_action: :edit} = assigns) do
     ~H"""
-    <.simple_form for={@form} phx-change="validate" phx-submit="submit">
+    <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update application</h2>
-      <.input field={@form[:name]} label="Name" />
-      <.input type="textarea" field={@form[:json_schema]} label="Schema" />
+      <.input field={@ash_form[:name]} label="Name" />
+      <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
       <:actions>
         <.button>Save</.button>
         <.button :if={false} type="delete">Delete</.button>
@@ -16,15 +16,15 @@ defmodule HousingAppWeb.Live.Applications.Edit do
   end
 
   def mount(%{"id" => id}, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
-    case HousingApp.Management.get_application!(id, current_user_tenant.tenant_id, actor: current_user_tenant) do
-      nil ->
+    case HousingApp.Management.Application.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
+      {:error, _} ->
         {:ok,
          socket
          |> put_flash(:error, "Not found")
          |> push_navigate(to: ~p"/applications")}
 
-      app ->
-        form =
+      {:ok, app} ->
+        ash_form =
           app
           |> AshPhoenix.Form.for_update(:update,
             api: HousingApp.Management,
@@ -34,34 +34,30 @@ defmodule HousingAppWeb.Live.Applications.Edit do
           )
           |> to_form()
 
-        {:ok, assign(socket, form: form, page_title: "Edit Application")}
+        forms = HousingApp.Management.Form.list!(actor: current_user_tenant, tenant: tenant) |> Enum.map(&{&1.name, &1.id})
+
+        {:ok, assign(socket, ash_form: ash_form, forms: forms, page_title: "Edit Application")}
     end
-  rescue
-    _ ->
-      {:ok,
-       socket
-       |> put_flash(:error, "Not found")
-       |> push_navigate(to: ~p"/applications")}
   end
 
   def handle_event("validate", %{"form" => params}, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form, params)
-    {:noreply, assign(socket, form: form)}
+    ash_form = AshPhoenix.Form.validate(socket.assigns.ash_form, params)
+    {:noreply, assign(socket, ash_form: ash_form)}
   end
 
   def handle_event("submit", %{"form" => params}, socket) do
-    with %{source: %{valid?: true}} = form <- AshPhoenix.Form.validate(socket.assigns.form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(form) do
+    with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
+         {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
       {:noreply,
        socket
        |> put_flash(:info, "Successfully updated the application.")
        |> push_navigate(to: ~p"/applications")}
     else
-      %{source: %{valid?: false}} = form ->
-        {:noreply, assign(socket, form: form)}
+      %{source: %{valid?: false}} = ash_form ->
+        {:noreply, assign(socket, ash_form: ash_form)}
 
-      {:error, form} ->
-        {:noreply, assign(socket, form: form)}
+      {:error, ash_form} ->
+        {:noreply, assign(socket, ash_form: ash_form)}
     end
   end
 end

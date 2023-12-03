@@ -19,7 +19,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
         </.link>
       </:button>
       <:col :let={application} label="name">
-        <a href={~p"/applications/#{application.id}"}><%= application.name %></a>
+        <.link patch={~p"/applications/#{application.id}"}><%= application.name %></.link>
       </:col>
       <:col :let={application} label="status">
         <span
@@ -41,6 +41,9 @@ defmodule HousingAppWeb.Live.Applications.Index do
           Archived
         </span>
       </:col>
+      <:col :let={application} label="form">
+        <.link patch={~p"/forms/#{application.form_id}/edit"}><%= application.form.name %></.link>
+      </:col>
       <:action :let={application}>
         <.link patch={~p"/applications/#{application.id}/edit"} class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
           Edit
@@ -50,8 +53,8 @@ defmodule HousingAppWeb.Live.Applications.Index do
     """
   end
 
-  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant}} = socket) do
-    applications = HousingApp.Management.list_applications!(current_user_tenant.tenant_id, actor: current_user_tenant)
+  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+    {:ok, applications} = HousingApp.Management.Application.list(actor: current_user_tenant, tenant: tenant)
 
     {:ok, assign(socket, applications: applications, page_title: "Applications")}
   end

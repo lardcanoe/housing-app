@@ -25,15 +25,6 @@ defmodule HousingApp.Management.Application do
       allow_nil? false
     end
 
-    attribute :json_schema, :string do
-      allow_nil? false
-    end
-
-    attribute :version, :integer do
-      default 1
-      allow_nil? false
-    end
-
     create_timestamp :created_at
     update_timestamp :updated_at
   end
@@ -46,6 +37,11 @@ defmodule HousingApp.Management.Application do
     # Tenant is duplicate data, but makes it safer and easier to do data dumps
     belongs_to :tenant, HousingApp.Accounts.Tenant do
       api HousingApp.Accounts
+      attribute_writable? true
+      allow_nil? false
+    end
+
+    belongs_to :form, HousingApp.Management.Form do
       attribute_writable? true
       allow_nil? false
     end
@@ -71,18 +67,33 @@ defmodule HousingApp.Management.Application do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:name, :description, :json_schema]
+      accept [:name, :description, :form_id]
 
-      argument :tenant_id, :uuid do
+      change set_attribute(:tenant_id, actor(:tenant_id))
+    end
+
+    read :list do
+      prepare build(load: [:form])
+    end
+
+    read :get_by_id do
+      argument :id, :uuid do
         allow_nil? false
       end
 
-      change manage_relationship(:tenant_id, :tenant, type: :append_and_remove)
+      get? true
+
+      prepare build(load: [:form])
+
+      filter expr(id == ^arg(:id))
     end
   end
 
-  validations do
-    validate {HousingApp.Validations.IsJsonSchema, attribute: :json_schema}
+  code_interface do
+    define_for HousingApp.Accounts
+
+    define :list
+    define :get_by_id, args: [:id]
   end
 
   multitenancy do

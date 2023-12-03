@@ -6,10 +6,6 @@ defmodule HousingApp.Repo do
   end
 
   def all_tenants do
-    for t <- HousingApp.Accounts.all_tenants!() do
-      # This is broken sadly:
-      # t.schema
-      "tenant_#{t.id}"
-    end
+    HousingApp.Accounts.all_tenants!() |> Enum.map(fn t -> "tenant_#{t.id}" end)
   end
 end

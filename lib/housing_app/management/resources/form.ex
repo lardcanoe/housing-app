@@ -81,6 +81,7 @@ defmodule HousingApp.Management.Form do
     end
 
     read :list do
+      prepare build(select: [:id, :name, :description, :status])
     end
 
     read :get_by_id do
@@ -92,10 +93,6 @@ defmodule HousingApp.Management.Form do
 
       filter expr(id == ^arg(:id))
     end
-
-    # read :list do
-    #   select [:id, :name, :description, :status]
-    # end
   end
 
   code_interface do
