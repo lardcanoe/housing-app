@@ -9,10 +9,8 @@ defmodule HousingApp.Management.Profile do
   attributes do
     uuid_primary_key :id
 
-    # Used for things like "student, parent, RA, etc"
-    # These are applicable based on the type of organization that the tenant is
-    attribute :roles, {:array, :string} do
-      default []
+    attribute :data, :map do
+      default %{}
       allow_nil? false
     end
 
@@ -59,12 +57,35 @@ defmodule HousingApp.Management.Profile do
     repo HousingApp.Repo
 
     custom_indexes do
-      index [:roles], using: "GIN"
+      index [:data], using: "GIN"
     end
   end
 
   actions do
     defaults [:create, :read, :update, :destroy]
+
+    read :list do
+      prepare build(load: [user_tenant: [:user]])
+    end
+
+    read :get_by_id do
+      argument :id, :uuid do
+        allow_nil? false
+      end
+
+      get? true
+
+      prepare build(load: [user_tenant: [:user]])
+
+      filter expr(id == ^arg(:id))
+    end
+  end
+
+  code_interface do
+    define_for HousingApp.Management
+
+    define :list
+    define :get_by_id, args: [:id]
   end
 
   identities do

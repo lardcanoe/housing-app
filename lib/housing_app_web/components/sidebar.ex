@@ -126,8 +126,8 @@ defmodule HousingAppWeb.Components.Sidebar do
         </form>
         <ul class="space-y-2">
           <li>
-            <a
-              href="#"
+            <.link
+              patch={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -141,7 +141,7 @@ defmodule HousingAppWeb.Components.Sidebar do
                 <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
               </svg>
               <span class="ml-3">Overview</span>
-            </a>
+            </.link>
           </li>
           <!-- Forms -->
           <li>
@@ -266,8 +266,8 @@ defmodule HousingAppWeb.Components.Sidebar do
             <button
               type="button"
               class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-              aria-controls="dropdown-sales"
-              data-collapse-toggle="dropdown-sales"
+              aria-controls="dropdown-profiles"
+              data-collapse-toggle="dropdown-profiles"
             >
               <svg
                 aria-hidden="true"
@@ -293,30 +293,22 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
             </button>
-            <ul id="dropdown-sales" class="hidden py-2 space-y-2">
+            <ul id="dropdown-profiles" class="hidden py-2 space-y-2">
               <li>
-                <a
-                  href="#"
+                <.link
+                  patch={~p"/profiles/new"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   + New
-                </a>
+                </.link>
               </li>
               <li>
-                <a
-                  href="#"
+                <.link
+                  patch={~p"/profiles"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Manage
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  View All
-                </a>
+                </.link>
               </li>
             </ul>
           </li>

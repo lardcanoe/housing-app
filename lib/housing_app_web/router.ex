@@ -75,8 +75,15 @@ defmodule HousingAppWeb.Router do
         live "/:id", View, :view
       end
 
+      scope "/profiles", Live.Profiles do
+        # TODO: pipe_through [:require_authenticated_non_end_user]
+        live "/", Index, :index
+        live "/new", New, :new
+        live "/:id/edit", Edit, :edit
+      end
+
       live "/settings/profile", Live.UserSettingsLive, :index
-      live "/settings/account", Live.UserSettingsLive, :index
+      live "/settings/account", Live.TenantSettings, :index
     end
   end
 

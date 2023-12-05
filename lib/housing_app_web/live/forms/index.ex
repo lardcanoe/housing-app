@@ -12,6 +12,9 @@ defmodule HousingAppWeb.Live.Forms.Index do
           Add form
         </.link>
       </:button>
+      <:col :let={form} :if={@current_user.role == :platform_admin} label="id">
+        <%= form.id %>
+      </:col>
       <:col :let={form} label="name">
         <a href={~p"/forms/#{form.id}"}><%= form.name %></a>
       </:col>

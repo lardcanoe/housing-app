@@ -317,8 +317,23 @@ defmodule HousingAppWeb.Components.Navbar do
               <span :if={@current_user_tenant.tenant.name} class="block text-sm font-semibold text-gray-900 dark:text-white">
                 <%= @current_user_tenant.tenant.name %>
               </span>
+              <span :if={@current_user.role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
+                <%= @current_user_tenant.tenant_id %>
+              </span>
               <span :if={@current_user.email} class="block text-sm text-gray-900 truncate dark:text-white">
                 <%= @current_user.email %>
+              </span>
+              <span :if={@current_user.role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
+                Id: <%= @current_user_tenant.user_id %>
+              </span>
+              <span :if={@current_user.role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
+                UT: <%= @current_user_tenant.id %>
+              </span>
+              <span :if={@current_user.role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
+                Role: <%= @current_user_tenant.user.role %>
+              </span>
+              <span :if={@current_user.role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
+                Type: <%= @current_user_tenant.user_type %>
               </span>
             </div>
             <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
