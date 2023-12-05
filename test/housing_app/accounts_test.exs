@@ -50,7 +50,7 @@ defmodule HousingApp.AccountsTest do
   describe "user_tenants" do
     import HousingApp.AccountsFixtures
 
-    @invalid_user_tenant_attrs %{"user_id" => nil, "tenant_id" => nil, "role" => "foo"}
+    @invalid_user_tenant_attrs %{"user_id" => nil, "tenant_id" => nil, "user_type" => "foo"}
 
     test "list_user_tenants!/0 returns all user_tenants" do
       tenant = tenant_fixture()
@@ -88,28 +88,28 @@ defmodule HousingApp.AccountsTest do
     test "change_user_tenant/1 user cannot promote self to admin" do
       tenant = tenant_fixture()
       user = user_fixture()
-      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "role" => :user}, actor: user)
-      assert user_tenant.role == :user
-      {:error, %Ash.Error.Forbidden{}} = Accounts.update_user_tenant(user_tenant, %{"role" => :admin}, actor: user_tenant)
-      assert Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).role == :user
+      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "user_type" => :user}, actor: user)
+      assert user_tenant.user_type == :user
+      {:error, %Ash.Error.Forbidden{}} = Accounts.update_user_tenant(user_tenant, %{"user_type" => :admin}, actor: user_tenant)
+      assert Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).user_type == :user
     end
 
     test "change_user_tenant/1 staff cannot promote self to admin" do
       tenant = tenant_fixture()
       user = user_fixture()
-      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "role" => :staff}, actor: user)
-      assert user_tenant.role == :staff
-      {:error, %Ash.Error.Forbidden{}} = Accounts.update_user_tenant(user_tenant, %{"role" => :admin}, actor: user_tenant)
-      assert Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).role == :staff
+      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "user_type" => :staff}, actor: user)
+      assert user_tenant.user_type == :staff
+      {:error, %Ash.Error.Forbidden{}} = Accounts.update_user_tenant(user_tenant, %{"user_type" => :admin}, actor: user_tenant)
+      assert Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).user_type == :staff
     end
 
     test "change_user_tenant/1 admin downgrade to staff" do
       tenant = tenant_fixture()
       user = user_fixture()
-      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "role" => :admin}, actor: user)
-      assert user_tenant.role == :admin
-      {:ok, _} = Accounts.update_user_tenant(user_tenant, %{"role" => :staff}, actor: user_tenant)
-      assert Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).role == :staff
+      user_tenant = user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user.id, "user_type" => :admin}, actor: user)
+      assert user_tenant.user_type == :admin
+      {:ok, _} = Accounts.update_user_tenant(user_tenant, %{"user_type" => :staff}, actor: user_tenant)
+      assert Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).user_type == :staff
     end
   end
 end

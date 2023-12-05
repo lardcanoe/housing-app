@@ -138,7 +138,7 @@ defmodule HousingAppWeb.Router do
 
   def require_authenticated_non_end_user(conn, _opts) do
     # current_user_tenant isn't available?
-    if is_nil(conn.assigns[:current_user_tenant]) || conn.assigns[:current_user_tenant].role == :user do
+    if is_nil(conn.assigns[:current_user_tenant]) || conn.assigns[:current_user_tenant].user_type == :user do
       conn
       |> put_flash(:error, dgettext("auth", "You are not authorized to access this page."))
       |> redirect(to: "/")

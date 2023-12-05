@@ -46,7 +46,7 @@ defmodule HousingAppWeb.Components.Navbar do
               Housing App
             </span>
           </a>
-          <form :if={@current_user_tenant.role != :user} action="#" method="GET" class="hidden md:block md:pl-2">
+          <form :if={@current_user_tenant.user_type != :user} action="#" method="GET" class="hidden md:block md:pl-2">
             <label for="topbar-search" class="sr-only">Search</label>
             <div class="relative md:w-64 md:w-96">
               <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
@@ -71,7 +71,7 @@ defmodule HousingAppWeb.Components.Navbar do
         </div>
         <div class="flex items-center lg:order-2">
           <button
-            :if={@current_user_tenant.role != :user}
+            :if={@current_user_tenant.user_type != :user}
             type="button"
             data-drawer-toggle="drawer-navigation"
             aria-controls="drawer-navigation"

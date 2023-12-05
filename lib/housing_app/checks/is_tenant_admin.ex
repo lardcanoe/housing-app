@@ -7,11 +7,11 @@ defmodule HousingApp.Checks.IsTenantAdmin do
   end
 
   def match?(
-        %HousingApp.Accounts.UserTenant{role: role},
+        %HousingApp.Accounts.UserTenant{user_type: user_type},
         _context,
         _opts
       ) do
-    role == :admin
+    user_type == :admin
   end
 
   def match?(_, _, _), do: false

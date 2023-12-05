@@ -9,7 +9,7 @@ defmodule HousingApp.Accounts.UserTenant do
   attributes do
     uuid_primary_key :id
 
-    attribute :role, :atom do
+    attribute :user_type, :atom do
       constraints one_of: [:user, :staff, :admin]
       default :user
       allow_nil? false

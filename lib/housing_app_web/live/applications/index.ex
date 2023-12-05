@@ -1,7 +1,7 @@
 defmodule HousingAppWeb.Live.Applications.Index do
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
-  def render(%{live_action: :index, current_user_tenant: %{role: :user}} = assigns) do
+  def render(%{live_action: :index, current_user_tenant: %{user_type: :user}} = assigns) do
     ~H"""
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4"></div>
     """

@@ -1,7 +1,7 @@
 defmodule HousingAppWeb.Live.HomeLive do
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
-  def render(%{live_action: :index, current_user_tenant: %{role: :user}} = assigns) do
+  def render(%{live_action: :index, current_user_tenant: %{user_type: :user}} = assigns) do
     ~H"""
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
       <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64">
@@ -13,7 +13,7 @@ defmodule HousingAppWeb.Live.HomeLive do
     """
   end
 
-  def render(%{live_action: :index, current_user_tenant: %{role: :staff}} = assigns) do
+  def render(%{live_action: :index, current_user_tenant: %{user_type: :staff}} = assigns) do
     ~H"""
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
       <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64">
@@ -25,7 +25,7 @@ defmodule HousingAppWeb.Live.HomeLive do
     """
   end
 
-  def render(%{live_action: :index, current_user_tenant: %{role: :admin}} = assigns) do
+  def render(%{live_action: :index, current_user_tenant: %{user_type: :admin}} = assigns) do
     ~H"""
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
       <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64">
@@ -80,7 +80,7 @@ defmodule HousingAppWeb.Live.HomeLive do
             %{
               tenant_id: tenant.id,
               user_id: socket.assigns.current_user.id,
-              role: :admin
+              user_type: :admin
             },
             actor: socket.assigns.current_user
           )
