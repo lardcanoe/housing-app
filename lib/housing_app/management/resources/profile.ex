@@ -9,6 +9,13 @@ defmodule HousingApp.Management.Profile do
   attributes do
     uuid_primary_key :id
 
+    # Used for things like "student, parent, RA, etc"
+    # These are applicable based on the type of organization that the tenant is
+    attribute :roles, {:array, :string} do
+      default []
+      allow_nil? false
+    end
+
     create_timestamp :created_at
     update_timestamp :updated_at
   end
@@ -50,6 +57,10 @@ defmodule HousingApp.Management.Profile do
   postgres do
     table "profiles"
     repo HousingApp.Repo
+
+    custom_indexes do
+      index [:roles], using: "GIN"
+    end
   end
 
   actions do
