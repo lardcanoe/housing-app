@@ -20,7 +20,7 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
          |> put_flash(:error, "Not found")
          |> push_navigate(to: ~p"/profiles")}
 
-      {:ok, _} ->
+      {:ok, profile} ->
         profile_form_id =
           case HousingApp.Management.TenantSetting.get_setting(:system, :profile_form_id,
                  actor: current_user_tenant,
@@ -33,12 +33,12 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
 
         form = HousingApp.Management.Form.get_by_id!(profile_form_id, actor: current_user_tenant, tenant: tenant)
 
-        {:ok, assign(socket, json_schema: form.json_schema |> Jason.decode!(), page_title: "Edit Profile")}
+        {:ok, assign(socket, json_schema: form.json_schema |> Jason.decode!(), profile: profile, page_title: "Edit Profile")}
     end
   end
 
   def handle_event("load-schema", _params, socket) do
-    {:reply, %{schema: socket.assigns.json_schema}, socket}
+    {:reply, %{schema: socket.assigns.json_schema, data: socket.assigns.profile.data}, socket}
   end
 
   def handle_event("submit", data, socket) do
@@ -46,6 +46,9 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
 
     case ExJsonSchema.Validator.validate(ref_schema, data) do
       :ok ->
+        socket.assigns.profile
+        |> HousingApp.Management.Profile.submit(%{data: data}, actor: socket.assigns.current_user_tenant, tenant: socket.assigns.current_tenant)
+
         {:noreply,
          socket
          |> put_flash(:info, "Update profile")

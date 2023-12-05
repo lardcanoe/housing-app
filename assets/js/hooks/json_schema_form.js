@@ -10,6 +10,7 @@ export default {
                 disable_edit_json: true,
                 disable_properties: true,
                 no_additional_properties: true,
+                startval: reply.data,
             });
 
             document

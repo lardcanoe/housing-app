@@ -79,6 +79,10 @@ defmodule HousingApp.Management.Profile do
 
       filter expr(id == ^arg(:id))
     end
+
+    update :submit do
+      accept [:data]
+    end
   end
 
   code_interface do
@@ -86,6 +90,7 @@ defmodule HousingApp.Management.Profile do
 
     define :list
     define :get_by_id, args: [:id]
+    define :submit
   end
 
   identities do

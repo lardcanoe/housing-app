@@ -96,7 +96,7 @@ defmodule HousingApp.Management.Form do
   end
 
   code_interface do
-    define_for HousingApp.Accounts
+    define_for HousingApp.Management
 
     define :list
     define :get_by_id, args: [:id]
