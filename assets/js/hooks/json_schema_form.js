@@ -9,8 +9,9 @@ export default {
                 disable_collapse: true,
                 disable_edit_json: true,
                 disable_properties: true,
-                no_additional_properties: true,
-                startval: reply.data,
+                ajax_cache_buster: true,
+                display_required_only: false,
+                startval: reply.data
             });
 
             document

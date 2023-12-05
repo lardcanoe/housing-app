@@ -6,7 +6,7 @@ defmodule HousingAppWeb.Live.TenantSettings do
     ~H"""
     <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update account settings</h2>
-      <.input field={@ash_form[:profile_form_id]} label="Default Profile Form" />
+      <.input type="select" options={@forms} field={@ash_form[:profile_form_id]} label="Default Profile Form" />
       <:actions>
         <.button>Save</.button>
       </:actions>
@@ -34,7 +34,9 @@ defmodule HousingAppWeb.Live.TenantSettings do
       }
       |> to_form()
 
-    {:ok, assign(socket, ash_form: ash_form, page_title: "Account Settings")}
+    forms = HousingApp.Management.Form.list!(actor: current_user_tenant, tenant: tenant) |> Enum.map(&{&1.name, &1.id})
+
+    {:ok, assign(socket, ash_form: ash_form, forms: forms, page_title: "Account Settings")}
   end
 
   def handle_event("validate", %{"profile_form_id" => _profile_form_id}, socket) do
