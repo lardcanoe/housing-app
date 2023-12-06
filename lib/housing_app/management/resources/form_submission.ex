@@ -72,9 +72,15 @@ defmodule HousingApp.Management.FormSubmission do
       change set_attribute(:user_tenant_id, actor(:id))
     end
 
-    # read :list do
-    #   prepare build(select: [:id, :name, :description, :status])
-    # end
+    read :list_by_form do
+      argument :form_id, :uuid do
+        allow_nil? false
+      end
+
+      prepare build(load: [user_tenant: [:user]])
+
+      filter expr(form_id == ^arg(:form_id) and is_nil(archived_at))
+    end
 
     # read :get_by_id do
     #   argument :id, :uuid do
@@ -91,6 +97,7 @@ defmodule HousingApp.Management.FormSubmission do
     define_for HousingApp.Management
 
     define :submit
+    define :list_by_form, args: [:form_id]
     # define :get_by_id, args: [:id]
   end
 

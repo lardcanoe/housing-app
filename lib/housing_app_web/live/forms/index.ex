@@ -26,7 +26,7 @@ defmodule HousingAppWeb.Live.Forms.Index do
         <%= form.id %>
       </:col>
       <:col :let={form} label="name">
-        <a href={~p"/forms/#{form.id}"}><%= form.name %></a>
+        <.link patch={~p"/forms/#{form.id}"}><%= form.name %></.link>
       </:col>
       <:col :let={form} label="status">
         <span
@@ -49,7 +49,9 @@ defmodule HousingAppWeb.Live.Forms.Index do
         </span>
       </:col>
       <:col :let={form} label="Submissions">
-        <%= form.count_of_submissions %>
+        <.link patch={~p"/forms/#{form.id}/submissions"}>
+          <%= form.count_of_submissions %>
+        </.link>
       </:col>
       <:action :let={form}>
         <.link
@@ -57,6 +59,14 @@ defmodule HousingAppWeb.Live.Forms.Index do
           class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
         >
           Edit
+        </.link>
+      </:action>
+      <:action :let={form}>
+        <.link
+          patch={~p"/forms/#{form.id}/submissions"}
+          class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+        >
+          View submissions
         </.link>
       </:action>
     </.table>
