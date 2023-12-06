@@ -41,7 +41,6 @@ defmodule HousingAppWeb.Live.HomeLive do
       <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64"></div>
       <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64"></div>
     </div>
-    <div id="myGrid" style="width: 100%; height: 400px;" class="ag-theme-quartz" phx-hook="AgGrid"></div>
     """
   end
 
@@ -66,10 +65,6 @@ defmodule HousingAppWeb.Live.HomeLive do
   def handle_event("validate", %{"form" => params}, socket) do
     create_form = AshPhoenix.Form.validate(socket.assigns.create_form, params)
     {:noreply, assign(socket, create_form: create_form)}
-  end
-
-  def handle_event("load-data", %{}, socket) do
-    {:noreply, socket}
   end
 
   def handle_event("submit", %{"form" => params}, socket) do
