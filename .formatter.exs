@@ -11,5 +11,5 @@
   subdirectories: ["priv/*/migrations"],
   plugins: [Phoenix.LiveView.HTMLFormatter, Spark.Formatter],
   inputs: ["*.{heex,ex,exs}", "{config,lib,test}/**/*.{heex,ex,exs}", "priv/*/seeds.exs"],
-  line_length: 150
+  line_length: 120
 ]

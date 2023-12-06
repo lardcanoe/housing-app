@@ -5,7 +5,7 @@ export default {
     mounted() {
         this.pushEvent("load-schema", {}, (reply, ref) => {
             // TODO: WHY IS THIS HIDING NON-REQUIRED FIELDS?
-            const editor = new JSONEditor(this.el, {
+            this.editor = new JSONEditor(this.el, {
                 schema: reply.schema,
                 disable_collapse: true,
                 disable_edit_json: true,
@@ -18,14 +18,22 @@ export default {
             document
                 .getElementById("json-schema-form-submit")
                 .addEventListener("click", () => {
-                    const errors = editor.validate();
+                    const errors = this.editor.validate();
                     if (errors.length) {
-                        editor.setOption("show_errors", "always");
+                        this.editor.setOption("show_errors", "always");
                     } else {
-                        editor.setOption("show_errors", "interaction");
-                        this.pushEvent("submit", editor.getValue());
+                        this.editor.setOption("show_errors", "interaction");
+                        this.pushEvent("submit", this.editor.getValue());
                     }
                 });
         });
     },
+
+    destroyed() {
+        if (!this.editor) {
+            return;
+        }
+
+        this.editor.destroy();
+    }
 };

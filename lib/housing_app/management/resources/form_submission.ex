@@ -1,99 +1,100 @@
-# defmodule HousingApp.Management.FormSubmission do
-#   @moduledoc false
+defmodule HousingApp.Management.FormSubmission do
+  @moduledoc false
 
-#   use Ash.Resource,
-#     data_layer: AshPostgres.DataLayer,
-#     extensions: [AshArchival.Resource, AshAdmin.Api]
+  use Ash.Resource,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshAdmin.Api]
 
-#   # authorizers: [Ash.Policy.Authorizer]
+  # authorizers: [Ash.Policy.Authorizer]
 
-#   attributes do
-#     uuid_primary_key :id
+  attributes do
+    uuid_primary_key :id
 
-#     attribute :data, :map do
-#       allow_nil? false
-#     end
+    attribute :data, :map do
+      allow_nil? false
+    end
 
-#     create_timestamp :created_at
-#     update_timestamp :updated_at
-#   end
+    create_timestamp :created_at
+    update_timestamp :updated_at
 
-#   admin do
-#     show?(true)
-#   end
+    attribute :archived_at, :utc_datetime_usec do
+      allow_nil? true
+    end
+  end
 
-#   relationships do
-#     # Tenant is duplicate data, but makes it safer and easier to do data dumps
-#     belongs_to :tenant, HousingApp.Accounts.Tenant do
-#       api HousingApp.Accounts
-#       attribute_writable? true
-#       allow_nil? false
-#     end
+  admin do
+    show?(true)
+  end
 
-#     belongs_to :user_tenant, HousingApp.Accounts.UserTenant do
-#       api HousingApp.Accounts
-#       attribute_writable? true
-#       allow_nil? false
-#     end
+  relationships do
+    # Tenant is duplicate data, but makes it safer and easier to do data dumps
+    belongs_to :tenant, HousingApp.Accounts.Tenant do
+      api HousingApp.Accounts
+      attribute_writable? true
+      allow_nil? false
+    end
 
-#     belongs_to :form, HousingApp.Management.Form do
-#       attribute_writable? true
-#       allow_nil? false
-#     end
-#   end
+    belongs_to :user_tenant, HousingApp.Accounts.UserTenant do
+      api HousingApp.Accounts
+      attribute_writable? true
+      allow_nil? false
+    end
 
-#   # policies do
-#   #   bypass always() do
-#   #     authorize_if HousingApp.Checks.IsPlatformAdmin
-#   #     authorize_if HousingApp.Checks.IsTenantAdmin
-#   #   end
+    belongs_to :form, HousingApp.Management.Form do
+      attribute_writable? true
+      allow_nil? false
+    end
+  end
 
-#   #   policy action_type(:read) do
-#   #     authorize_if always()
-#   #   end
-#   # end
+  # policies do
+  #   bypass always() do
+  #     authorize_if HousingApp.Checks.IsPlatformAdmin
+  #     authorize_if HousingApp.Checks.IsTenantAdmin
+  #   end
 
-#   postgres do
-#     table "form_submissions"
-#     repo HousingApp.Repo
-#   end
+  #   policy action_type(:read) do
+  #     authorize_if always()
+  #   end
+  # end
 
-#   actions do
-#     defaults [:create, :read, :update, :destroy]
+  postgres do
+    table "form_submissions"
+    repo HousingApp.Repo
+  end
 
-#     # create :new do
-#     #   accept [:name, :description, :json_schema]
+  actions do
+    defaults [:create, :read, :update, :destroy]
 
-#     #   argument :tenant_id, :uuid do
-#     #     allow_nil? false
-#     #   end
+    create :submit do
+      accept [:form_id, :data]
 
-#     #   change manage_relationship(:tenant_id, :tenant, type: :append_and_remove)
-#     # end
+      change set_attribute(:tenant_id, actor(:tenant_id))
+      change set_attribute(:user_tenant_id, actor(:id))
+    end
 
-#     # read :list do
-#     #   prepare build(select: [:id, :name, :description, :status])
-#     # end
+    # read :list do
+    #   prepare build(select: [:id, :name, :description, :status])
+    # end
 
-#     # read :get_by_id do
-#     #   argument :id, :uuid do
-#     #     allow_nil? false
-#     #   end
+    # read :get_by_id do
+    #   argument :id, :uuid do
+    #     allow_nil? false
+    #   end
 
-#     #   get? true
+    #   get? true
 
-#     #   filter expr(id == ^arg(:id))
-#     # end
-#   end
+    #   filter expr(id == ^arg(:id))
+    # end
+  end
 
-#   # code_interface do
-#   #   define_for HousingApp.Management
+  code_interface do
+    define_for HousingApp.Management
 
-#   #   define :list
-#   #   define :get_by_id, args: [:id]
-#   # end
+    define :submit
+    # define :get_by_id, args: [:id]
+  end
 
-#   multitenancy do
-#     strategy :context
-#   end
-# end
+  multitenancy do
+    strategy :context
+  end
+end

@@ -1,4 +1,6 @@
 defmodule HousingAppWeb.Live.Profiles.Index do
+  @moduledoc false
+
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :index} = assigns) do
@@ -16,7 +18,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
         <%= profile.id %>
       </:col>
       <:col :let={profile} label="User Name">
-        <.link patch={~p"/profiles/#{profile.id}"}><%= profile.user_tenant.user.name %></.link>
+        <.link patch={~p"/profiles/#{profile.id}/edit"}><%= profile.user_tenant.user.name %></.link>
       </:col>
       <:col :let={profile} label="User Email">
         <%= profile.user_tenant.user.email %>

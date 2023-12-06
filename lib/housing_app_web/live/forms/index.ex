@@ -5,8 +5,18 @@ defmodule HousingAppWeb.Live.Forms.Index do
     ~H"""
     <.table id="forms" rows={@forms} pagination={false} row_id={fn row -> "forms-row-#{row.id}" end}>
       <:button>
-        <svg class="h-3.5 w-3.5 mr-2" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path clip-rule="evenodd" fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+        <svg
+          class="h-3.5 w-3.5 mr-2"
+          fill="currentColor"
+          viewbox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            clip-rule="evenodd"
+            fill-rule="evenodd"
+            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+          />
         </svg>
         <.link patch={~p"/forms/new"}>
           Add form
@@ -38,8 +48,14 @@ defmodule HousingAppWeb.Live.Forms.Index do
           Archived
         </span>
       </:col>
+      <:col :let={form} label="Submissions">
+        <%= form.count_of_submissions %>
+      </:col>
       <:action :let={form}>
-        <.link patch={~p"/forms/#{form.id}/edit"} class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+        <.link
+          patch={~p"/forms/#{form.id}/edit"}
+          class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+        >
           Edit
         </.link>
       </:action>
@@ -47,7 +63,11 @@ defmodule HousingAppWeb.Live.Forms.Index do
     """
   end
 
-  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}} = socket) do
+  def mount(
+        _params,
+        _session,
+        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}} = socket
+      ) do
     case HousingApp.Management.Form.list(actor: current_user_tenant, tenant: current_tenant) do
       {:ok, forms} ->
         {:ok, assign(socket, forms: forms, page_title: "Forms")}

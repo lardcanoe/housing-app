@@ -3,7 +3,7 @@ defmodule HousingApp.Management.Form do
 
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshArchival.Resource, AshAdmin.Api],
+    extensions: [AshAdmin.Api],
     authorizers: [Ash.Policy.Authorizer]
 
   attributes do
@@ -36,6 +36,10 @@ defmodule HousingApp.Management.Form do
 
     create_timestamp :created_at
     update_timestamp :updated_at
+
+    attribute :archived_at, :utc_datetime_usec do
+      allow_nil? true
+    end
   end
 
   admin do
@@ -48,6 +52,11 @@ defmodule HousingApp.Management.Form do
       api HousingApp.Accounts
       attribute_writable? true
       allow_nil? false
+    end
+
+    has_many :submissions, HousingApp.Management.FormSubmission do
+      source_attribute :id
+      destination_attribute :form_id
     end
   end
 
@@ -81,7 +90,13 @@ defmodule HousingApp.Management.Form do
     end
 
     read :list do
-      prepare build(select: [:id, :name, :description, :status])
+      prepare build(
+                select: [:id, :name, :description, :status],
+                load: [:count_of_submissions],
+                sort: [:name]
+              )
+
+      filter expr(is_nil(archived_at))
     end
 
     read :get_by_id do
@@ -91,7 +106,7 @@ defmodule HousingApp.Management.Form do
 
       get? true
 
-      filter expr(id == ^arg(:id))
+      filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
   end
 
@@ -104,6 +119,12 @@ defmodule HousingApp.Management.Form do
 
   validations do
     validate {HousingApp.Validations.IsJsonSchema, attribute: :json_schema}
+  end
+
+  aggregates do
+    count :count_of_submissions, :submissions do
+      filter expr(is_nil(archived_at))
+    end
   end
 
   multitenancy do

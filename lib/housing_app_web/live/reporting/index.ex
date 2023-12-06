@@ -1,4 +1,6 @@
 defmodule HousingAppWeb.Live.Reporting.Index do
+  @moduledoc false
+
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :index} = assigns) do
@@ -14,15 +16,11 @@ defmodule HousingAppWeb.Live.Reporting.Index do
   def handle_event("load-data", %{}, socket) do
     {:reply,
      %{
-       columns: [
-         %{field: "make"},
-         %{field: "model"},
-         %{field: "price"}
-       ],
+       columns: [%{field: "make"}, %{field: "model"}, %{field: "price"}],
        data: [
-         %{make: "Toyota", model: "Corolla", price: 35000},
-         %{make: "Ford", model: "Mondeo", price: 32000},
-         %{make: "Porsche", model: "Boxter", price: 72000}
+         %{make: "Toyota", model: "Corolla", price: 35_000},
+         %{make: "Ford", model: "Mondeo", price: 32_000},
+         %{make: "Porsche", model: "Boxter", price: 72_000}
        ]
      }, socket}
   end

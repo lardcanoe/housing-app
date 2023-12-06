@@ -2,6 +2,7 @@
 /_build/
 
 .elixir_ls/
+.elixir-tools/
 
 # If you run "mix test --cover", coverage assets end up here.
 /cover/
