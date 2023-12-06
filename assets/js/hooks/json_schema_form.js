@@ -4,6 +4,7 @@ JSONEditor.defaults.options.theme = "tailwind";
 export default {
     mounted() {
         this.pushEvent("load-schema", {}, (reply, ref) => {
+            // TODO: WHY IS THIS HIDING NON-REQUIRED FIELDS?
             const editor = new JSONEditor(this.el, {
                 schema: reply.schema,
                 disable_collapse: true,
