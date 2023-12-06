@@ -3,7 +3,6 @@ defmodule HousingApp.Accounts.UserTenant do
 
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshArchival.Resource],
     authorizers: [Ash.Policy.Authorizer]
 
   attributes do
@@ -17,6 +16,10 @@ defmodule HousingApp.Accounts.UserTenant do
 
     create_timestamp :created_at
     update_timestamp :updated_at
+
+    attribute :archived_at, :utc_datetime_usec do
+      allow_nil? true
+    end
   end
 
   relationships do
@@ -67,7 +70,7 @@ defmodule HousingApp.Accounts.UserTenant do
 
       prepare build(load: [:user, :tenant])
 
-      filter expr(user_id == ^actor(:id) and tenant_id == ^arg(:tenant_id))
+      filter expr(user_id == ^actor(:id) and tenant_id == ^arg(:tenant_id) and is_nil(archived_at))
     end
 
     read :get_by_id do
@@ -79,7 +82,7 @@ defmodule HousingApp.Accounts.UserTenant do
 
       prepare build(load: [:user, :tenant])
 
-      filter expr(user_id == ^actor(:id) and id == ^arg(:id))
+      filter expr(user_id == ^actor(:id) and id == ^arg(:id) and is_nil(archived_at))
     end
 
     read :get_default do
@@ -87,7 +90,7 @@ defmodule HousingApp.Accounts.UserTenant do
 
       prepare build(limit: 1, sort: [created_at: :asc], load: [:user, :tenant])
 
-      filter expr(user_id == ^actor(:id))
+      filter expr(user_id == ^actor(:id) and is_nil(archived_at))
     end
   end
 

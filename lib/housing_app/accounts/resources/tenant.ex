@@ -2,8 +2,7 @@ defmodule HousingApp.Accounts.Tenant do
   @moduledoc false
 
   use Ash.Resource,
-    data_layer: AshPostgres.DataLayer,
-    extensions: [AshArchival.Resource]
+    data_layer: AshPostgres.DataLayer
 
   attributes do
     uuid_primary_key :id
@@ -12,6 +11,10 @@ defmodule HousingApp.Accounts.Tenant do
 
     create_timestamp :created_at
     update_timestamp :updated_at
+
+    attribute :archived_at, :utc_datetime_usec do
+      allow_nil? true
+    end
   end
 
   relationships do

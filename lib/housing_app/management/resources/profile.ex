@@ -3,7 +3,7 @@ defmodule HousingApp.Management.Profile do
 
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshArchival.Resource, AshAdmin.Api],
+    extensions: [AshAdmin.Api],
     authorizers: [Ash.Policy.Authorizer]
 
   attributes do
@@ -16,6 +16,10 @@ defmodule HousingApp.Management.Profile do
 
     create_timestamp :created_at
     update_timestamp :updated_at
+
+    attribute :archived_at, :utc_datetime_usec do
+      allow_nil? true
+    end
   end
 
   admin do
@@ -66,6 +70,8 @@ defmodule HousingApp.Management.Profile do
 
     read :list do
       prepare build(load: [user_tenant: [:user]])
+
+      filter expr(is_nil(archived_at))
     end
 
     read :get_by_id do
@@ -77,7 +83,7 @@ defmodule HousingApp.Management.Profile do
 
       prepare build(load: [user_tenant: [:user]])
 
-      filter expr(id == ^arg(:id))
+      filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
 
     update :submit do
