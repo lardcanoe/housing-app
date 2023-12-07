@@ -1,19 +1,11 @@
 defmodule HousingAppWeb.Live.Forms.Submissions do
+  @moduledoc false
+
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :submissions} = assigns) do
     ~H"""
-    <.table id="submissions" rows={@submissions} pagination={false} row_id={fn row -> "submissions-row-#{row.id}" end}>
-      <:col :let={submission} :if={@current_user.role == :platform_admin} label="id">
-        <%= submission.id %>
-      </:col>
-      <:col :let={submission} label="name">
-        <%= submission.user_tenant.user.name %>
-      </:col>
-      <:col :let={submission} label="Date">
-        <%= submission.created_at %>
-      </:col>
-    </.table>
+    <div id="myGrid" style="width: 100%; height: 400px;" class="ag-theme-quartz-dark" phx-hook="AgGrid"></div>
     """
   end
 
@@ -30,16 +22,40 @@ defmodule HousingAppWeb.Live.Forms.Submissions do
          |> push_navigate(to: ~p"/forms")}
 
       {:ok, form} ->
-        case HousingApp.Management.FormSubmission.list_by_form(form.id, actor: current_user_tenant, tenant: tenant) do
-          {:ok, submissions} ->
-            {:ok, assign(socket, submissions: submissions, page_title: "Form Submissions")}
+        {:ok, socket |> assign(form: form, page_title: "Form Submissions")}
+    end
+  end
 
-          _ ->
-            {:ok,
-             socket
-             |> assign(submissions: [], page_title: "Form Submissions")
-             |> put_flash(:error, "Error loading submissions.")}
-        end
+  def handle_event(
+        "load-data",
+        %{},
+        %{assigns: %{form: form, current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+      ) do
+    schema = form.json_schema |> Jason.decode!()
+
+    columns =
+      HousingApp.Utils.JsonSchema.schema_to_aggrid_columns(schema) ++
+        [
+          %{
+            "field" => "metadata.created_at",
+            "headerName" => "Created At",
+            "type" => ["dateColumn", "nonEditableColumn"]
+          },
+          %{"field" => "metadata.user", "headerName" => "User"}
+        ]
+
+    case HousingApp.Management.FormSubmission.list_by_form(form.id, actor: current_user_tenant, tenant: tenant) do
+      {:ok, submissions} ->
+        data =
+          submissions
+          |> Enum.map(
+            &Enum.into(&1.data, %{"metadata" => %{"created_at" => &1.created_at, "user" => &1.user_tenant.user.name}})
+          )
+
+        {:reply, %{columns: columns, data: data}, socket}
+
+      _ ->
+        {:reply, %{columns: columns, data: []}, socket}
     end
   end
 end
