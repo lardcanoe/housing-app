@@ -11,6 +11,14 @@ export default {
                     autoHeight: true,
                     filter: true
                 },
+                columnTypes: {
+                    numberColumn: { width: 130, filter: 'agNumberColumnFilter' },
+                    nonEditableColumn: { editable: false },
+                    dateColumn: {
+                        // specify we want to use the date filter
+                        filter: 'agDateColumnFilter'
+                    }
+                },
                 columnDefs: reply.columns,
                 rowData: reply.data
             };

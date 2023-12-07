@@ -9,7 +9,7 @@ defmodule HousingApp.Utils.JsonSchema do
     |> Enum.map(fn {key, value} ->
       case value do
         %{"type" => "integer"} ->
-          %{field: "#{prefix}#{key}", type: "numberColumn", headerName: Map.get(value, "title", key)}
+          %{field: "#{prefix}#{key}", type: "numericColumn", headerName: Map.get(value, "title", key)}
 
         %{"type" => "string", "format" => "date"} ->
           %{
