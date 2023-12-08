@@ -28,6 +28,10 @@ defmodule HousingAppWeb.Live.UserSettingsLive do
     {:ok, assign(socket, ash_form: ash_form, page_title: "Profile Settings")}
   end
 
+  def handle_params(params, _url, socket) do
+    {:noreply, assign(socket, params: params)}
+  end
+
   def handle_event("validate", %{"form" => params}, socket) do
     ash_form = AshPhoenix.Form.validate(socket.assigns.form, params)
     {:noreply, assign(socket, ash_form: ash_form)}

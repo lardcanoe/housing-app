@@ -15,6 +15,10 @@ defmodule HousingAppWeb.Live.Reporting.Index do
     {:ok, assign(socket, sidebar: :reporting, page_title: "Reporting Dashboard")}
   end
 
+  def handle_params(params, _url, socket) do
+    {:noreply, assign(socket, params: params)}
+  end
+
   def handle_event("load-data", %{}, socket) do
     {:reply,
      %{

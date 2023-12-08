@@ -52,4 +52,8 @@ defmodule HousingAppWeb.Live.Profiles.Index do
 
     {:ok, assign(socket, profiles: profiles, sidebar: :profiles, page_title: "Profiles")}
   end
+
+  def handle_params(params, _url, socket) do
+    {:noreply, assign(socket, params: params)}
+  end
 end

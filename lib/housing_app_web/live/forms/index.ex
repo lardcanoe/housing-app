@@ -89,4 +89,8 @@ defmodule HousingAppWeb.Live.Forms.Index do
          socket |> assign(forms: [], sidebar: :forms, page_title: "Forms") |> put_flash(:error, "Error loading forms.")}
     end
   end
+
+  def handle_params(params, _url, socket) do
+    {:noreply, assign(socket, params: params)}
+  end
 end

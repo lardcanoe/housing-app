@@ -32,6 +32,10 @@ defmodule HousingAppWeb.Live.Forms.New do
     {:ok, assign(socket, form: form, sidebar: :forms, page_title: "New Form")}
   end
 
+  def handle_params(params, _url, socket) do
+    {:noreply, assign(socket, params: params)}
+  end
+
   def handle_event("validate", %{"form" => params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.form, params)
     {:noreply, assign(socket, form: form)}

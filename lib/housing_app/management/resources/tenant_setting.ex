@@ -48,6 +48,7 @@ defmodule HousingApp.Management.TenantSetting do
     defaults [:create, :read, :update, :destroy]
 
     read :list_settings do
+      prepare build(select: [:namespace, :setting, :value])
     end
 
     read :get_setting do
@@ -64,6 +65,19 @@ defmodule HousingApp.Management.TenantSetting do
       filter expr(namespace == ^arg(:namespace) and setting == ^arg(:setting))
     end
 
+    action :get_settings, :map do
+      run fn input, context ->
+        map =
+          __MODULE__.list_settings!(actor: context.actor)
+          |> Enum.map(fn entry ->
+            {{entry.namespace, entry.setting}, entry.value}
+          end)
+          |> Map.new()
+
+        {:ok, map}
+      end
+    end
+
     create :update_setting do
       accept [:namespace, :setting, :value]
       upsert? true
@@ -76,6 +90,7 @@ defmodule HousingApp.Management.TenantSetting do
     define :list_settings
     define :get_setting, args: [:namespace, :setting]
     define :update_setting
+    define :get_settings
   end
 
   identities do

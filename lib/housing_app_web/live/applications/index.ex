@@ -73,4 +73,8 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
     {:ok, assign(socket, applications: applications, sidebar: :applications, page_title: "Applications")}
   end
+
+  def handle_params(params, _url, socket) do
+    {:noreply, assign(socket, params: params)}
+  end
 end
