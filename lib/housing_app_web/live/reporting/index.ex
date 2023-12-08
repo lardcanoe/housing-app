@@ -5,6 +5,8 @@ defmodule HousingAppWeb.Live.Reporting.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
+    <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Reporting</h1>
+
     <div id="myGrid" style="width: 100%; height: 400px;" class="ag-theme-quartz-dark" phx-hook="AgGrid"></div>
     """
   end

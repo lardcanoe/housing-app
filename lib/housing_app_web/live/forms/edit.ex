@@ -1,4 +1,6 @@
 defmodule HousingAppWeb.Live.Forms.Edit do
+  @moduledoc false
+
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :edit} = assigns) do
@@ -7,6 +9,7 @@ defmodule HousingAppWeb.Live.Forms.Edit do
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update form</h2>
       <.input field={@form[:name]} label="Name" />
       <.input type="textarea" field={@form[:json_schema]} label="Schema" />
+      <.input type="select" options={@status_options} field={@form[:status]} label="Status" />
       <:actions>
         <.button>Save</.button>
         <.button :if={false} type="delete">Delete</.button>
@@ -15,7 +18,11 @@ defmodule HousingAppWeb.Live.Forms.Edit do
     """
   end
 
-  def mount(%{"id" => id}, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+  def mount(
+        %{"id" => id},
+        _session,
+        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+      ) do
     case HousingApp.Management.Form.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
@@ -34,7 +41,13 @@ defmodule HousingAppWeb.Live.Forms.Edit do
           )
           |> to_form()
 
-        {:ok, assign(socket, form: form, page_title: "Edit Form")}
+        status_options = [
+          {"Draft", :draft},
+          {"Approved (Published)", :approved},
+          {"Archived", :archived}
+        ]
+
+        {:ok, assign(socket, form: form, status_options: status_options, page_title: "Edit Form")}
     end
   end
 

@@ -4,6 +4,8 @@ defmodule HousingAppWeb.Live.Forms.View do
 
   def render(%{live_action: :view} = assigns) do
     ~H"""
+    <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">View Form</h1>
+
     <div class="bg-white dark:bg-white">
       <div id="json-schema-form" phx-hook="JSONSchemaForm" />
       <.button id="json-schema-form-submit" phx-update="ignore">

@@ -3,6 +3,8 @@ defmodule HousingAppWeb.Live.Forms.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
+    <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Forms</h1>
+
     <.table id="forms" rows={@forms} pagination={false} row_id={fn row -> "forms-row-#{row.id}" end}>
       <:button>
         <svg

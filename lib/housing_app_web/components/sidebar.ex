@@ -14,8 +14,8 @@ defmodule HousingAppWeb.Components.Sidebar do
       <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
         <ul class="space-y-2">
           <li>
-            <a
-              href="#"
+            <.link
+              patch={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -29,11 +29,11 @@ defmodule HousingAppWeb.Components.Sidebar do
                 <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
               </svg>
               <span class="ml-3">Overview</span>
-            </a>
+            </.link>
           </li>
           <li>
-            <a
-              href={~p"/applications"}
+            <.link
+              patch={~p"/applications"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -47,11 +47,11 @@ defmodule HousingAppWeb.Components.Sidebar do
                 <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
               </svg>
               <span class="ml-3">My Applications</span>
-            </a>
+            </.link>
           </li>
           <li>
-            <a
-              href="#"
+            <.link
+              patch={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -65,11 +65,11 @@ defmodule HousingAppWeb.Components.Sidebar do
                 <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
               </svg>
               <span class="ml-3">Housing</span>
-            </a>
+            </.link>
           </li>
           <li>
-            <a
-              href="#"
+            <.link
+              patch={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -79,14 +79,16 @@ defmodule HousingAppWeb.Components.Sidebar do
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z"></path>
-                <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"></path>
+                <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z">
+                </path>
+                <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z">
+                </path>
               </svg>
               <span class="flex-1 ml-3 whitespace-nowrap">Messages</span>
               <span class="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-primary-800 bg-primary-100 dark:bg-primary-200 dark:text-primary-800">
                 4
               </span>
-            </a>
+            </.link>
           </li>
         </ul>
       </div>
@@ -106,7 +108,12 @@ defmodule HousingAppWeb.Components.Sidebar do
           <label for="sidebar-search" class="sr-only">Search</label>
           <div class="relative">
             <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
-              <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                class="w-5 h-5 text-gray-500 dark:text-gray-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   fill-rule="evenodd"
                   clip-rule="evenodd"
@@ -167,7 +174,13 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Forms</span>
-              <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                aria-hidden="true"
+                class="w-6 h-6"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -178,28 +191,20 @@ defmodule HousingAppWeb.Components.Sidebar do
             </button>
             <ul id="dropdown-forms" class="hidden py-2 space-y-2">
               <li>
-                <a
-                  href="#"
+                <.link
+                  patch={~p"/forms/new"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   + New
-                </a>
+                </.link>
               </li>
               <li>
-                <a
-                  href={~p"/forms"}
+                <.link
+                  patch={~p"/forms"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Manage
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  Calendar
-                </a>
+                </.link>
               </li>
             </ul>
           </li>
@@ -226,7 +231,13 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Applications</span>
-              <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                aria-hidden="true"
+                class="w-6 h-6"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -237,28 +248,20 @@ defmodule HousingAppWeb.Components.Sidebar do
             </button>
             <ul id="dropdown-pages" class="hidden py-2 space-y-2">
               <li>
-                <a
-                  href="#"
+                <.link
+                  patch={~p"/applications/new"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   + New
-                </a>
+                </.link>
               </li>
               <li>
-                <a
-                  href={~p"/applications"}
+                <.link
+                  patch={~p"/applications"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Manage
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  Calendar
-                </a>
+                </.link>
               </li>
             </ul>
           </li>
@@ -285,7 +288,13 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Students</span>
-              <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                aria-hidden="true"
+                class="w-6 h-6"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -336,7 +345,13 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Reporting</span>
-              <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                aria-hidden="true"
+                class="w-6 h-6"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   fill-rule="evenodd"
                   d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -357,8 +372,8 @@ defmodule HousingAppWeb.Components.Sidebar do
             </ul>
           </li>
           <li>
-            <a
-              href="#"
+            <.link
+              patch={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -368,20 +383,22 @@ defmodule HousingAppWeb.Components.Sidebar do
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z"></path>
-                <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"></path>
+                <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z">
+                </path>
+                <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z">
+                </path>
               </svg>
               <span class="flex-1 ml-3 whitespace-nowrap">Messages</span>
               <span class="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-primary-800 bg-primary-100 dark:bg-primary-200 dark:text-primary-800">
                 4
               </span>
-            </a>
+            </.link>
           </li>
         </ul>
         <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
           <li>
-            <a
-              href="#"
+            <.link
+              patch={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
             >
               <svg
@@ -400,11 +417,11 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
               <span class="ml-3">Docs</span>
-            </a>
+            </.link>
           </li>
           <li>
-            <a
-              href="#"
+            <.link
+              patch={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
             >
               <svg
@@ -418,11 +435,11 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
               <span class="ml-3">Components</span>
-            </a>
+            </.link>
           </li>
           <li>
-            <a
-              href="#"
+            <.link
+              patch={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
             >
               <svg
@@ -440,7 +457,7 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
               <span class="ml-3">Help</span>
-            </a>
+            </.link>
           </li>
         </ul>
       </div>
