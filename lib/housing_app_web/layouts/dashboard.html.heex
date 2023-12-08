@@ -1,7 +1,11 @@
 <div class="antialiased bg-gray-50 dark:bg-gray-900">
-  <.navbar current_user={@current_user} current_user_tenant={@current_user_tenant} available_user_tenants={@available_user_tenants} />
+  <.navbar
+    current_user={@current_user}
+    current_user_tenant={@current_user_tenant}
+    available_user_tenants={@available_user_tenants}
+  />
 
-  <.sidebar current_user_tenant={@current_user_tenant} />
+  <.sidebar section={assigns[:sidebar]} current_user_tenant={@current_user_tenant} />
 
   <main class="p-4 md:ml-64 h-auto pt-20">
     <div class="mx-auto">

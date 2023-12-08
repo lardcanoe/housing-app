@@ -1,8 +1,11 @@
 defmodule HousingAppWeb.Components.Sidebar do
+  @moduledoc false
+
   use Phoenix.Component
   use HousingAppWeb, :verified_routes
 
   attr :current_user_tenant, :any, required: true
+  attr :section, :any, default: nil
 
   def sidebar(%{current_user_tenant: %{user_type: :user}} = assigns) do
     ~H"""
@@ -97,6 +100,8 @@ defmodule HousingAppWeb.Components.Sidebar do
   end
 
   def sidebar(assigns) do
+    IO.inspect(assigns)
+
     ~H"""
     <aside
       class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -189,7 +194,7 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
             </button>
-            <ul id="dropdown-forms" class="hidden py-2 space-y-2">
+            <ul id="dropdown-forms" class={["py-2 space-y-2", @section != :forms && "hidden"]}>
               <li>
                 <.link
                   patch={~p"/forms/new"}
@@ -213,8 +218,8 @@ defmodule HousingAppWeb.Components.Sidebar do
             <button
               type="button"
               class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-              aria-controls="dropdown-pages"
-              data-collapse-toggle="dropdown-pages"
+              aria-controls="dropdown-applications"
+              data-collapse-toggle="dropdown-applications"
             >
               <svg
                 aria-hidden="true"
@@ -246,7 +251,7 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
             </button>
-            <ul id="dropdown-pages" class="hidden py-2 space-y-2">
+            <ul id="dropdown-applications" class={["py-2 space-y-2", @section != :applications && "hidden"]}>
               <li>
                 <.link
                   patch={~p"/applications/new"}
@@ -303,7 +308,7 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
             </button>
-            <ul id="dropdown-profiles" class="hidden py-2 space-y-2">
+            <ul id="dropdown-profiles" class={["py-2 space-y-2", @section != :profiles && "hidden"]}>
               <li>
                 <.link
                   patch={~p"/profiles/new"}
@@ -360,7 +365,7 @@ defmodule HousingAppWeb.Components.Sidebar do
                 </path>
               </svg>
             </button>
-            <ul id="dropdown-reporting" class="hidden py-2 space-y-2">
+            <ul id="dropdown-reporting" class={["py-2 space-y-2", @section != :reporting && "hidden"]}>
               <li>
                 <.link
                   patch={~p"/reporting"}

@@ -27,6 +27,7 @@ defmodule HousingAppWeb.Live.Forms.Edit do
       {:error, _} ->
         {:ok,
          socket
+         |> assign(sidebar: :forms)
          |> put_flash(:error, "Not found")
          |> push_navigate(to: ~p"/forms")}
 
@@ -47,7 +48,7 @@ defmodule HousingAppWeb.Live.Forms.Edit do
           {"Archived", :archived}
         ]
 
-        {:ok, assign(socket, form: form, status_options: status_options, page_title: "Edit Form")}
+        {:ok, assign(socket, form: form, status_options: status_options, sidebar: :forms, page_title: "Edit Form")}
     end
   end
 

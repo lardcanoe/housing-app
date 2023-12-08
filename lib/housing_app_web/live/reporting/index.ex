@@ -12,7 +12,7 @@ defmodule HousingAppWeb.Live.Reporting.Index do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, page_title: "Reporting Dashboard")}
+    {:ok, assign(socket, sidebar: :reporting, page_title: "Reporting Dashboard")}
   end
 
   def handle_event("load-data", %{}, socket) do

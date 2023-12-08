@@ -71,6 +71,6 @@ defmodule HousingAppWeb.Live.Applications.Index do
   def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
     {:ok, applications} = HousingApp.Management.Application.list(actor: current_user_tenant, tenant: tenant)
 
-    {:ok, assign(socket, applications: applications, page_title: "Applications")}
+    {:ok, assign(socket, applications: applications, sidebar: :applications, page_title: "Applications")}
   end
 end

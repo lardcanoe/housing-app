@@ -29,7 +29,7 @@ defmodule HousingAppWeb.Live.Forms.New do
       )
       |> to_form()
 
-    {:ok, assign(socket, form: form, page_title: "New Form")}
+    {:ok, assign(socket, form: form, sidebar: :forms, page_title: "New Form")}
   end
 
   def handle_event("validate", %{"form" => params}, socket) do

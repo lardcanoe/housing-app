@@ -82,10 +82,11 @@ defmodule HousingAppWeb.Live.Forms.Index do
       ) do
     case HousingApp.Management.Form.list(actor: current_user_tenant, tenant: current_tenant) do
       {:ok, forms} ->
-        {:ok, assign(socket, forms: forms, page_title: "Forms")}
+        {:ok, assign(socket, forms: forms, sidebar: :forms, page_title: "Forms")}
 
       _ ->
-        {:ok, socket |> assign(forms: [], page_title: "Forms") |> put_flash(:error, "Error loading forms.")}
+        {:ok,
+         socket |> assign(forms: [], sidebar: :forms, page_title: "Forms") |> put_flash(:error, "Error loading forms.")}
     end
   end
 end

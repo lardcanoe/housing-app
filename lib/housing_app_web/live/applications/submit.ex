@@ -12,16 +12,26 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     """
   end
 
-  def mount(%{"id" => id}, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+  def mount(
+        %{"id" => id},
+        _session,
+        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+      ) do
     case HousingApp.Management.Application.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
          socket
+         |> assign(sidebar: :applications)
          |> put_flash(:error, "Not found")
          |> push_navigate(to: ~p"/applications")}
 
       {:ok, app} ->
-        {:ok, assign(socket, json_schema: app.form.json_schema |> Jason.decode!(), page_title: "Submit Application")}
+        {:ok,
+         assign(socket,
+           json_schema: app.form.json_schema |> Jason.decode!(),
+           sidebar: :applications,
+           page_title: "Submit Application"
+         )}
     end
   end
 

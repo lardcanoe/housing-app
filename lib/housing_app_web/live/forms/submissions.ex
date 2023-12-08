@@ -20,11 +20,12 @@ defmodule HousingAppWeb.Live.Forms.Submissions do
       {:error, _} ->
         {:ok,
          socket
+         |> assign(sidebar: :forms)
          |> put_flash(:error, "Not found")
          |> push_navigate(to: ~p"/forms")}
 
       {:ok, form} ->
-        {:ok, socket |> assign(form: form, page_title: "Form Submissions")}
+        {:ok, socket |> assign(form: form, sidebar: :forms, page_title: "Form Submissions")}
     end
   end
 

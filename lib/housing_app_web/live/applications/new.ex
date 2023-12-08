@@ -27,7 +27,7 @@ defmodule HousingAppWeb.Live.Applications.New do
 
     forms = HousingApp.Management.Form.list!(actor: current_user_tenant, tenant: tenant) |> Enum.map(&{&1.name, &1.id})
 
-    {:ok, assign(socket, ash_form: ash_form, forms: forms, page_title: "New Application")}
+    {:ok, assign(socket, ash_form: ash_form, forms: forms, sidebar: :applications, page_title: "New Application")}
   end
 
   def handle_event("validate", %{"form" => params}, socket) do

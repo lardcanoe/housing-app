@@ -50,6 +50,6 @@ defmodule HousingAppWeb.Live.Profiles.Index do
   def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
     {:ok, profiles} = HousingApp.Management.Profile.list(actor: current_user_tenant, tenant: tenant)
 
-    {:ok, assign(socket, profiles: profiles, page_title: "Profiles")}
+    {:ok, assign(socket, profiles: profiles, sidebar: :profiles, page_title: "Profiles")}
   end
 end

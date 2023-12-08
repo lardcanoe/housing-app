@@ -15,11 +15,16 @@ defmodule HousingAppWeb.Live.Applications.Edit do
     """
   end
 
-  def mount(%{"id" => id}, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+  def mount(
+        %{"id" => id},
+        _session,
+        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+      ) do
     case HousingApp.Management.Application.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
          socket
+         |> assign(sidebar: :applications)
          |> put_flash(:error, "Not found")
          |> push_navigate(to: ~p"/applications")}
 
@@ -34,9 +39,10 @@ defmodule HousingAppWeb.Live.Applications.Edit do
           )
           |> to_form()
 
-        forms = HousingApp.Management.Form.list!(actor: current_user_tenant, tenant: tenant) |> Enum.map(&{&1.name, &1.id})
+        forms =
+          HousingApp.Management.Form.list!(actor: current_user_tenant, tenant: tenant) |> Enum.map(&{&1.name, &1.id})
 
-        {:ok, assign(socket, ash_form: ash_form, forms: forms, page_title: "Edit Application")}
+        {:ok, assign(socket, ash_form: ash_form, forms: forms, sidebar: :applications, page_title: "Edit Application")}
     end
   end
 

@@ -24,11 +24,18 @@ defmodule HousingAppWeb.Live.Forms.View do
       {:error, _} ->
         {:ok,
          socket
+         |> assign(sidebar: :forms)
          |> put_flash(:error, "Not found")
          |> push_navigate(to: ~p"/forms")}
 
       {:ok, form} ->
-        {:ok, assign(socket, form_id: id, json_schema: form.json_schema |> Jason.decode!(), page_title: "View Form")}
+        {:ok,
+         assign(socket,
+           form_id: id,
+           json_schema: form.json_schema |> Jason.decode!(),
+           sidebar: :forms,
+           page_title: "View Form"
+         )}
     end
   end
 

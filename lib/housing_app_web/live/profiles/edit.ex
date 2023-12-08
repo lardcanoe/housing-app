@@ -12,11 +12,16 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
     """
   end
 
-  def mount(%{"id" => id}, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+  def mount(
+        %{"id" => id},
+        _session,
+        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+      ) do
     case HousingApp.Management.Profile.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
          socket
+         |> assign(sidebar: :profiles)
          |> put_flash(:error, "Not found")
          |> push_navigate(to: ~p"/profiles")}
 
@@ -33,7 +38,13 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
 
         form = HousingApp.Management.Form.get_by_id!(profile_form_id, actor: current_user_tenant, tenant: tenant)
 
-        {:ok, assign(socket, json_schema: form.json_schema |> Jason.decode!(), profile: profile, page_title: "Edit Profile")}
+        {:ok,
+         assign(socket,
+           json_schema: form.json_schema |> Jason.decode!(),
+           profile: profile,
+           sidebar: :profiles,
+           page_title: "Edit Profile"
+         )}
     end
   end
 
@@ -47,7 +58,10 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
     case ExJsonSchema.Validator.validate(ref_schema, data) do
       :ok ->
         socket.assigns.profile
-        |> HousingApp.Management.Profile.submit(%{data: data}, actor: socket.assigns.current_user_tenant, tenant: socket.assigns.current_tenant)
+        |> HousingApp.Management.Profile.submit(%{data: data},
+          actor: socket.assigns.current_user_tenant,
+          tenant: socket.assigns.current_tenant
+        )
 
         {:noreply,
          socket
