@@ -38,7 +38,8 @@ config :housing_app, HousingApp.Mailer, adapter: Swoosh.Adapters.Local
 config :esbuild,
   version: "0.17.11",
   default: [
-    args: ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
+    args:
+      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
@@ -63,7 +64,7 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :housing_app, :ash_apis, [HousingApp.Accounts, HousingApp.Management]
+config :housing_app, :ash_apis, [HousingApp.Accounts, HousingApp.Management, HousingApp.Assignments]
 
 # https://hexdocs.pm/ash/policies.html#logging
 config :ash, :policies, log_policy_breakdowns: :error
