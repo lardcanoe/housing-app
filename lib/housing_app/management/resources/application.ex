@@ -25,6 +25,12 @@ defmodule HousingApp.Management.Application do
       allow_nil? false
     end
 
+    attribute :type, :string do
+      constraints min_length: 1, trim?: true
+      default ""
+      allow_nil? false
+    end
+
     create_timestamp :created_at
     update_timestamp :updated_at
 
@@ -71,15 +77,34 @@ defmodule HousingApp.Management.Application do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:name, :description, :form_id]
+      accept [:name, :description, :form_id, :type]
 
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
 
     read :list do
-      prepare build(load: [:form])
+      prepare build(
+                select: [:id, :name, :type, :description, :status, :form_id],
+                load: [:form],
+                sort: [:name]
+              )
 
       filter expr(is_nil(archived_at))
+    end
+
+    read :list_by_type do
+      argument :type, :string do
+        constraints min_length: 1, trim?: true
+        allow_nil? false
+      end
+
+      prepare build(
+                select: [:id, :name, :type, :description, :status, :form_id],
+                load: [:form],
+                sort: [:name]
+              )
+
+      filter expr(type == ^arg(:type) and is_nil(archived_at))
     end
 
     read :get_by_id do
@@ -99,6 +124,7 @@ defmodule HousingApp.Management.Application do
     define_for HousingApp.Management
 
     define :list
+    define :list_by_type, args: [:type]
     define :get_by_id, args: [:id]
   end
 

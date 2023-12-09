@@ -1,4 +1,5 @@
 defmodule HousingAppWeb.Live.Applications.Edit do
+  @moduledoc false
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :edit} = assigns) do
@@ -7,6 +8,8 @@ defmodule HousingAppWeb.Live.Applications.Edit do
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update application</h2>
       <.input field={@ash_form[:name]} label="Name" />
       <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
+      <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
+      <.input field={@ash_form[:type]} label="Type" />
       <:actions>
         <.button>Save</.button>
         <.button :if={false} type="delete">Delete</.button>
@@ -39,10 +42,23 @@ defmodule HousingAppWeb.Live.Applications.Edit do
           )
           |> to_form()
 
+        status_options = [
+          {"Draft", :draft},
+          {"Approved (Published)", :approved},
+          {"Archived", :archived}
+        ]
+
         forms =
           HousingApp.Management.Form.list!(actor: current_user_tenant, tenant: tenant) |> Enum.map(&{&1.name, &1.id})
 
-        {:ok, assign(socket, ash_form: ash_form, forms: forms, sidebar: :applications, page_title: "Edit Application")}
+        {:ok,
+         assign(socket,
+           ash_form: ash_form,
+           forms: forms,
+           status_options: status_options,
+           sidebar: :applications,
+           page_title: "Edit Application"
+         )}
     end
   end
 

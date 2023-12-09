@@ -34,6 +34,12 @@ defmodule HousingApp.Management.Form do
       allow_nil? false
     end
 
+    attribute :type, :string do
+      constraints min_length: 1, trim?: true
+      default ""
+      allow_nil? false
+    end
+
     create_timestamp :created_at
     update_timestamp :updated_at
 
@@ -80,7 +86,7 @@ defmodule HousingApp.Management.Form do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:name, :description, :json_schema]
+      accept [:name, :description, :json_schema, :type]
 
       argument :tenant_id, :uuid do
         allow_nil? false
@@ -91,12 +97,27 @@ defmodule HousingApp.Management.Form do
 
     read :list do
       prepare build(
-                select: [:id, :name, :description, :status],
+                select: [:id, :name, :type, :description, :status],
                 load: [:count_of_submissions],
                 sort: [:name]
               )
 
       filter expr(is_nil(archived_at))
+    end
+
+    read :list_by_type do
+      argument :type, :string do
+        constraints min_length: 1, trim?: true
+        allow_nil? false
+      end
+
+      prepare build(
+                select: [:id, :name, :type, :description, :status],
+                load: [:count_of_submissions],
+                sort: [:name]
+              )
+
+      filter expr(type == ^arg(:type) and is_nil(archived_at))
     end
 
     read :get_by_id do
@@ -114,6 +135,7 @@ defmodule HousingApp.Management.Form do
     define_for HousingApp.Management
 
     define :list
+    define :list_by_type, args: [:type]
     define :get_by_id, args: [:id]
   end
 

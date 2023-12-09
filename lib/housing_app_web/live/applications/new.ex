@@ -7,6 +7,7 @@ defmodule HousingAppWeb.Live.Applications.New do
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Application</h2>
       <.input field={@ash_form[:name]} label="Name" />
       <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
+      <.input field={@ash_form[:type]} label="Type" />
       <:actions>
         <.button>Create</.button>
       </:actions>

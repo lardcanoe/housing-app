@@ -33,6 +33,9 @@ defmodule HousingAppWeb.Live.Applications.Index do
       <:col :let={application} label="name">
         <.link patch={~p"/applications/#{application.id}"}><%= application.name %></.link>
       </:col>
+      <:col :let={form} label="type">
+        <%= form.type %>
+      </:col>
       <:col :let={application} label="status">
         <span
           :if={application.status == :draft}
@@ -54,7 +57,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
         </span>
       </:col>
       <:col :let={application} label="form">
-        <.link patch={~p"/forms/#{application.form_id}/edit"}><%= application.form.name %></.link>
+        <.link patch={~p"/applications/#{application.form_id}/edit"}><%= application.form.name %></.link>
       </:col>
       <:action :let={application}>
         <.link
@@ -68,13 +71,48 @@ defmodule HousingAppWeb.Live.Applications.Index do
     """
   end
 
-  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
-    {:ok, applications} = HousingApp.Management.Application.list(actor: current_user_tenant, tenant: tenant)
+  def mount(params, _session, socket) do
+    case fetch_applications(params, socket) do
+      {:ok, applications} ->
+        {:ok, assign(socket, applications: applications, sidebar: :applications, page_title: "Applications")}
 
-    {:ok, assign(socket, applications: applications, sidebar: :applications, page_title: "Applications")}
+      _ ->
+        {:ok,
+         socket
+         |> assign(applications: [], sidebar: :applications, page_title: "Applications")
+         |> put_flash(:error, "Error loading applications.")}
+    end
   end
 
   def handle_params(params, _url, socket) do
-    {:noreply, assign(socket, params: params)}
+    case fetch_applications(params, socket) do
+      {:ok, applications} ->
+        {:noreply, assign(socket, applications: applications, sidebar: :applications, page_title: "Application")}
+
+      _ ->
+        {:noreply,
+         socket
+         |> assign(applications: [], sidebar: :applications, page_title: "Application")
+         |> put_flash(:error, "Error loading applications.")}
+    end
+  end
+
+  defp fetch_applications(%{"type" => type}, %{
+         assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
+       })
+       when is_binary(type) and type != "" do
+    case HousingApp.Management.Application.list_by_type(type, actor: current_user_tenant, tenant: current_tenant) do
+      {:ok, applications} -> {:ok, applications}
+      _ -> {:error, []}
+    end
+  end
+
+  defp fetch_applications(_type, %{
+         assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
+       }) do
+    case HousingApp.Management.Application.list(actor: current_user_tenant, tenant: current_tenant) do
+      {:ok, applications} -> {:ok, applications}
+      _ -> {:error, []}
+    end
   end
 end

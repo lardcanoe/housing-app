@@ -7,6 +7,7 @@ defmodule HousingAppWeb.Live.Forms.New do
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Form</h2>
       <.input field={@form[:name]} label="Name" />
       <.input type="textarea" field={@form[:json_schema]} label="Schema" />
+      <.input field={@ash_form[:type]} label="Type" />
       <:actions>
         <.button>Create</.button>
       </:actions>

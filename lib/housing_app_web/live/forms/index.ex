@@ -30,6 +30,9 @@ defmodule HousingAppWeb.Live.Forms.Index do
       <:col :let={form} label="name">
         <.link patch={~p"/forms/#{form.id}"}><%= form.name %></.link>
       </:col>
+      <:col :let={form} label="type">
+        <%= form.type %>
+      </:col>
       <:col :let={form} label="status">
         <span
           :if={form.status == :draft}
@@ -75,12 +78,8 @@ defmodule HousingAppWeb.Live.Forms.Index do
     """
   end
 
-  def mount(
-        _params,
-        _session,
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}} = socket
-      ) do
-    case HousingApp.Management.Form.list(actor: current_user_tenant, tenant: current_tenant) do
+  def mount(params, _session, socket) do
+    case fetch_forms(params, socket) do
       {:ok, forms} ->
         {:ok, assign(socket, forms: forms, sidebar: :forms, page_title: "Forms")}
 
@@ -91,6 +90,32 @@ defmodule HousingAppWeb.Live.Forms.Index do
   end
 
   def handle_params(params, _url, socket) do
-    {:noreply, assign(socket, params: params)}
+    case fetch_forms(params, socket) do
+      {:ok, forms} ->
+        {:noreply, assign(socket, forms: forms, sidebar: :forms, page_title: "Forms")}
+
+      _ ->
+        {:noreply,
+         socket |> assign(forms: [], sidebar: :forms, page_title: "Forms") |> put_flash(:error, "Error loading forms.")}
+    end
+  end
+
+  defp fetch_forms(%{"type" => type}, %{
+         assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
+       })
+       when is_binary(type) and type != "" do
+    case HousingApp.Management.Form.list_by_type(type, actor: current_user_tenant, tenant: current_tenant) do
+      {:ok, forms} -> {:ok, forms}
+      _ -> {:error, []}
+    end
+  end
+
+  defp fetch_forms(_type, %{
+         assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
+       }) do
+    case HousingApp.Management.Form.list(actor: current_user_tenant, tenant: current_tenant) do
+      {:ok, forms} -> {:ok, forms}
+      _ -> {:error, []}
+    end
   end
 end
