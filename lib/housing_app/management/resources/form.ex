@@ -105,6 +105,16 @@ defmodule HousingApp.Management.Form do
       filter expr(is_nil(archived_at))
     end
 
+    read :list_approved do
+      prepare build(
+                select: [:id, :name, :type, :description, :status],
+                load: [:count_of_submissions],
+                sort: [:name]
+              )
+
+      filter expr(status == :approved and is_nil(archived_at))
+    end
+
     read :list_by_type do
       argument :type, :string do
         constraints min_length: 1, trim?: true
@@ -135,6 +145,7 @@ defmodule HousingApp.Management.Form do
     define_for HousingApp.Management
 
     define :list
+    define :list_approved
     define :list_by_type, args: [:type]
     define :get_by_id, args: [:id]
   end

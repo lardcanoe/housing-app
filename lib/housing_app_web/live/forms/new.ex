@@ -3,10 +3,10 @@ defmodule HousingAppWeb.Live.Forms.New do
 
   def render(%{live_action: :new} = assigns) do
     ~H"""
-    <.simple_form for={@form} phx-change="validate" phx-submit="submit">
+    <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Form</h2>
-      <.input field={@form[:name]} label="Name" />
-      <.input type="textarea" field={@form[:json_schema]} label="Schema" />
+      <.input field={@ash_form[:name]} label="Name" />
+      <.input type="textarea" field={@ash_form[:json_schema]} label="Schema" />
       <.input field={@ash_form[:type]} label="Type" />
       <:actions>
         <.button>Create</.button>
@@ -16,7 +16,7 @@ defmodule HousingAppWeb.Live.Forms.New do
   end
 
   def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
-    form =
+    ash_form =
       HousingApp.Management.Form
       |> AshPhoenix.Form.for_create(:new,
         api: HousingApp.Management,
@@ -30,7 +30,7 @@ defmodule HousingAppWeb.Live.Forms.New do
       )
       |> to_form()
 
-    {:ok, assign(socket, form: form, sidebar: :forms, page_title: "New Form")}
+    {:ok, assign(socket, ash_form: ash_form, sidebar: :forms, page_title: "New Form")}
   end
 
   def handle_params(params, _url, socket) do
@@ -38,23 +38,23 @@ defmodule HousingAppWeb.Live.Forms.New do
   end
 
   def handle_event("validate", %{"form" => params}, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form, params)
-    {:noreply, assign(socket, form: form)}
+    ash_form = AshPhoenix.Form.validate(socket.assigns.ash_form, params)
+    {:noreply, assign(socket, ash_form: ash_form)}
   end
 
   def handle_event("submit", %{"form" => params}, socket) do
-    with %{source: %{valid?: true}} = form <- AshPhoenix.Form.validate(socket.assigns.form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(form) do
+    with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
+         {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
       {:noreply,
        socket
        |> put_flash(:info, "Successfully created the form.")
        |> push_navigate(to: ~p"/forms")}
     else
-      %{source: %{valid?: false}} = form ->
-        {:noreply, assign(socket, form: form)}
+      %{source: %{valid?: false}} = ash_form ->
+        {:noreply, assign(socket, ash_form: ash_form)}
 
-      {:error, form} ->
-        {:noreply, assign(socket, form: form)}
+      {:error, ash_form} ->
+        {:noreply, assign(socket, ash_form: ash_form)}
     end
   end
 end

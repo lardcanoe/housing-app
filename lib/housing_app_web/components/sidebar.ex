@@ -4,6 +4,8 @@ defmodule HousingAppWeb.Components.Sidebar do
   use Phoenix.Component
   use HousingAppWeb, :verified_routes
 
+  import HousingAppWeb.CoreComponents, only: [icon: 1]
+
   attr :current_user_tenant, :any, required: true
   attr :section, :any, default: nil
 
@@ -162,20 +164,10 @@ defmodule HousingAppWeb.Components.Sidebar do
               aria-controls="dropdown-forms"
               data-collapse-toggle="dropdown-forms"
             >
-              <svg
-                aria-hidden="true"
+              <.icon
+                name="hero-rectangle-group-solid"
                 class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                  clip-rule="evenodd"
-                >
-                </path>
-              </svg>
+              />
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Forms</span>
               <svg
                 aria-hidden="true"
@@ -227,20 +219,10 @@ defmodule HousingAppWeb.Components.Sidebar do
               aria-controls="dropdown-applications"
               data-collapse-toggle="dropdown-applications"
             >
-              <svg
-                aria-hidden="true"
+              <.icon
+                name="hero-document-text-solid"
                 class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                  clip-rule="evenodd"
-                >
-                </path>
-              </svg>
+              />
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Applications</span>
               <svg
                 aria-hidden="true"
@@ -276,6 +258,45 @@ defmodule HousingAppWeb.Components.Sidebar do
               </li>
             </ul>
           </li>
+          <!-- Assignments -->
+          <li>
+            <button
+              type="button"
+              class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              aria-controls="dropdown-assignments"
+              data-collapse-toggle="dropdown-assignments"
+            >
+              <.icon
+                name="hero-building-office-2-solid"
+                class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
+              />
+              <span class="flex-1 ml-3 text-left whitespace-nowrap">Assignments</span>
+              <svg
+                aria-hidden="true"
+                class="w-6 h-6"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                >
+                </path>
+              </svg>
+            </button>
+            <ul id="dropdown-assignments" class={["py-2 space-y-2", @section != :assignments && "hidden"]}>
+              <li>
+                <.link
+                  patch={~p"/assignments/inventory"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Inventory
+                </.link>
+              </li>
+            </ul>
+          </li>
           <!-- Students -->
           <li>
             <button
@@ -284,20 +305,10 @@ defmodule HousingAppWeb.Components.Sidebar do
               aria-controls="dropdown-profiles"
               data-collapse-toggle="dropdown-profiles"
             >
-              <svg
-                aria-hidden="true"
+              <.icon
+                name="hero-users-solid"
                 class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
-                  clip-rule="evenodd"
-                >
-                </path>
-              </svg>
+              />
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Students</span>
               <svg
                 aria-hidden="true"
@@ -341,20 +352,10 @@ defmodule HousingAppWeb.Components.Sidebar do
               aria-controls="dropdown-reporting"
               data-collapse-toggle="dropdown-reporting"
             >
-              <svg
-                aria-hidden="true"
+              <.icon
+                name="hero-chart-bar-square-solid"
                 class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
-                  clip-rule="evenodd"
-                >
-                </path>
-              </svg>
+              />
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Reporting</span>
               <svg
                 aria-hidden="true"

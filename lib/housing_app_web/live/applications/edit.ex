@@ -49,7 +49,8 @@ defmodule HousingAppWeb.Live.Applications.Edit do
         ]
 
         forms =
-          HousingApp.Management.Form.list!(actor: current_user_tenant, tenant: tenant) |> Enum.map(&{&1.name, &1.id})
+          HousingApp.Management.Form.list_approved!(actor: current_user_tenant, tenant: tenant)
+          |> Enum.map(&{&1.name, &1.id})
 
         {:ok,
          assign(socket,

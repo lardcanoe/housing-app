@@ -26,7 +26,9 @@ defmodule HousingAppWeb.Live.Applications.New do
       )
       |> to_form()
 
-    forms = HousingApp.Management.Form.list!(actor: current_user_tenant, tenant: tenant) |> Enum.map(&{&1.name, &1.id})
+    forms =
+      HousingApp.Management.Form.list_approved!(actor: current_user_tenant, tenant: tenant)
+      |> Enum.map(&{&1.name, &1.id})
 
     {:ok, assign(socket, ash_form: ash_form, forms: forms, sidebar: :applications, page_title: "New Application")}
   end
