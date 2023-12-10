@@ -289,10 +289,26 @@ defmodule HousingAppWeb.Components.Sidebar do
             <ul id="dropdown-assignments" class={["py-2 space-y-2", @section != :assignments && "hidden"]}>
               <li>
                 <.link
-                  patch={~p"/assignments/inventory"}
+                  patch={~p"/assignments/buildings"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
-                  Inventory
+                  Buildings
+                </.link>
+              </li>
+              <li>
+                <.link
+                  patch={~p"/assignments/rooms"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Rooms
+                </.link>
+              </li>
+              <li>
+                <.link
+                  patch={~p"/assignments/beds"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Beds
                 </.link>
               </li>
             </ul>

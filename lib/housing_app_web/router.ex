@@ -83,6 +83,30 @@ defmodule HousingAppWeb.Router do
         live "/:id/edit", Edit, :edit
       end
 
+      scope "/assignments", Live.Assignments do
+        # TODO: pipe_through [:require_authenticated_non_end_user]
+        scope "/buildings", Buildings do
+          live "/", Index, :index
+          live "/new", New, :new
+          # live "/:id", View, :view
+          live "/:id/edit", Edit, :edit
+        end
+
+        scope "/rooms", Rooms do
+          live "/", Index, :index
+          live "/new", New, :new
+          live "/:id", Index, :view
+          live "/:id/edit", Edit, :edit
+        end
+
+        scope "/beds", Beds do
+          live "/", Index, :index
+          live "/new", New, :new
+          live "/:id", Index, :view
+          live "/:id/edit", Edit, :edit
+        end
+      end
+
       scope "/reporting", Live.Reporting do
         # TODO: pipe_through [:require_authenticated_non_end_user]
         live "/", Index, :index

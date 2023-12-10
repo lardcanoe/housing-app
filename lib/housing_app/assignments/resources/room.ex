@@ -20,7 +20,7 @@ defmodule HousingApp.Assignments.Room do
     end
 
     attribute :block, :string do
-      constraints trim?: true
+      constraints min_length: 0, trim?: true
       default ""
       allow_nil? false
     end
@@ -76,7 +76,13 @@ defmodule HousingApp.Assignments.Room do
   actions do
     defaults [:create, :read, :update, :destroy]
 
+    create :new do
+      accept [:name, :floor, :block, :max_capacity, :building_id]
+      change set_attribute(:tenant_id, actor(:tenant_id))
+    end
+
     read :list do
+      prepare build(load: [:building])
       filter expr(is_nil(archived_at))
     end
 
@@ -84,6 +90,8 @@ defmodule HousingApp.Assignments.Room do
       argument :id, :uuid do
         allow_nil? false
       end
+
+      prepare build(load: [:building])
 
       get? true
 
@@ -94,6 +102,7 @@ defmodule HousingApp.Assignments.Room do
   code_interface do
     define_for HousingApp.Assignments
 
+    define :new
     define :list
     define :get_by_id, args: [:id]
   end

@@ -64,7 +64,13 @@ defmodule HousingApp.Assignments.Bed do
   actions do
     defaults [:create, :read, :update, :destroy]
 
+    create :new do
+      accept [:name, :room_id]
+      change set_attribute(:tenant_id, actor(:tenant_id))
+    end
+
     read :list do
+      prepare build(load: [room: [:building]])
       filter expr(is_nil(archived_at))
     end
 
@@ -72,6 +78,8 @@ defmodule HousingApp.Assignments.Bed do
       argument :id, :uuid do
         allow_nil? false
       end
+
+      prepare build(load: [room: [:building]])
 
       get? true
 
@@ -82,6 +90,7 @@ defmodule HousingApp.Assignments.Bed do
   code_interface do
     define_for HousingApp.Assignments
 
+    define :new
     define :list
     define :get_by_id, args: [:id]
   end

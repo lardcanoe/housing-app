@@ -70,6 +70,11 @@ defmodule HousingApp.Assignments.Building do
   actions do
     defaults [:create, :read, :update, :destroy]
 
+    create :new do
+      accept [:name, :location, :floors, :rooms]
+      change set_attribute(:tenant_id, actor(:tenant_id))
+    end
+
     read :list do
       filter expr(is_nil(archived_at))
     end
@@ -88,6 +93,7 @@ defmodule HousingApp.Assignments.Building do
   code_interface do
     define_for HousingApp.Assignments
 
+    define :new
     define :list
     define :get_by_id, args: [:id]
   end
