@@ -102,6 +102,28 @@ defmodule HousingAppWeb.Components.Sidebar do
   end
 
   def sidebar(assigns) do
+    assigns =
+      assign_new(assigns, :form_types, fn ->
+        {:ok, form_types} =
+          HousingApp.Management.Form.get_types(
+            actor: assigns.current_user_tenant,
+            tenant: assigns.current_tenant
+          )
+
+        form_types
+      end)
+
+    assigns =
+      assign_new(assigns, :application_types, fn ->
+        {:ok, application_types} =
+          HousingApp.Management.Application.get_types(
+            actor: assigns.current_user_tenant,
+            tenant: assigns.current_tenant
+          )
+
+        application_types
+      end)
+
     ~H"""
     <aside
       class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -180,12 +202,12 @@ defmodule HousingAppWeb.Components.Sidebar do
                   Manage
                 </.link>
               </li>
-              <li>
+              <li :for={t <- @form_types}>
                 <.link
-                  patch={~p"/forms?type=Profile"}
-                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  patch={~p"/forms?type=#{t}"}
+                  class="flex items-center p-2 pl-11 w-full text-sm font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
-                  Foo
+                  <%= t %>
                 </.link>
               </li>
             </ul>
@@ -212,6 +234,14 @@ defmodule HousingAppWeb.Components.Sidebar do
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Manage
+                </.link>
+              </li>
+              <li :for={t <- @application_types}>
+                <.link
+                  patch={~p"/applications?type=#{t}"}
+                  class="flex items-center p-2 pl-11 w-full text-sm font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  <%= t %>
                 </.link>
               </li>
             </ul>

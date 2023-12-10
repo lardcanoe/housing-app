@@ -5,14 +5,12 @@ defmodule HousingAppWeb.Live.Accounting.Products.Edit do
   def render(%{live_action: :edit} = assigns) do
     ~H"""
     <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
-      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update application</h2>
+      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update product</h2>
       <.input field={@ash_form[:name]} label="Name" />
-      <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
-      <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
-      <.input field={@ash_form[:type]} label="Type" />
+      <.input field={@ash_form[:description]} label="Description" />
+      <.input type="number" step=".01" field={@ash_form[:rate]} label="Rate" />
       <:actions>
         <.button>Save</.button>
-        <.button :if={false} type="delete">Delete</.button>
       </:actions>
     </.simple_form>
     """
@@ -23,42 +21,30 @@ defmodule HousingAppWeb.Live.Accounting.Products.Edit do
         _session,
         %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
-    case HousingApp.Management.Application.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
+    case HousingApp.Accounting.Product.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
          socket
-         |> assign(sidebar: :applications)
+         |> assign(sidebar: :accounting)
          |> put_flash(:error, "Not found")
-         |> push_navigate(to: ~p"/applications")}
+         |> push_navigate(to: ~p"/accounting/products")}
 
       {:ok, app} ->
         ash_form =
           app
           |> AshPhoenix.Form.for_update(:update,
-            api: HousingApp.Management,
+            api: HousingApp.Accounting,
             forms: [auto?: true],
             actor: current_user_tenant,
             tenant: tenant
           )
           |> to_form()
 
-        status_options = [
-          {"Draft", :draft},
-          {"Approved (Published)", :approved},
-          {"Archived", :archived}
-        ]
-
-        forms =
-          HousingApp.Management.Form.list_approved!(actor: current_user_tenant, tenant: tenant)
-          |> Enum.map(&{&1.name, &1.id})
-
         {:ok,
          assign(socket,
            ash_form: ash_form,
-           forms: forms,
-           status_options: status_options,
-           sidebar: :applications,
-           page_title: "Edit Application"
+           sidebar: :accounting,
+           page_title: "Edit Product"
          )}
     end
   end
@@ -73,8 +59,8 @@ defmodule HousingAppWeb.Live.Accounting.Products.Edit do
          {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
       {:noreply,
        socket
-       |> put_flash(:info, "Successfully updated the application.")
-       |> push_navigate(to: ~p"/applications")}
+       |> put_flash(:info, "Successfully updated the product.")
+       |> push_navigate(to: ~p"/accounting/products")}
     else
       %{source: %{valid?: false}} = ash_form ->
         {:noreply, assign(socket, ash_form: ash_form)}

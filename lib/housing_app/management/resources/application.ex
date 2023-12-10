@@ -1,6 +1,8 @@
 defmodule HousingApp.Management.Application do
   @moduledoc false
 
+  require Ash.Query
+
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
     extensions: [AshAdmin.Api],
@@ -92,6 +94,16 @@ defmodule HousingApp.Management.Application do
       filter expr(is_nil(archived_at))
     end
 
+    read :list_approved do
+      prepare build(
+                select: [:id, :name, :type, :description, :status, :form_id],
+                load: [:form],
+                sort: [:name]
+              )
+
+      filter expr(status == :approved and is_nil(archived_at))
+    end
+
     read :list_by_type do
       argument :type, :string do
         constraints min_length: 1, trim?: true
@@ -118,14 +130,32 @@ defmodule HousingApp.Management.Application do
 
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
+
+    action :get_types, {:array, :string} do
+      run fn input, context ->
+        types =
+          __MODULE__
+          |> Ash.Query.for_read(:read, %{select: [:type]}, actor: context.actor)
+          |> Ash.Query.filter(is_nil(archived_at))
+          |> HousingApp.Management.read!()
+          |> Enum.map(& &1.type)
+          |> Enum.reject(&(is_nil(&1) || &1 == ""))
+          |> Enum.uniq()
+          |> Enum.sort()
+
+        {:ok, types}
+      end
+    end
   end
 
   code_interface do
     define_for HousingApp.Management
 
     define :list
+    define :list_approved
     define :list_by_type, args: [:type]
     define :get_by_id, args: [:id]
+    define :get_types
   end
 
   multitenancy do

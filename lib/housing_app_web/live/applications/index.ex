@@ -97,22 +97,36 @@ defmodule HousingAppWeb.Live.Applications.Index do
     end
   end
 
-  defp fetch_applications(%{"type" => type}, %{
-         assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
-       })
+  defp fetch_applications(
+         %{"type" => type},
+         %{
+           assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
+         } = socket
+       )
        when is_binary(type) and type != "" do
-    case HousingApp.Management.Application.list_by_type(type, actor: current_user_tenant, tenant: current_tenant) do
-      {:ok, applications} -> {:ok, applications}
-      _ -> {:error, []}
+    if connected?(socket) do
+      case HousingApp.Management.Application.list_by_type(type, actor: current_user_tenant, tenant: current_tenant) do
+        {:ok, applications} -> {:ok, applications}
+        _ -> {:error, []}
+      end
+    else
+      {:ok, []}
     end
   end
 
-  defp fetch_applications(_type, %{
-         assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
-       }) do
-    case HousingApp.Management.Application.list(actor: current_user_tenant, tenant: current_tenant) do
-      {:ok, applications} -> {:ok, applications}
-      _ -> {:error, []}
+  defp fetch_applications(
+         _type,
+         %{
+           assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
+         } = socket
+       ) do
+    if connected?(socket) do
+      case HousingApp.Management.Application.list(actor: current_user_tenant, tenant: current_tenant) do
+        {:ok, applications} -> {:ok, applications}
+        _ -> {:error, []}
+      end
+    else
+      {:ok, []}
     end
   end
 end
