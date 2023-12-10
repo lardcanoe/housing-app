@@ -169,30 +169,9 @@ defmodule HousingAppWeb.Components.Sidebar do
                 class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
               />
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Forms</span>
-              <svg
-                aria-hidden="true"
-                class="w-6 h-6"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clip-rule="evenodd"
-                >
-                </path>
-              </svg>
+              <.svg_dropdown />
             </button>
             <ul id="dropdown-forms" class={["py-2 space-y-2", @section != :forms && "hidden"]}>
-              <li>
-                <.link
-                  patch={~p"/forms/new"}
-                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  + New
-                </.link>
-              </li>
               <li>
                 <.link
                   patch={~p"/forms"}
@@ -224,30 +203,9 @@ defmodule HousingAppWeb.Components.Sidebar do
                 class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
               />
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Applications</span>
-              <svg
-                aria-hidden="true"
-                class="w-6 h-6"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clip-rule="evenodd"
-                >
-                </path>
-              </svg>
+              <.svg_dropdown />
             </button>
             <ul id="dropdown-applications" class={["py-2 space-y-2", @section != :applications && "hidden"]}>
-              <li>
-                <.link
-                  patch={~p"/applications/new"}
-                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  + New
-                </.link>
-              </li>
               <li>
                 <.link
                   patch={~p"/applications"}
@@ -271,20 +229,7 @@ defmodule HousingAppWeb.Components.Sidebar do
                 class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
               />
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Assignments</span>
-              <svg
-                aria-hidden="true"
-                class="w-6 h-6"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clip-rule="evenodd"
-                >
-                </path>
-              </svg>
+              <.svg_dropdown />
             </button>
             <ul id="dropdown-assignments" class={["py-2 space-y-2", @section != :assignments && "hidden"]}>
               <li>
@@ -326,30 +271,9 @@ defmodule HousingAppWeb.Components.Sidebar do
                 class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
               />
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Students</span>
-              <svg
-                aria-hidden="true"
-                class="w-6 h-6"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clip-rule="evenodd"
-                >
-                </path>
-              </svg>
+              <.svg_dropdown />
             </button>
             <ul id="dropdown-profiles" class={["py-2 space-y-2", @section != :profiles && "hidden"]}>
-              <li>
-                <.link
-                  patch={~p"/profiles/new"}
-                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  + New
-                </.link>
-              </li>
               <li>
                 <.link
                   patch={~p"/profiles"}
@@ -373,20 +297,7 @@ defmodule HousingAppWeb.Components.Sidebar do
                 class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
               />
               <span class="flex-1 ml-3 text-left whitespace-nowrap">Reporting</span>
-              <svg
-                aria-hidden="true"
-                class="w-6 h-6"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clip-rule="evenodd"
-                >
-                </path>
-              </svg>
+              <.svg_dropdown />
             </button>
             <ul id="dropdown-reporting" class={["py-2 space-y-2", @section != :reporting && "hidden"]}>
               <li>
@@ -424,6 +335,49 @@ defmodule HousingAppWeb.Components.Sidebar do
           </li>
         </ul>
         <ul class="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
+          <!-- New -->
+          <li>
+            <button
+              type="button"
+              class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              aria-controls="dropdown-new"
+              data-collapse-toggle="dropdown-new"
+            >
+              <.icon
+                name="hero-plus-solid"
+                class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
+              />
+              <span class="flex-1 ml-3 text-left whitespace-nowrap">New</span>
+              <.svg_dropdown />
+            </button>
+            <ul id="dropdown-new" class="hidden py-2 space-y-2">
+              <li>
+                <.link
+                  patch={~p"/forms/new"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  New Form
+                </.link>
+              </li>
+              <li>
+                <.link
+                  patch={~p"/applications/new"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  New Application
+                </.link>
+              </li>
+              <li>
+                <.link
+                  patch={~p"/profiles/new"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  New Profile
+                </.link>
+              </li>
+            </ul>
+          </li>
+
           <li>
             <.link
               patch={~p"/"}
@@ -490,6 +444,19 @@ defmodule HousingAppWeb.Components.Sidebar do
         </ul>
       </div>
     </aside>
+    """
+  end
+
+  defp svg_dropdown(assigns) do
+    ~H"""
+    <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+      <path
+        fill-rule="evenodd"
+        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+        clip-rule="evenodd"
+      >
+      </path>
+    </svg>
     """
   end
 end
