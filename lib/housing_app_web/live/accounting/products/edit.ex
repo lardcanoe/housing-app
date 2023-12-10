@@ -1,33 +1,18 @@
-defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
+defmodule HousingAppWeb.Live.Accounting.Products.Edit do
   @moduledoc false
-
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :edit} = assigns) do
     ~H"""
     <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
-      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update room</h2>
-      <.input
-        type="select"
-        field={@ash_form[:building_id]}
-        options={@buildings}
-        label="Building"
-        prompt="Select a building..."
-        disabled
-      />
+      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update application</h2>
       <.input field={@ash_form[:name]} label="Name" />
-      <.input field={@ash_form[:block]} label="Block" />
-      <.input type="number" field={@ash_form[:floor]} label="Floor" />
-      <.input type="number" field={@ash_form[:max_capacity]} label="Max Capacity" />
-      <.input
-        type="select"
-        field={@ash_form[:product_id]}
-        options={@products}
-        label="Product"
-        prompt="Select a product for pricing..."
-      />
+      <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
+      <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
+      <.input field={@ash_form[:type]} label="Type" />
       <:actions>
         <.button>Save</.button>
+        <.button :if={false} type="delete">Delete</.button>
       </:actions>
     </.simple_form>
     """
@@ -38,40 +23,42 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
         _session,
         %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
-    case HousingApp.Assignments.Room.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
+    case HousingApp.Management.Application.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
          socket
-         |> assign(sidebar: :assignments)
+         |> assign(sidebar: :applications)
          |> put_flash(:error, "Not found")
-         |> push_navigate(to: ~p"/assignments/rooms")}
+         |> push_navigate(to: ~p"/applications")}
 
       {:ok, app} ->
         ash_form =
           app
           |> AshPhoenix.Form.for_update(:update,
-            api: HousingApp.Assignments,
+            api: HousingApp.Management,
             forms: [auto?: true],
             actor: current_user_tenant,
             tenant: tenant
           )
           |> to_form()
 
-        buildings =
-          HousingApp.Assignments.Building.list!(actor: current_user_tenant, tenant: tenant)
-          |> Enum.map(&{&1.name, &1.id})
+        status_options = [
+          {"Draft", :draft},
+          {"Approved (Published)", :approved},
+          {"Archived", :archived}
+        ]
 
-        products =
-          HousingApp.Accounting.Product.list!(actor: current_user_tenant, tenant: tenant)
+        forms =
+          HousingApp.Management.Form.list_approved!(actor: current_user_tenant, tenant: tenant)
           |> Enum.map(&{&1.name, &1.id})
 
         {:ok,
          assign(socket,
            ash_form: ash_form,
-           buildings: buildings,
-           products: products,
-           sidebar: :assignments,
-           page_title: "Edit Room"
+           forms: forms,
+           status_options: status_options,
+           sidebar: :applications,
+           page_title: "Edit Application"
          )}
     end
   end
@@ -86,8 +73,8 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
          {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
       {:noreply,
        socket
-       |> put_flash(:info, "Successfully updated the room.")
-       |> push_navigate(to: ~p"/assignments/rooms")}
+       |> put_flash(:info, "Successfully updated the application.")
+       |> push_navigate(to: ~p"/applications")}
     else
       %{source: %{valid?: false}} = ash_form ->
         {:noreply, assign(socket, ash_form: ash_form)}

@@ -66,6 +66,14 @@ defmodule HousingAppWeb.Router do
         live "/:id", Submit, :submit
       end
 
+      scope "/accounting", Live.Accounting do
+        scope "/products", Products do
+          live "/", Index, :index
+          live "/new", New, :new
+          live "/:id/edit", Edit, :edit
+        end
+      end
+
       scope "/forms", Live.Forms do
         # TODO: pipe_through [:require_authenticated_non_end_user]
 

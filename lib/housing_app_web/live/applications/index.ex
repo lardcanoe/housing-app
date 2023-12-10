@@ -33,8 +33,8 @@ defmodule HousingAppWeb.Live.Applications.Index do
       <:col :let={application} label="name">
         <.link patch={~p"/applications/#{application.id}"}><%= application.name %></.link>
       </:col>
-      <:col :let={form} label="type">
-        <%= form.type %>
+      <:col :let={application} label="type">
+        <%= application.type %>
       </:col>
       <:col :let={application} label="status">
         <span

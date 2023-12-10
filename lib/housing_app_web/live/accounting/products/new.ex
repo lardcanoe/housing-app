@@ -1,4 +1,4 @@
-defmodule HousingAppWeb.Live.Assignments.Rooms.New do
+defmodule HousingAppWeb.Live.Accounting.Products.New do
   @moduledoc false
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
@@ -6,25 +6,10 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.New do
   def render(%{live_action: :new} = assigns) do
     ~H"""
     <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
-      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Room</h2>
-      <.input
-        type="select"
-        field={@ash_form[:building_id]}
-        options={@buildings}
-        label="Building"
-        prompt="Select a building..."
-      />
+      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Product</h2>
       <.input field={@ash_form[:name]} label="Name" />
-      <.input field={@ash_form[:block]} label="Block" />
-      <.input type="number" field={@ash_form[:floor]} label="Floor" />
-      <.input type="number" field={@ash_form[:max_capacity]} label="Max Capacity" />
-      <.input
-        type="select"
-        field={@ash_form[:product_id]}
-        options={@products}
-        label="Product"
-        prompt="Select a product for pricing..."
-      />
+      <.input field={@ash_form[:description]} label="Description" />
+      <.input type="number" step=".01" field={@ash_form[:rate]} label="Rate" />
       <:actions>
         <.button>Create</.button>
       </:actions>
@@ -34,31 +19,16 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.New do
 
   def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
     ash_form =
-      HousingApp.Assignments.Room
+      HousingApp.Accounting.Product
       |> AshPhoenix.Form.for_create(:new,
-        api: HousingApp.Assignments,
+        api: HousingApp.Accounting,
         forms: [auto?: true],
         actor: current_user_tenant,
         tenant: tenant
       )
       |> to_form()
 
-    buildings =
-      HousingApp.Assignments.Building.list!(actor: current_user_tenant, tenant: tenant)
-      |> Enum.map(&{&1.name, &1.id})
-
-    products =
-      HousingApp.Accounting.Product.list!(actor: current_user_tenant, tenant: tenant)
-      |> Enum.map(&{&1.name, &1.id})
-
-    {:ok,
-     assign(socket,
-       ash_form: ash_form,
-       buildings: buildings,
-       products: products,
-       sidebar: :assignments,
-       page_title: "New Room"
-     )}
+    {:ok, assign(socket, ash_form: ash_form, sidebar: :accounting, page_title: "New Product")}
   end
 
   def handle_params(params, _url, socket) do
@@ -71,12 +41,13 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.New do
   end
 
   def handle_event("submit", %{"form" => params}, socket) do
+    # Database constraints will validate that :form_id is a valid form for the current tenant
     with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
          {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
       {:noreply,
        socket
-       |> put_flash(:info, "Successfully created the room.")
-       |> push_navigate(to: ~p"/assignments/rooms")}
+       |> put_flash(:info, "Successfully created the product.")
+       |> push_navigate(to: ~p"/accounting/products")}
     else
       %{source: %{valid?: false}} = ash_form ->
         {:noreply, assign(socket, ash_form: ash_form)}

@@ -1,4 +1,4 @@
-defmodule HousingApp.Assignments.Room do
+defmodule HousingApp.Accounting.Product do
   @moduledoc false
 
   use Ash.Resource,
@@ -14,18 +14,12 @@ defmodule HousingApp.Assignments.Room do
       allow_nil? false
     end
 
-    attribute :floor, :integer do
-      default 1
-      allow_nil? false
-    end
-
-    attribute :block, :string do
-      constraints min_length: 0, trim?: true
+    attribute :description, :string do
+      constraints trim?: true
       default ""
-      allow_nil? false
     end
 
-    attribute :max_capacity, :integer do
+    attribute :rate, :decimal do
       default 0
       allow_nil? false
     end
@@ -54,17 +48,6 @@ defmodule HousingApp.Assignments.Room do
       attribute_writable? true
       allow_nil? false
     end
-
-    belongs_to :building, HousingApp.Assignments.Building do
-      attribute_writable? true
-      allow_nil? false
-    end
-
-    belongs_to :product, HousingApp.Accounting.Product do
-      api HousingApp.Accounting
-      attribute_writable? true
-      allow_nil? false
-    end
   end
 
   policies do
@@ -75,7 +58,7 @@ defmodule HousingApp.Assignments.Room do
   end
 
   postgres do
-    table "rooms"
+    table "products"
     repo HousingApp.Repo
   end
 
@@ -83,12 +66,11 @@ defmodule HousingApp.Assignments.Room do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:name, :floor, :block, :max_capacity, :building_id, :product_id]
+      accept [:name, :description, :rate]
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
 
     read :list do
-      prepare build(load: [:building])
       filter expr(is_nil(archived_at))
     end
 
@@ -97,8 +79,6 @@ defmodule HousingApp.Assignments.Room do
         allow_nil? false
       end
 
-      prepare build(load: [:building])
-
       get? true
 
       filter expr(id == ^arg(:id) and is_nil(archived_at))
@@ -106,7 +86,7 @@ defmodule HousingApp.Assignments.Room do
   end
 
   code_interface do
-    define_for HousingApp.Assignments
+    define_for HousingApp.Accounting
 
     define :new
     define :list
@@ -114,7 +94,7 @@ defmodule HousingApp.Assignments.Room do
   end
 
   identities do
-    identity :unique_by_building_and_name, [:building_id, :name]
+    identity :unique_by_name, [:name]
   end
 
   multitenancy do

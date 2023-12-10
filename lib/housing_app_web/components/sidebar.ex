@@ -284,6 +284,32 @@ defmodule HousingAppWeb.Components.Sidebar do
               </li>
             </ul>
           </li>
+          <!-- Accounting -->
+          <li>
+            <button
+              type="button"
+              class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              aria-controls="dropdown-accounting"
+              data-collapse-toggle="dropdown-accounting"
+            >
+              <.icon
+                name="hero-currency-dollar-solid"
+                class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
+              />
+              <span class="flex-1 ml-3 text-left whitespace-nowrap">Accounting</span>
+              <.svg_dropdown />
+            </button>
+            <ul id="dropdown-accounting" class={["py-2 space-y-2", @section != :accounting && "hidden"]}>
+              <li>
+                <.link
+                  patch={~p"/accounting/products"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Products
+                </.link>
+              </li>
+            </ul>
+          </li>
           <!-- Reporting -->
           <li>
             <button
