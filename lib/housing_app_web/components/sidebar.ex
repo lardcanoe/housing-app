@@ -7,6 +7,7 @@ defmodule HousingAppWeb.Components.Sidebar do
   import HousingAppWeb.CoreComponents, only: [icon: 1]
 
   attr :current_user_tenant, :any, required: true
+  attr :current_tenant, :any, required: true
   attr :section, :any, default: nil
 
   def sidebar(%{current_user_tenant: %{user_type: :user}} = assigns) do
@@ -284,6 +285,14 @@ defmodule HousingAppWeb.Components.Sidebar do
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Beds
+                </.link>
+              </li>
+              <li>
+                <.link
+                  patch={~p"/assignments/bookings"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Bookings
                 </.link>
               </li>
             </ul>

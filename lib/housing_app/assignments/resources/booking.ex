@@ -9,11 +9,11 @@ defmodule HousingApp.Assignments.Booking do
   attributes do
     uuid_primary_key :id
 
-    attribute :start_at, :utc_datetime_usec do
+    attribute :start_at, :date do
       allow_nil? false
     end
 
-    attribute :end_at, :utc_datetime_usec do
+    attribute :end_at, :date do
       allow_nil? false
     end
 
@@ -116,6 +116,11 @@ defmodule HousingApp.Assignments.Booking do
 
   identities do
     identity :unique_by_bed_profile_start_at, [:bed_id, :profile_id, :start_at]
+  end
+
+  validations do
+    validate compare(:end_at, greater_than: :start_at)
+    # FUTURE: , message: "must be a date after %{start_at}."
   end
 
   multitenancy do

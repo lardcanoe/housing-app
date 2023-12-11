@@ -113,6 +113,13 @@ defmodule HousingAppWeb.Router do
           live "/:id", Index, :view
           live "/:id/edit", Edit, :edit
         end
+
+        scope "/bookings", Bookings do
+          live "/", Index, :index
+          live "/new", New, :new
+          live "/:id", Index, :view
+          live "/:id/edit", Edit, :edit
+        end
       end
 
       scope "/reporting", Live.Reporting do
