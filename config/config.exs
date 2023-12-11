@@ -64,12 +64,13 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :housing_app, :ash_apis, [
-  HousingApp.Accounts,
-  HousingApp.Management,
-  HousingApp.Assignments,
-  HousingApp.Accounting
-]
+config :housing_app,
+  ash_apis: [
+    HousingApp.Accounts,
+    HousingApp.Management,
+    HousingApp.Assignments,
+    HousingApp.Accounting
+  ]
 
 # https://hexdocs.pm/ash/policies.html#logging
 config :ash, :policies, log_policy_breakdowns: :error

@@ -7,5 +7,6 @@ defmodule HousingApp.Assignments.Registry do
     entry HousingApp.Assignments.Building
     entry HousingApp.Assignments.Room
     entry HousingApp.Assignments.Bed
+    entry HousingApp.Assignments.Booking
   end
 end

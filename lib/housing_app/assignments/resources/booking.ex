@@ -1,105 +1,124 @@
-# defmodule HousingApp.Assignments.Booking do
-#   @moduledoc false
+defmodule HousingApp.Assignments.Booking do
+  @moduledoc false
 
-#   use Ash.Resource,
-#     data_layer: AshPostgres.DataLayer,
-#     extensions: [AshAdmin.Api],
-#     authorizers: [Ash.Policy.Authorizer]
+  use Ash.Resource,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshAdmin.Api],
+    authorizers: [Ash.Policy.Authorizer]
 
-#   attributes do
-#     uuid_primary_key :id
+  attributes do
+    uuid_primary_key :id
 
-#     attribute :name, :string do
-#       constraints min_length: 1, trim?: true
-#       allow_nil? false
-#     end
+    attribute :start_at, :utc_datetime_usec do
+      allow_nil? false
+    end
 
-#     attribute :available_at, :utc_datetime_usec do
-#       allow_nil? true
-#     end
+    attribute :end_at, :utc_datetime_usec do
+      allow_nil? false
+    end
 
-#     attribute :data, :map do
-#       default %{}
-#       allow_nil? false
-#     end
+    attribute :data, :map do
+      default %{}
+      allow_nil? false
+    end
 
-#     create_timestamp :created_at
-#     update_timestamp :updated_at
+    create_timestamp :created_at
+    update_timestamp :updated_at
 
-#     attribute :archived_at, :utc_datetime_usec do
-#       allow_nil? true
-#     end
-#   end
+    attribute :archived_at, :utc_datetime_usec do
+      allow_nil? true
+    end
+  end
 
-#   admin do
-#     show?(true)
-#   end
+  admin do
+    show?(true)
+  end
 
-#   relationships do
-#     # Tenant is duplicate data, but makes it safer and easier to do data dumps
-#     belongs_to :tenant, HousingApp.Accounts.Tenant do
-#       api HousingApp.Accounts
-#       attribute_writable? true
-#       allow_nil? false
-#     end
+  relationships do
+    # Tenant is duplicate data, but makes it safer and easier to do data dumps
+    belongs_to :tenant, HousingApp.Accounts.Tenant do
+      api HousingApp.Accounts
+      attribute_writable? true
+      allow_nil? false
+    end
 
-#     belongs_to :room, HousingApp.Assignments.Room do
-#       attribute_writable? true
-#       allow_nil? false
-#     end
-#   end
+    belongs_to :bed, HousingApp.Assignments.Bed do
+      attribute_writable? true
+      allow_nil? false
+    end
 
-#   policies do
-#     bypass always() do
-#       authorize_if HousingApp.Checks.IsPlatformAdmin
-#       authorize_if HousingApp.Checks.IsTenantAdmin
-#     end
-#   end
+    belongs_to :profile, HousingApp.Management.Profile do
+      api HousingApp.Management
+      attribute_writable? true
+      allow_nil? false
+    end
 
-#   postgres do
-#     table "beds"
-#     repo HousingApp.Repo
-#   end
+    belongs_to :product, HousingApp.Accounting.Product do
+      api HousingApp.Accounting
+      attribute_writable? true
+      allow_nil? false
+    end
+  end
 
-#   actions do
-#     defaults [:create, :read, :update, :destroy]
+  policies do
+    bypass always() do
+      authorize_if HousingApp.Checks.IsPlatformAdmin
+      authorize_if HousingApp.Checks.IsTenantAdmin
+    end
+  end
 
-#     create :new do
-#       accept [:name, :room_id]
-#       change set_attribute(:tenant_id, actor(:tenant_id))
-#     end
+  postgres do
+    table "bookings"
+    repo HousingApp.Repo
 
-#     read :list do
-#       prepare build(load: [room: [:building]])
-#       filter expr(is_nil(archived_at))
-#     end
+    custom_indexes do
+      index [:bed_id]
+    end
 
-#     read :get_by_id do
-#       argument :id, :uuid do
-#         allow_nil? false
-#       end
+    custom_indexes do
+      index [:profile_id]
+    end
+  end
 
-#       prepare build(load: [room: [:building]])
+  actions do
+    defaults [:create, :read, :update, :destroy]
 
-#       get? true
+    create :new do
+      accept [:bed_id, :profile_id, :product_id, :start_at, :end_at]
+      change set_attribute(:tenant_id, actor(:tenant_id))
+    end
 
-#       filter expr(id == ^arg(:id) and is_nil(archived_at))
-#     end
-#   end
+    read :list do
+      prepare build(load: [:product, profile: [user_tenant: [:user]], bed: [room: [:building]]])
+      filter expr(is_nil(archived_at))
+    end
 
-#   code_interface do
-#     define_for HousingApp.Assignments
+    read :get_by_id do
+      argument :id, :uuid do
+        allow_nil? false
+      end
 
-#     define :new
-#     define :list
-#     define :get_by_id, args: [:id]
-#   end
+      prepare build(load: [:product, profile: [user_tenant: [:user]], bed: [room: [:building]]])
 
-#   identities do
-#     identity :unique_by_room_and_name, [:room_id, :name]
-#   end
+      get? true
 
-#   multitenancy do
-#     strategy :context
-#   end
-# end
+      filter expr(id == ^arg(:id) and is_nil(archived_at))
+    end
+  end
+
+  code_interface do
+    define_for HousingApp.Assignments
+
+    define :new
+    define :list
+    define :get_by_id, args: [:id]
+  end
+
+  identities do
+    identity :unique_by_bed_profile_start_at, [:bed_id, :profile_id, :start_at]
+  end
+
+  multitenancy do
+    strategy :context
+  end
+end
