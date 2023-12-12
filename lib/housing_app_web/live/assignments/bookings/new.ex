@@ -7,9 +7,40 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.New do
     ~H"""
     <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Booking</h2>
-      <.input type="select" field={@ash_form[:profile_id]} options={@profiles} label="Profile" prompt="Select a profile..." />
-      <.input type="select" field={@ash_form[:bed_id]} options={@beds} label="Bed" prompt="Select a bed..." />
-      <.input type="select" field={@ash_form[:product_id]} options={@products} label="Rate" prompt="Select a rate..." />
+      <.async_result :let={profiles} assign={@profiles}>
+        <:loading>
+          <.input
+            type="select"
+            field={@ash_form[:profile_id]}
+            options={[]}
+            label="Profile"
+            prompt="Loading profiles..."
+            disabled
+          />
+        </:loading>
+        <:failed :let={reason}><%= reason %></:failed>
+        <.input
+          type="select"
+          field={@ash_form[:profile_id]}
+          options={profiles}
+          label="Profile"
+          prompt="Select a profile..."
+        />
+      </.async_result>
+      <.async_result :let={beds} assign={@beds}>
+        <:loading>
+          <.input type="select" field={@ash_form[:bed_id]} options={[]} label="Bed" disabled prompt="Loading beds..." />
+        </:loading>
+        <:failed :let={reason}><%= reason %></:failed>
+        <.input type="select" field={@ash_form[:bed_id]} options={beds} label="Bed" prompt="Select a bed..." />
+      </.async_result>
+      <.async_result :let={products} assign={@products}>
+        <:loading>
+          <.input type="select" field={@ash_form[:product_id]} options={[]} label="Rate" disabled prompt="Loading rates..." />
+        </:loading>
+        <:failed :let={reason}><%= reason %></:failed>
+        <.input type="select" field={@ash_form[:product_id]} options={products} label="Rate" prompt="Select a rate..." />
+      </.async_result>
       <.input type="date" field={@ash_form[:start_at]} label="Start At" />
       <.input type="date" field={@ash_form[:end_at]} label="End At" />
       <:actions>
@@ -30,27 +61,36 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.New do
       )
       |> to_form()
 
-    beds =
-      HousingApp.Assignments.Bed.list!(actor: current_user_tenant, tenant: tenant)
-      |> Enum.map(&{"#{&1.room.building.name} / #{&1.room.name} / #{&1.name}", &1.id})
-
-    profiles =
-      HousingApp.Management.Profile.list!(actor: current_user_tenant, tenant: tenant)
-      |> Enum.map(&{&1.user_tenant.user.name, &1.id})
-
-    products =
-      HousingApp.Accounting.Product.list!(actor: current_user_tenant, tenant: tenant)
-      |> Enum.map(&{"#{&1.name}, $#{&1.rate}", &1.id})
-
     {:ok,
-     assign(socket,
+     socket
+     |> assign(
        ash_form: ash_form,
-       beds: beds,
-       profiles: profiles,
-       products: products,
        sidebar: :assignments,
        page_title: "New Booking"
-     )}
+     )
+     |> assign_async([:beds, :profiles, :products], fn ->
+       profiles =
+         HousingApp.Management.Profile.list!(actor: current_user_tenant, tenant: tenant)
+         |> Enum.sort_by(& &1.user_tenant.user.name)
+         |> Enum.map(&{&1.user_tenant.user.name, &1.id})
+
+       beds =
+         HousingApp.Assignments.Bed.list!(actor: current_user_tenant, tenant: tenant)
+         |> Enum.map(&{"#{&1.room.building.name} / #{&1.room.name} / #{&1.name}", &1.id})
+         |> Enum.sort_by(fn {name, _} -> name end)
+
+       products =
+         HousingApp.Accounting.Product.list!(actor: current_user_tenant, tenant: tenant)
+         |> Enum.map(&{"#{&1.name}, $#{&1.rate}", &1.id})
+         |> Enum.sort_by(fn {name, _} -> name end)
+
+       {:ok,
+        %{
+          profiles: profiles,
+          beds: beds,
+          products: products
+        }}
+     end)}
   end
 
   def handle_params(params, _url, socket) do
