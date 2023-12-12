@@ -7,7 +7,7 @@ defmodule HousingAppWeb.Live.Forms.Submissions do
     ~H"""
     <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Form Submissions</h1>
 
-    <div id="myGrid" style="width: 100%; height: 400px;" class="ag-theme-quartz-dark" phx-hook="AgGrid"></div>
+    <div id="ag-data-grid" style="width: 100%; height: 400px;" class="ag-theme-quartz-dark" phx-hook="AgGrid"></div>
     """
   end
 

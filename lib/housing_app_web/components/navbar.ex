@@ -1,4 +1,6 @@
 defmodule HousingAppWeb.Components.Navbar do
+  @moduledoc false
+
   use Phoenix.Component
   use HousingAppWeb, :verified_routes
 

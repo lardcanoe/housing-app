@@ -60,12 +60,13 @@ export default {
                 autoSizeStrategy: {
                     type: 'fitGridWidth',
                 },
+                rowSelection: 'multiple',
                 columnDefs: reply.columns,
                 rowData: reply.data
             };
 
             // setup the grid after the page has finished loading
-            const gridDiv = document.querySelector('#myGrid');
+            const gridDiv = document.querySelector('#ag-data-grid');
             const api = agGrid.createGrid(gridDiv, gridOptions);
         });
     },
