@@ -128,13 +128,13 @@ defmodule HousingAppWeb.Live.Profiles.Index do
             "id" => p.id,
             "name" => p.user_tenant.user.name,
             "email" => p.user_tenant.user.email,
-            "edit" => ~p"/profiles/#{p.id}/edit"
+            "actions" => [["Edit", ~p"/profiles/#{p.id}/edit"]]
           }
         else
           %{
             "name" => p.user_tenant.user.name,
             "email" => p.user_tenant.user.email,
-            "edit" => ~p"/profiles/#{p.id}/edit"
+            "actions" => [["Edit", ~p"/profiles/#{p.id}/edit"]]
           }
         end
       end)
@@ -143,17 +143,17 @@ defmodule HousingAppWeb.Live.Profiles.Index do
       {:reply,
        %{
          columns: [
-           %{field: "id", minWidth: 120, pinned: "left"},
+           %{field: "id", minWidth: 120, pinned: "left", checkboxSelection: true},
            %{field: "name", minWidth: 160, pinned: "left"},
-           %{field: "email", email: true, minWidth: 160},
+           %{field: "email", minWidth: 160},
            %{
-             field: "edit",
-             link: "Edit",
+             field: "actions",
              pinned: "right",
              maxWidth: 90,
              filter: false,
              editable: false,
-             sortable: false
+             sortable: false,
+             resizable: false
            }
          ],
          data: profiles
@@ -162,16 +162,16 @@ defmodule HousingAppWeb.Live.Profiles.Index do
       {:reply,
        %{
          columns: [
-           %{field: "name", minWidth: 160, pinned: "left"},
-           %{field: "email", email: true, minWidth: 160},
+           %{field: "name", minWidth: 160, pinned: "left", checkboxSelection: true},
+           %{field: "email", minWidth: 160},
            %{
-             field: "edit",
-             link: "Edit",
+             field: "actions",
              pinned: "right",
              maxWidth: 90,
              filter: false,
              editable: false,
-             sortable: false
+             sortable: false,
+             resizable: false
            }
          ],
          data: profiles

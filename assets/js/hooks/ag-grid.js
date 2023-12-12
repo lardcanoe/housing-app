@@ -28,12 +28,14 @@ export default {
             }
 
             reply.columns.forEach(c => {
-                if (c.link) {
+                if (c.field === 'actions') {
                     c.cellRenderer = function (params) {
-                        // target="_blank"
-                        return '<a href="' + params.value + '" rel="noopener">' + c.link + '</a>'
+                        return params.value.map((action) => {
+                            return '<a href="' + action[1] + '" rel="noopener">' + action[0] + '</a>'
+                        }).join('')
                     }
-                } else if (c.email) {
+                    c.valueFormatter = (_) => ''
+                } else if (c.field === 'email') {
                     c.cellRenderer = function (params) {
                         return '<a href="mailto:' + params.value + '" target="_blank" rel="noopener">' + params.value + '</a>'
                     }
@@ -44,7 +46,8 @@ export default {
                 defaultColDef: {
                     wrapText: true,
                     autoHeight: true,
-                    filter: true
+                    filter: true,
+                    floatingFilter: true
                 },
                 columnTypes: {
                     numberColumn: { width: 130, filter: 'agNumberColumnFilter' },
