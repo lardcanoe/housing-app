@@ -3,6 +3,7 @@ defmodule HousingApp.Accounts.User do
 
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [AshAuthentication, AshAdmin.Resource]
 
   authentication do
@@ -14,7 +15,7 @@ defmodule HousingApp.Accounts.User do
         hashed_password_field(:hashed_password)
         sign_in_tokens_enabled?(true)
         confirmation_required?(false)
-        register_action_accept([:email])
+        register_action_accept([:email, :name])
 
         resettable do
           sender HousingApp.Accounts.User.Senders.SendPasswordResetEmail
@@ -51,12 +52,46 @@ defmodule HousingApp.Accounts.User do
     update_timestamp :updated_at
   end
 
+  relationships do
+    has_many :user_tenants, HousingApp.Accounts.UserTenant
+  end
+
   admin do
     actor?(true)
   end
 
-  relationships do
-    has_many :user_tenants, HousingApp.Accounts.UserTenant
+  policies do
+    bypass always() do
+      authorize_if always()
+    end
+
+    # bypass always() do
+    #   authorize_if HousingApp.Checks.IsPlatformAdmin
+    # end
+
+    # policy action(:read) do
+    #   authorize_if expr(id == ^actor(:id))
+    # end
+
+    # policy action(:update) do
+    #   description "A logged in user can update themselves."
+    #   authorize_if expr(id == ^actor(:id))
+    # end
+
+    # policy action(:update_email) do
+    #   description("A logged in user can update their email")
+    #   authorize_if(expr(id == ^actor(:id)))
+    # end
+
+    # policy action(:resend_confirmation_instructions) do
+    #   description("A logged in user can request an email confirmation")
+    #   authorize_if(expr(id == ^actor(:id)))
+    # end
+
+    # policy action(:change_password) do
+    #   description("A logged in user can reset their password")
+    #   authorize_if(expr(id == ^actor(:id)))
+    # end
   end
 
   postgres do
@@ -70,6 +105,22 @@ defmodule HousingApp.Accounts.User do
 
   actions do
     defaults [:read, :update]
+
+    # action :sign_out, :integer do
+    #   argument :user, MyApp.User, allow_nil?: false
+
+    #   run fn input, _ ->
+    #     subject = AshAuthentication.user_to_subject(input.arguments.user)
+
+    #     import Ecto.Query
+
+    #     query = from t in MyApp.Token,
+    #       where: t.subject == ^subject
+
+    #     {count, _} = MyApp.Repo.delete_all(query)
+    #     {:ok, count}
+    #   end
+    # end
   end
 
   code_interface do
@@ -81,7 +132,7 @@ defmodule HousingApp.Accounts.User do
   end
 
   validations do
-    validate match(:email, ~r/@/)
+    validate match(:email, ~r/^[^\s]+@[^\s]+$/), message: "must have the @ sign and no spaces"
     validate string_length(:email, min: 6, max: 200)
   end
 end

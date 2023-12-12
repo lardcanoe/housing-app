@@ -49,6 +49,7 @@ defmodule HousingApp.MixProject do
       {:phoenix_live_dashboard, "~> 0.8.2"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
+      {:faker, "~> 0.17.0"},
       {:bandit, "~> 1.1.1"},
       {:swoosh, "~> 1.3"},
       {:finch, "~> 0.13"},

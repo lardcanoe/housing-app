@@ -29,16 +29,29 @@ defmodule HousingAppWeb.Live.HomeLive do
     ~H"""
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
       <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64">
+        <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Add Tenant</h1>
         <.simple_form for={@create_form} phx-change="validate" phx-submit="submit">
           <.input field={@create_form[:name]} label="Name" />
           <:flex_inputs></:flex_inputs>
           <:actions>
-            <.button>Save</.button>
-            <.button type="delete">Delete</.button>
+            <.button>Create</.button>
+            <.button :if={false} type="delete">Delete</.button>
           </:actions>
         </.simple_form>
       </div>
-      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64"></div>
+      <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600">
+        <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Generate Fake Data</h1>
+        <.simple_form for={@faker_form} phx-change="validate-faker" phx-submit="submit-faker">
+          <.input type="number" field={@faker_form[:products]} label="Products" />
+          <.input type="number" field={@faker_form[:buildings]} label="Buildings" />
+          <.input type="number" field={@faker_form[:rooms]} label="Rooms" />
+          <.input type="number" field={@faker_form[:students]} label="Students" />
+          <:flex_inputs></:flex_inputs>
+          <:actions>
+            <.button>Generate</.button>
+          </:actions>
+        </.simple_form>
+      </div>
       <div class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-32 md:h-64"></div>
     </div>
     """
@@ -49,17 +62,20 @@ defmodule HousingAppWeb.Live.HomeLive do
       HousingApp.Accounts.Tenant
       |> AshPhoenix.Form.for_create(:create,
         api: HousingApp.Accounts,
-        forms: [
-          items: [
-            type: :list,
-            resource: HousingApp.Accounts.Tenant,
-            create_action: :create
-          ]
-        ]
+        forms: [auto?: true]
       )
       |> to_form()
 
-    {:ok, assign(socket, create_form: form, page_title: "Dashboard")}
+    faker_form =
+      %{
+        "products" => 3,
+        "buildings" => 10,
+        "rooms" => 4000,
+        "students" => 5000
+      }
+      |> to_form()
+
+    {:ok, assign(socket, create_form: form, faker_form: faker_form, page_title: "Dashboard")}
   end
 
   def handle_params(params, _url, socket) do
@@ -92,5 +108,32 @@ defmodule HousingAppWeb.Live.HomeLive do
       {:error, create_form} ->
         {:noreply, assign(socket, create_form: create_form)}
     end
+  end
+
+  def handle_event("validate-faker", _form, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("submit-faker", params, socket) do
+    HousingApp.Accounts.Faker.generate(
+      users: String.to_integer(params["students"]),
+      tenant: socket.assigns.current_tenant,
+      actor: socket.assigns.current_user_tenant
+    )
+
+    # HousingApp.Accounting.Faker.generate(products: params["products"])
+
+    # HousingApp.Management.Faker.generate(
+    #   students: params["students"],
+    #   tenant: socket.assigns.current_tenant,
+    #   actor: socket.assigns.current_user
+    # )
+
+    # HousingApp.Assignments.Faker.generate(
+    #   buildings: params["buildings"],
+    #   rooms: params["rooms"]
+    # )
+
+    {:noreply, socket |> put_flash(:info, "Generated fake data!")}
   end
 end
