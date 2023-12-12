@@ -5,89 +5,91 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Rooms</h1>
-
-    <.table id="rooms" rows={@rooms} pagination={false} row_id={fn row -> "rooms-row-#{row.id}" end}>
-      <:button>
-        <svg
-          class="h-3.5 w-3.5 mr-2"
-          fill="currentColor"
-          viewbox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            clip-rule="evenodd"
-            fill-rule="evenodd"
-            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-          />
-        </svg>
+    <.data_grid id="ag-data-grid" header="Rooms" count={@count} loading={@loading}>
+      <:actions>
         <.link patch={~p"/assignments/rooms/new"}>
-          Add room
+          <button
+            type="button"
+            class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
+          >
+            <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add room
+          </button>
         </.link>
-      </:button>
-      <:col :let={room} :if={@current_user.role == :platform_admin} label="id">
-        <%= room.id %>
-      </:col>
-      <:col :let={room} label="building">
-        <%= room.building.name %>
-      </:col>
-      <:col :let={room} label="name">
-        <.link patch={~p"/assignments/rooms/#{room.id}"}><%= room.name %></.link>
-      </:col>
-      <:col :let={room} label="floor">
-        <%= room.floor %>
-      </:col>
-      <:col :let={room} label="block">
-        <%= room.block %>
-      </:col>
-      <:col :let={room} label="max capacity">
-        <%= room.max_capacity %>
-      </:col>
-      <:action :let={room}>
-        <.link
-          patch={~p"/assignments/rooms/#{room.id}/edit"}
-          class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-        >
-          Edit
-        </.link>
-      </:action>
-    </.table>
+      </:actions>
+    </.data_grid>
     """
   end
 
   def mount(_params, _session, socket) do
-    case fetch_rooms(socket) do
-      {:ok, rooms} ->
-        {:ok, assign(socket, rooms: rooms, sidebar: :assignments, page_title: "Rooms")}
-
-      _ ->
-        {:ok,
-         socket
-         |> assign(rooms: [], sidebar: :assignments, page_title: "Rooms")
-         |> put_flash(:error, "Error loading rooms.")}
-    end
+    {:ok, assign(socket, loading: true, count: 0, sidebar: :assignments, page_title: "Rooms")}
   end
 
-  def handle_params(_params, _url, socket) do
-    case fetch_rooms(socket) do
-      {:ok, rooms} ->
-        {:noreply, assign(socket, rooms: rooms, sidebar: :assignments, page_title: "Rooms")}
-
-      _ ->
-        {:noreply,
-         socket
-         |> assign(rooms: [], sidebar: :assignments, page_title: "Rooms")
-         |> put_flash(:error, "Error loading rooms.")}
-    end
+  def handle_params(params, _url, socket) do
+    {:noreply, assign(socket, params: params, loading: true, count: 0, sidebar: :assignments, page_title: "Rooms")}
   end
 
-  defp fetch_rooms(%{
-         assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
-       }) do
-    case HousingApp.Assignments.Room.list(actor: current_user_tenant, tenant: current_tenant) do
-      {:ok, rooms} -> {:ok, rooms}
-      _ -> {:error, []}
-    end
+  def handle_event(
+        "load-data",
+        %{},
+        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+      ) do
+    rooms =
+      HousingApp.Assignments.Room.list!(actor: current_user_tenant, tenant: tenant)
+      |> Enum.sort_by(&{&1.building.name, &1.name})
+      |> Enum.map(fn p ->
+        %{
+          "id" => p.id,
+          "name" => p.name,
+          "building" => p.building.name,
+          "floor" => p.floor,
+          "block" => p.block,
+          "max_capacity" => p.max_capacity,
+          "actions" => [["Edit", ~p"/assignments/rooms/#{p.id}/edit"]]
+        }
+      end)
+
+    columns =
+      if current_user_tenant.user.role == :platform_admin do
+        [
+          %{field: "id", pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+          %{field: "name", pinned: "left"},
+          %{field: "building", pinned: "left"},
+          %{field: "floor"},
+          %{field: "block"},
+          %{field: "max_capacity"},
+          %{
+            field: "actions",
+            pinned: "right",
+            maxWidth: 90,
+            filter: false,
+            editable: false,
+            sortable: false,
+            resizable: false
+          }
+        ]
+      else
+        [
+          %{field: "name", pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+          %{field: "building", pinned: "left"},
+          %{field: "floor"},
+          %{field: "block"},
+          %{field: "max_capacity"},
+          %{
+            field: "actions",
+            pinned: "right",
+            maxWidth: 90,
+            filter: false,
+            editable: false,
+            sortable: false,
+            resizable: false
+          }
+        ]
+      end
+
+    {:reply,
+     %{
+       columns: columns,
+       data: rooms
+     }, assign(socket, loading: false, count: length(rooms))}
   end
 end
