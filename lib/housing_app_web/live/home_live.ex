@@ -68,10 +68,10 @@ defmodule HousingAppWeb.Live.HomeLive do
 
     faker_form =
       %{
-        "products" => 3,
-        "buildings" => 10,
-        "rooms" => 4000,
-        "students" => 5000
+        "products" => 0,
+        "buildings" => 0,
+        "rooms" => 0,
+        "students" => 0
       }
       |> to_form()
 
@@ -115,25 +115,26 @@ defmodule HousingAppWeb.Live.HomeLive do
   end
 
   def handle_event("submit-faker", params, socket) do
-    HousingApp.Accounts.Faker.generate(
-      users: String.to_integer(params["students"]),
-      tenant: socket.assigns.current_tenant,
-      actor: socket.assigns.current_user_tenant
-    )
+    Task.async(fn ->
+      HousingApp.Faker.generate(
+        params,
+        tenant: socket.assigns.current_tenant,
+        actor: socket.assigns.current_user_tenant
+      )
+    end)
 
-    # HousingApp.Accounting.Faker.generate(products: params["products"])
+    {:noreply, socket |> put_flash(:info, "Generating fake data...")}
+  end
 
-    # HousingApp.Management.Faker.generate(
-    #   students: params["students"],
-    #   tenant: socket.assigns.current_tenant,
-    #   actor: socket.assigns.current_user
-    # )
+  def handle_info({ref, ret}, socket) do
+    Process.demonitor(ref, [:flush])
 
-    # HousingApp.Assignments.Faker.generate(
-    #   buildings: params["buildings"],
-    #   rooms: params["rooms"]
-    # )
+    case ret do
+      {:ok, _} ->
+        {:noreply, socket |> put_flash(:info, "Generated fake data!")}
 
-    {:noreply, socket |> put_flash(:info, "Generated fake data!")}
+      {:error, error} ->
+        {:noreply, socket |> put_flash(:error, "Error generating fake data: #{inspect(error)}")}
+    end
   end
 end

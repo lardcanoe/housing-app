@@ -23,7 +23,8 @@ defmodule HousingAppWeb.Components.DataGrid do
         <div class="w-full flex items-center space-x-3">
           <h1 class="dark:text-white font-semibold"><%= @header %></h1>
           <div :if={@loading} class="text-gray-400 font-medium">Loading...</div>
-          <div :if={!@loading} class="text-gray-400 font-medium"><%= @count %> results</div>
+          <div :if={!@loading && @count == 1} class="text-gray-400 font-medium">1 result</div>
+          <div :if={!@loading && @count != 1} class="text-gray-400 font-medium"><%= @count %> results</div>
         </div>
         <div class="w-full flex flex-row items-center justify-end space-x-3">
           <div :for={action <- @actions} :if={@actions != []}>

@@ -5,95 +5,97 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Bookings</h1>
-
-    <.table id="bookings" rows={@bookings} pagination={false} row_id={fn row -> "bookings-row-#{row.id}" end}>
-      <:button>
-        <svg
-          class="h-3.5 w-3.5 mr-2"
-          fill="currentColor"
-          viewbox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            clip-rule="evenodd"
-            fill-rule="evenodd"
-            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-          />
-        </svg>
+    <.data_grid id="ag-data-grid" header="Bookings" count={@count} loading={@loading}>
+      <:actions>
         <.link patch={~p"/assignments/bookings/new"}>
-          Add booking
+          <button
+            type="button"
+            class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
+          >
+            <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add booking
+          </button>
         </.link>
-      </:button>
-      <:col :let={booking} :if={@current_user.role == :platform_admin} label="id">
-        <%= booking.id %>
-      </:col>
-      <:col :let={booking} label="profile">
-        <%= booking.profile.user_tenant.user.name %>
-      </:col>
-      <:col :let={booking} label="building">
-        <%= booking.bed.room.building.name %>
-      </:col>
-      <:col :let={booking} label="room">
-        <%= booking.bed.room.name %>
-      </:col>
-      <:col :let={booking} label="bed">
-        <%= booking.bed.name %>
-      </:col>
-      <:col :let={booking} label="product">
-        <%= booking.product.name %> ($<%= booking.product.rate %>)
-      </:col>
-      <:col :let={booking} label="start at">
-        <%= booking.start_at %>
-      </:col>
-      <:col :let={booking} label="end at">
-        <%= booking.end_at %>
-      </:col>
-      <:action :let={booking}>
-        <.link
-          patch={~p"/assignments/bookings/#{booking.id}/edit"}
-          class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-        >
-          Edit
-        </.link>
-      </:action>
-    </.table>
+      </:actions>
+    </.data_grid>
     """
   end
 
   def mount(_params, _session, socket) do
-    case fetch_bookings(socket) do
-      {:ok, bookings} ->
-        {:ok, assign(socket, bookings: bookings, sidebar: :assignments, page_title: "Bookings")}
-
-      _ ->
-        {:ok,
-         socket
-         |> assign(bookings: [], sidebar: :assignments, page_title: "Bookings")
-         |> put_flash(:error, "Error loading bookings.")}
-    end
+    {:ok, assign(socket, loading: true, count: 0, sidebar: :assignments, page_title: "Bookings")}
   end
 
   def handle_params(_params, _url, socket) do
-    case fetch_bookings(socket) do
-      {:ok, bookings} ->
-        {:noreply, assign(socket, bookings: bookings, sidebar: :assignments, page_title: "Bookings")}
-
-      _ ->
-        {:noreply,
-         socket
-         |> assign(bookings: [], sidebar: :assignments, page_title: "Bookings")
-         |> put_flash(:error, "Error loading bookings.")}
-    end
+    {:noreply, assign(socket, loading: true, count: 0, sidebar: :assignments, page_title: "Bookings")}
   end
 
-  defp fetch_bookings(%{
-         assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
-       }) do
-    case HousingApp.Assignments.Booking.list(actor: current_user_tenant, tenant: current_tenant) do
-      {:ok, bookings} -> {:ok, bookings}
-      _ -> {:error, []}
-    end
+  def handle_event(
+        "load-data",
+        %{},
+        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+      ) do
+    bookings =
+      HousingApp.Assignments.Booking.list!(actor: current_user_tenant, tenant: tenant)
+      |> Enum.sort_by(& &1.profile.user_tenant.user.name)
+      |> Enum.map(fn b ->
+        %{
+          "id" => b.id,
+          "profile" => b.profile.user_tenant.user.name,
+          "building" => b.bed.room.building.name,
+          "room" => b.bed.room.name,
+          "bed" => b.bed.name,
+          "rate" => "#{b.product.name} ($#{b.product.rate})",
+          "start_at" => b.start_at,
+          "end_at" => b.end_at,
+          "actions" => [["Edit", ~p"/assignments/bookings/#{b.id}/edit"]]
+        }
+      end)
+
+    columns =
+      if current_user_tenant.user.role == :platform_admin do
+        [
+          %{field: "id", minWidth: 120, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+          %{field: "profile", minWidth: 160, pinned: "left"},
+          %{field: "building"},
+          %{field: "room"},
+          %{field: "bed"},
+          %{field: "rate"},
+          %{field: "start_at", headerName: "Start", type: "date"},
+          %{field: "end_at", headerName: "End", type: "date"},
+          %{
+            field: "actions",
+            pinned: "right",
+            maxWidth: 90,
+            filter: false,
+            editable: false,
+            sortable: false,
+            resizable: false
+          }
+        ]
+      else
+        [
+          %{field: "profile", minWidth: 160, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+          %{field: "building"},
+          %{field: "room"},
+          %{field: "bed"},
+          %{field: "rate"},
+          %{field: "start_at", headerName: "Start", type: "date"},
+          %{field: "end_at", headerName: "End", type: "date"},
+          %{
+            field: "actions",
+            pinned: "right",
+            maxWidth: 90,
+            filter: false,
+            editable: false,
+            sortable: false,
+            resizable: false
+          }
+        ]
+      end
+
+    {:reply,
+     %{
+       columns: columns,
+       data: bookings
+     }, assign(socket, loading: false, count: length(bookings))}
   end
 end
