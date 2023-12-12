@@ -8,3 +8,29 @@
 .dashboard-area-height {
     height: calc(100vh - (160px));
 }
+
+/* https://www.ag-grid.com/javascript-data-grid/global-style-customisation-compactness/ */
+
+.ag-theme-quartz.compact {
+    --ag-grid-size: 2px;
+    --ag-list-item-height: 20px;
+    --ag-font-size: 12px;
+}
+
+.ag-theme-quartz-dark.compact {
+    --ag-grid-size: 2px;
+    --ag-list-item-height: 20px;
+    --ag-font-size: 12px;
+}
+
+.ag-theme-quartz.large {
+    --ag-grid-size: 10px;
+    --ag-list-item-height: 40px;
+    --ag-font-size: 32px;
+}
+
+.ag-theme-quartz-dark.large {
+    --ag-grid-size: 10px;
+    --ag-list-item-height: 40px;
+    --ag-font-size: 32px;
+}

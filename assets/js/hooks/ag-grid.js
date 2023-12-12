@@ -6,6 +6,27 @@ export default {
     mounted() {
         this.pushEvent("load-data", {}, (reply, ref) => {
 
+            const selectElements = document.querySelectorAll('[name="table-settings-size"]');
+
+            // https://www.ag-grid.com/javascript-data-grid/global-style-customisation-compactness/
+
+            if (selectElements) {
+                selectElements.forEach((s) => s.addEventListener("change", (event) => {
+                    const selectedOption = event.target.value;
+                    const sizes = ['large', 'normal', 'compact'];
+
+                    let el = document.querySelector('.ag-theme-quartz');
+                    if (el) {
+                        sizes.forEach((size) => el.classList.toggle(size, size === selectedOption));
+                    }
+
+                    el = document.querySelector('.ag-theme-quartz-dark');
+                    if (el) {
+                        sizes.forEach((size) => el.classList.toggle(size, size === selectedOption));
+                    }
+                }));
+            }
+
             reply.columns.forEach(c => {
                 if (c.link) {
                     c.cellRenderer = function (params) {
