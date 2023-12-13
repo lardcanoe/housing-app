@@ -5,7 +5,7 @@ defmodule HousingAppWeb.Live.Assignments.Beds.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <.data_grid id="ag-data-grid" header="Beds" count={@count} loading={@loading}>
+    <.data_grid id="ag-data-grid" header="Beds" count={@count} loading={@loading} current_user_tenant={@current_user_tenant}>
       <:actions>
         <.link patch={~p"/assignments/beds/new"}>
           <button
@@ -48,40 +48,22 @@ defmodule HousingAppWeb.Live.Assignments.Beds.Index do
       end)
 
     columns =
-      if current_user_tenant.user.role == :platform_admin do
-        [
-          %{field: "id", pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-          %{field: "building", pinned: "left"},
-          %{field: "room", pinned: "left"},
-          %{field: "name"},
-          %{field: "floor"},
-          %{
-            field: "actions",
-            pinned: "right",
-            maxWidth: 90,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
-      else
-        [
-          %{field: "building", pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-          %{field: "room", pinned: "left"},
-          %{field: "name"},
-          %{field: "floor"},
-          %{
-            field: "actions",
-            pinned: "right",
-            maxWidth: 90,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
-      end
+      [
+        %{field: "building", pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+        %{field: "room", pinned: "left"},
+        %{field: "id", pinned: "left", hide: true},
+        %{field: "name"},
+        %{field: "floor"},
+        %{
+          field: "actions",
+          pinned: "right",
+          maxWidth: 90,
+          filter: false,
+          editable: false,
+          sortable: false,
+          resizable: false
+        }
+      ]
 
     {:reply,
      %{

@@ -5,7 +5,13 @@ defmodule HousingAppWeb.Live.Profiles.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <.data_grid id="ag-data-grid" header="Profiles" count={@count} loading={@loading}>
+    <.data_grid
+      id="ag-data-grid"
+      header="Profiles"
+      count={@count}
+      loading={@loading}
+      current_user_tenant={@current_user_tenant}
+    >
       <:actions>
         <.link patch={~p"/profiles/new"}>
           <button
@@ -46,36 +52,20 @@ defmodule HousingAppWeb.Live.Profiles.Index do
       end)
 
     columns =
-      if current_user_tenant.user.role == :platform_admin do
-        [
-          %{field: "id", minWidth: 120, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-          %{field: "name", minWidth: 160, pinned: "left"},
-          %{field: "email", minWidth: 160},
-          %{
-            field: "actions",
-            pinned: "right",
-            maxWidth: 90,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
-      else
-        [
-          %{field: "name", minWidth: 160, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-          %{field: "email", minWidth: 160},
-          %{
-            field: "actions",
-            pinned: "right",
-            maxWidth: 90,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
-      end
+      [
+        %{field: "name", minWidth: 160, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+        %{field: "id", minWidth: 120, pinned: "left", hide: true},
+        %{field: "email", minWidth: 160},
+        %{
+          field: "actions",
+          pinned: "right",
+          maxWidth: 90,
+          filter: false,
+          editable: false,
+          sortable: false,
+          resizable: false
+        }
+      ]
 
     {:reply,
      %{

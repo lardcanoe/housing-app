@@ -56,7 +56,7 @@ class ActionsValueRenderer {
 
 export default {
     mounted() {
-        const selectElements = document.querySelectorAll('[name="table-settings-size"]');
+        let selectElements = document.querySelectorAll('[name="table-settings-size"]');
 
         // https://www.ag-grid.com/javascript-data-grid/global-style-customisation-compactness/
 
@@ -74,6 +74,17 @@ export default {
                 if (el) {
                     sizes.forEach((size) => el.classList.toggle(size, size === selectedOption));
                 }
+            }));
+        }
+
+        selectElements = document.querySelectorAll('[name="table-settings-show-ids"]');
+        if (selectElements) {
+            selectElements.forEach((s) => s.addEventListener("change", (event) => {
+                this.gridInstance.applyColumnState({
+                    state: [
+                        { colId: 'id', hide: !event.target.checked }
+                    ],
+                });
             }));
         }
 

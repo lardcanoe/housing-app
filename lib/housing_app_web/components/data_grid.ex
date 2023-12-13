@@ -14,7 +14,7 @@ defmodule HousingAppWeb.Components.DataGrid do
   attr :loading, :boolean, required: true
   attr :count, :integer, required: true
   attr :drawer, :any, default: nil
-  attr :current_user_tenant, :any
+  attr :current_user_tenant, :any, required: true
   attr :current_tenant, :string
 
   slot :actions, doc: "the slot for showing user actions in the last table column"
@@ -91,6 +91,22 @@ defmodule HousingAppWeb.Components.DataGrid do
                         />
                         <label for="table-settings-size-3" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                           Large
+                        </label>
+                      </div>
+                    </li>
+                    <li :if={@current_user_tenant.user.role == :platform_admin}>
+                      <div class="flex items-center">
+                        <input
+                          id="table-settings-show-ids"
+                          type="checkbox"
+                          name="table-settings-show-ids"
+                          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                        />
+                        <label
+                          for="table-settings-show-ids"
+                          class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                        >
+                          Show IDs
                         </label>
                       </div>
                     </li>

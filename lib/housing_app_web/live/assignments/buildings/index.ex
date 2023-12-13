@@ -68,40 +68,22 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
       end)
 
     columns =
-      if current_user_tenant.user.role == :platform_admin do
-        [
-          %{field: "id", minWidth: 120, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-          %{field: "name", minWidth: 160, pinned: "left"},
-          %{field: "location"},
-          %{field: "floors"},
-          %{field: "rooms"},
-          %{
-            field: "actions",
-            pinned: "right",
-            maxWidth: 120,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
-      else
-        [
-          %{field: "name", minWidth: 160, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-          %{field: "location"},
-          %{field: "floors"},
-          %{field: "rooms"},
-          %{
-            field: "actions",
-            pinned: "right",
-            maxWidth: 120,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
-      end
+      [
+        %{field: "name", minWidth: 160, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+        %{field: "id", minWidth: 120, pinned: "left", hide: true},
+        %{field: "location"},
+        %{field: "floors"},
+        %{field: "rooms"},
+        %{
+          field: "actions",
+          pinned: "right",
+          maxWidth: 120,
+          filter: false,
+          editable: false,
+          sortable: false,
+          resizable: false
+        }
+      ]
 
     {:reply,
      %{

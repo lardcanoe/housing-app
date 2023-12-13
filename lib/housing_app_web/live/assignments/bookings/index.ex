@@ -5,7 +5,13 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <.data_grid id="ag-data-grid" header="Bookings" count={@count} loading={@loading}>
+    <.data_grid
+      id="ag-data-grid"
+      header="Bookings"
+      count={@count}
+      loading={@loading}
+      current_user_tenant={@current_user_tenant}
+    >
       <:actions>
         <.link patch={~p"/assignments/bookings/new"}>
           <button
@@ -51,46 +57,25 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
       end)
 
     columns =
-      if current_user_tenant.user.role == :platform_admin do
-        [
-          %{field: "id", minWidth: 120, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-          %{field: "profile", minWidth: 160, pinned: "left"},
-          %{field: "building"},
-          %{field: "room"},
-          %{field: "bed"},
-          %{field: "rate"},
-          %{field: "start_at", headerName: "Start", type: "date"},
-          %{field: "end_at", headerName: "End", type: "date"},
-          %{
-            field: "actions",
-            pinned: "right",
-            maxWidth: 90,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
-      else
-        [
-          %{field: "profile", minWidth: 160, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-          %{field: "building"},
-          %{field: "room"},
-          %{field: "bed"},
-          %{field: "rate"},
-          %{field: "start_at", headerName: "Start", type: "date"},
-          %{field: "end_at", headerName: "End", type: "date"},
-          %{
-            field: "actions",
-            pinned: "right",
-            maxWidth: 90,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
-      end
+      [
+        %{field: "profile", minWidth: 160, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+        %{field: "id", minWidth: 120, pinned: "left", hide: true},
+        %{field: "building"},
+        %{field: "room"},
+        %{field: "bed"},
+        %{field: "rate"},
+        %{field: "start_at", headerName: "Start", type: "date"},
+        %{field: "end_at", headerName: "End", type: "date"},
+        %{
+          field: "actions",
+          pinned: "right",
+          maxWidth: 90,
+          filter: false,
+          editable: false,
+          sortable: false,
+          resizable: false
+        }
+      ]
 
     {:reply,
      %{

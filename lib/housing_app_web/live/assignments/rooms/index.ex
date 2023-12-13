@@ -5,7 +5,13 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <.data_grid id="ag-data-grid" header="Rooms" count={@count} loading={@loading}>
+    <.data_grid
+      id="ag-data-grid"
+      header="Rooms"
+      count={@count}
+      loading={@loading}
+      current_user_tenant={@current_user_tenant}
+    >
       <:actions>
         <.link patch={~p"/assignments/rooms/new"}>
           <button
@@ -49,42 +55,23 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
       end)
 
     columns =
-      if current_user_tenant.user.role == :platform_admin do
-        [
-          %{field: "id", pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-          %{field: "name", pinned: "left"},
-          %{field: "building", pinned: "left"},
-          %{field: "floor"},
-          %{field: "block"},
-          %{field: "max_capacity"},
-          %{
-            field: "actions",
-            pinned: "right",
-            maxWidth: 90,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
-      else
-        [
-          %{field: "name", pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-          %{field: "building", pinned: "left"},
-          %{field: "floor"},
-          %{field: "block"},
-          %{field: "max_capacity"},
-          %{
-            field: "actions",
-            pinned: "right",
-            maxWidth: 90,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
-      end
+      [
+        %{field: "name", pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+        %{field: "building", pinned: "left"},
+        %{field: "id", pinned: "left", hide: true},
+        %{field: "floor"},
+        %{field: "block"},
+        %{field: "max_capacity"},
+        %{
+          field: "actions",
+          pinned: "right",
+          maxWidth: 90,
+          filter: false,
+          editable: false,
+          sortable: false,
+          resizable: false
+        }
+      ]
 
     {:reply,
      %{
