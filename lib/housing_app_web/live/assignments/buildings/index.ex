@@ -5,32 +5,26 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <div class="flex">
-      <div class="grow">
-        <.data_grid id="ag-data-grid" header="Buildings" count={@count} loading={@loading}>
-          <:actions>
-            <.link patch={~p"/assignments/buildings/new"}>
-              <button
-                type="button"
-                class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
-              >
-                <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add building
-              </button>
-            </.link>
-          </:actions>
-        </.data_grid>
-      </div>
-
-      <div class="hidden w-80 pl-4" id="drawer-right-parent">
-        <.live_component
-          module={HousingAppWeb.Components.Drawer.Building}
-          id="drawer-right"
-          current_user_tenant={@current_user_tenant}
-          current_tenant={@current_tenant}
-        >
-        </.live_component>
-      </div>
-    </div>
+    <.data_grid
+      id="ag-data-grid"
+      header="Buildings"
+      count={@count}
+      loading={@loading}
+      drawer={HousingAppWeb.Components.Drawer.Building}
+      current_user_tenant={@current_user_tenant}
+      current_tenant={@current_tenant}
+    >
+      <:actions>
+        <.link patch={~p"/assignments/buildings/new"}>
+          <button
+            type="button"
+            class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
+          >
+            <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add building
+          </button>
+        </.link>
+      </:actions>
+    </.data_grid>
     """
   end
 
