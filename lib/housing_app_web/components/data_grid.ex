@@ -129,7 +129,11 @@ defmodule HousingAppWeb.Components.DataGrid do
         </div>
       </div>
 
-      <div :if={@drawer} class="hidden w-80 pl-4" id="drawer-right-parent">
+      <div
+        :if={@drawer}
+        class="hidden w-80 ml-4 pl-2 bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700"
+        id="drawer-right-parent"
+      >
         <.live_component
           module={@drawer}
           id="drawer-right"

@@ -1,4 +1,4 @@
-defmodule HousingAppWeb.Components.Drawer.Building do
+defmodule HousingAppWeb.Components.Drawer.Room do
   @moduledoc false
 
   use HousingAppWeb, :live_component
@@ -9,7 +9,7 @@ defmodule HousingAppWeb.Components.Drawer.Building do
   attr :current_user_tenant, :any, required: true
   attr :current_tenant, :string, required: true
 
-  def render(%{building: nil} = assigns) do
+  def render(%{room: nil} = assigns) do
     ~H"""
     <div class="hidden" id={@id}></div>
     """
@@ -31,13 +31,10 @@ defmodule HousingAppWeb.Components.Drawer.Building do
         <.icon name="hero-building-office-2-solid" class="w-12 h-12" />
         <div>
           <h4 id="drawer-label" class="mb-1 text-xl font-bold leading-none text-gray-900 dark:text-white">
-            <%= @building.name %>
+            <%= @room.name %>
           </h4>
-          <p
-            :if={!is_nil(@building.location) && @building.location != ""}
-            class="text-base text-gray-500 dark:text-gray-400"
-          >
-            <%= @building.location %>
+          <p class="text-base text-gray-500 dark:text-gray-400">
+            <%= @room.building.name %>
           </p>
         </div>
       </div>
@@ -52,31 +49,41 @@ defmodule HousingAppWeb.Components.Drawer.Building do
           :if={@current_user_tenant.user.role == :platform_admin}
           class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400"
         >
-          <%= @building.id %>
+          <%= @room.id %>
         </dd>
-        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Floors</dt>
-        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400"><%= @building.floors %></dd>
-        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Rooms</dt>
-        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400"><%= @building.rooms %></dd>
+        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Floor</dt>
+        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400"><%= @room.floor %></dd>
+        <dt :if={@room.block != ""} class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Block</dt>
+        <dd :if={@room.block != ""} class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400"><%= @room.block %></dd>
+        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Max Capacity</dt>
+        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400"><%= @room.max_capacity %></dd>
+        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Bookings</dt>
+        <dd :if={@bookings == []} class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">None</dd>
+        <%= for booking <- @bookings do %>
+          <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
+            <%= booking.profile.user_tenant.user.name %>, Bed: <%= booking.bed.name %>
+          </dd>
+        <% end %>
       </dl>
     </div>
     """
   end
 
   def mount(socket) do
-    {:ok, socket |> assign(building: nil)}
+    {:ok, socket |> assign(room: nil, bookings: [])}
   end
 
   def update(
-        %{building_id: building_id},
+        %{room_id: room_id},
         %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
-    case HousingApp.Assignments.Building.get_by_id(building_id, actor: current_user_tenant, tenant: tenant) do
-      {:ok, building} ->
-        {:ok, assign(socket, building: building)}
+    case HousingApp.Assignments.Room.get_by_id(room_id, actor: current_user_tenant, tenant: tenant) do
+      {:ok, room} ->
+        bookings = HousingApp.Assignments.Booking.list_by_room!(room.id, actor: current_user_tenant, tenant: tenant)
+        {:ok, assign(socket, room: room, bookings: bookings)}
 
       {:error, _} ->
-        {:ok, assign(socket, building: nil)}
+        {:ok, assign(socket, room: nil, bookings: [])}
     end
   end
 

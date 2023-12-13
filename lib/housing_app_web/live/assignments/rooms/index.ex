@@ -10,7 +10,9 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
       header="Rooms"
       count={@count}
       loading={@loading}
+      drawer={HousingAppWeb.Components.Drawer.Room}
       current_user_tenant={@current_user_tenant}
+      current_tenant={@current_tenant}
     >
       <:actions>
         <.link patch={~p"/assignments/rooms/new"}>
@@ -34,6 +36,11 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
     {:noreply, assign(socket, params: params, loading: true, count: 0, sidebar: :assignments, page_title: "Rooms")}
   end
 
+  def handle_event("view-row", %{"id" => id}, socket) do
+    send_update(HousingAppWeb.Components.Drawer.Room, id: "drawer-right", room_id: id)
+    {:noreply, socket}
+  end
+
   def handle_event(
         "load-data",
         %{},
@@ -50,7 +57,7 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
           "floor" => p.floor,
           "block" => p.block,
           "max_capacity" => p.max_capacity,
-          "actions" => [["Edit", ~p"/assignments/rooms/#{p.id}/edit"]]
+          "actions" => [["Edit", ~p"/assignments/rooms/#{p.id}/edit"], ["View", ""]]
         }
       end)
 
@@ -65,7 +72,7 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
         %{
           field: "actions",
           pinned: "right",
-          maxWidth: 90,
+          maxWidth: 120,
           filter: false,
           editable: false,
           sortable: false,
