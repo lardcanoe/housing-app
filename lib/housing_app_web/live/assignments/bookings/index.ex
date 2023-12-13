@@ -64,8 +64,8 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
         %{field: "room"},
         %{field: "bed"},
         %{field: "rate"},
-        %{field: "start_at", headerName: "Start", type: "date"},
-        %{field: "end_at", headerName: "End", type: "date"},
+        %{field: "start_at", headerName: "Start", type: "dateColumn"},
+        %{field: "end_at", headerName: "End", type: "dateColumn"},
         %{
           field: "actions",
           pinned: "right",

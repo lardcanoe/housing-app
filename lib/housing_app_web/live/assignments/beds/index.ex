@@ -5,7 +5,15 @@ defmodule HousingAppWeb.Live.Assignments.Beds.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <.data_grid id="ag-data-grid" header="Beds" count={@count} loading={@loading} current_user_tenant={@current_user_tenant}>
+    <.data_grid
+      id="ag-data-grid"
+      header="Beds"
+      count={@count}
+      loading={@loading}
+      drawer={HousingAppWeb.Components.Drawer.Bed}
+      current_user_tenant={@current_user_tenant}
+      current_tenant={@current_tenant}
+    >
       <:actions>
         <.link patch={~p"/assignments/beds/new"}>
           <button
@@ -28,6 +36,11 @@ defmodule HousingAppWeb.Live.Assignments.Beds.Index do
     {:noreply, assign(socket, params: params, loading: true, count: 0, sidebar: :assignments, page_title: "Beds")}
   end
 
+  def handle_event("view-row", %{"id" => id}, socket) do
+    send_update(HousingAppWeb.Components.Drawer.Bed, id: "drawer-right", bed_id: id)
+    {:noreply, socket}
+  end
+
   def handle_event(
         "load-data",
         %{},
@@ -43,7 +56,7 @@ defmodule HousingAppWeb.Live.Assignments.Beds.Index do
           "building" => p.room.building.name,
           "room" => p.room.name,
           "floor" => p.room.floor,
-          "actions" => [["Edit", ~p"/assignments/beds/#{p.id}/edit"]]
+          "actions" => [["Edit", ~p"/assignments/beds/#{p.id}/edit"], ["View", ""]]
         }
       end)
 
@@ -57,7 +70,7 @@ defmodule HousingAppWeb.Live.Assignments.Beds.Index do
         %{
           field: "actions",
           pinned: "right",
-          maxWidth: 90,
+          maxWidth: 120,
           filter: false,
           editable: false,
           sortable: false,
