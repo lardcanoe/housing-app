@@ -5,18 +5,32 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <.data_grid id="ag-data-grid" header="Buildings" count={@count} loading={@loading}>
-      <:actions>
-        <.link patch={~p"/assignments/buildings/new"}>
-          <button
-            type="button"
-            class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
-          >
-            <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add building
-          </button>
-        </.link>
-      </:actions>
-    </.data_grid>
+    <div class="flex">
+      <div class="grow">
+        <.data_grid id="ag-data-grid" header="Buildings" count={@count} loading={@loading}>
+          <:actions>
+            <.link patch={~p"/assignments/buildings/new"}>
+              <button
+                type="button"
+                class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
+              >
+                <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add building
+              </button>
+            </.link>
+          </:actions>
+        </.data_grid>
+      </div>
+
+      <div class="hidden w-80 pl-4" id="drawer-right-parent">
+        <.live_component
+          module={HousingAppWeb.Components.Drawer.Building}
+          id="drawer-right"
+          current_user_tenant={@current_user_tenant}
+          current_tenant={@current_tenant}
+        >
+        </.live_component>
+      </div>
+    </div>
     """
   end
 
@@ -25,7 +39,19 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
   end
 
   def handle_params(params, _url, socket) do
-    {:noreply, assign(socket, params: params, loading: true, count: 0, sidebar: :assignments, page_title: "Buildings")}
+    {:noreply,
+     assign(socket,
+       params: params,
+       loading: true,
+       count: 0,
+       sidebar: :assignments,
+       page_title: "Buildings"
+     )}
+  end
+
+  def handle_event("view-row", %{"id" => id}, socket) do
+    send_update(HousingAppWeb.Components.Drawer.Building, id: "drawer-right", building_id: id)
+    {:noreply, socket}
   end
 
   def handle_event(
@@ -43,7 +69,7 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
           "location" => p.location,
           "floors" => p.floors,
           "rooms" => p.rooms,
-          "actions" => [["Edit", ~p"/assignments/buildings/#{p.id}/edit"]]
+          "actions" => [["Edit", ~p"/assignments/buildings/#{p.id}/edit"], ["View", ""]]
         }
       end)
 
@@ -58,7 +84,7 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
           %{
             field: "actions",
             pinned: "right",
-            maxWidth: 90,
+            maxWidth: 120,
             filter: false,
             editable: false,
             sortable: false,
@@ -74,7 +100,7 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
           %{
             field: "actions",
             pinned: "right",
-            maxWidth: 90,
+            maxWidth: 120,
             filter: false,
             editable: false,
             sortable: false,
