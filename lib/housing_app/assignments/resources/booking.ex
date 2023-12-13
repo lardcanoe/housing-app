@@ -111,6 +111,15 @@ defmodule HousingApp.Assignments.Booking do
       filter expr(bed_id == ^arg(:bed_id) and is_nil(archived_at))
     end
 
+    read :list_by_profile do
+      argument :profile_id, :uuid do
+        allow_nil? false
+      end
+
+      prepare build(load: [:product, profile: [user_tenant: [:user]], bed: [room: [:building]]])
+      filter expr(profile_id == ^arg(:profile_id) and is_nil(archived_at))
+    end
+
     read :get_by_id do
       argument :id, :uuid do
         allow_nil? false
@@ -131,6 +140,7 @@ defmodule HousingApp.Assignments.Booking do
     define :list
     define :list_by_room, args: [:room_id]
     define :list_by_bed, args: [:bed_id]
+    define :list_by_profile, args: [:profile_id]
     define :get_by_id, args: [:id]
   end
 

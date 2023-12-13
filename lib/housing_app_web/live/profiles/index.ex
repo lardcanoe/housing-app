@@ -10,7 +10,9 @@ defmodule HousingAppWeb.Live.Profiles.Index do
       header="Profiles"
       count={@count}
       loading={@loading}
+      drawer={HousingAppWeb.Components.Drawer.Profile}
       current_user_tenant={@current_user_tenant}
+      current_tenant={@current_tenant}
     >
       <:actions>
         <.link patch={~p"/profiles/new"}>
@@ -34,6 +36,11 @@ defmodule HousingAppWeb.Live.Profiles.Index do
     {:noreply, assign(socket, params: params, loading: true, count: 0, sidebar: :profiles, page_title: "Profiles")}
   end
 
+  def handle_event("view-row", %{"id" => id}, socket) do
+    send_update(HousingAppWeb.Components.Drawer.Profile, id: "drawer-right", profile_id: id)
+    {:noreply, socket}
+  end
+
   def handle_event(
         "load-data",
         %{},
@@ -47,7 +54,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
           "id" => p.id,
           "name" => p.user_tenant.user.name,
           "email" => p.user_tenant.user.email,
-          "actions" => [["Edit", ~p"/profiles/#{p.id}/edit"]]
+          "actions" => [["Edit", ~p"/profiles/#{p.id}/edit"], ["View", ""]]
         }
       end)
 
@@ -59,7 +66,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
         %{
           field: "actions",
           pinned: "right",
-          maxWidth: 90,
+          maxWidth: 120,
           filter: false,
           editable: false,
           sortable: false,
