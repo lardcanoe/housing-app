@@ -343,7 +343,7 @@ defmodule HousingAppWeb.CoreComponents do
 
     ~H"""
     <div phx-feedback-for={@name} class="mb-5">
-      <div class="flex items-center w-20">
+      <div class="flex items-center">
         <input type="hidden" name={@name} value="false" />
         <input
           type="checkbox"
@@ -560,7 +560,13 @@ defmodule HousingAppWeb.CoreComponents do
               class="w-full md:w-auto flex items-center justify-center py-2 px-4 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
               type="button"
             >
-              <svg class="-ml-1 mr-1.5 w-5 h-5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <svg
+                class="-ml-1 mr-1.5 w-5 h-5"
+                fill="currentColor"
+                viewbox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
                 <path
                   clip-rule="evenodd"
                   fill-rule="evenodd"
@@ -569,10 +575,15 @@ defmodule HousingAppWeb.CoreComponents do
               </svg>
               Actions
             </button>
-            <div id="actionsDropdown" class="hidden z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600">
+            <div
+              id="actionsDropdown"
+              class="hidden z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600"
+            >
               <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="actionsDropdownButton">
                 <li>
-                  <a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Mass Edit</a>
+                  <a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                    Mass Edit
+                  </a>
                 </li>
               </ul>
               <div class="py-1">
@@ -590,7 +601,13 @@ defmodule HousingAppWeb.CoreComponents do
               class="w-full md:w-auto flex items-center justify-center py-2 px-4 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
               type="button"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 mr-2 text-gray-400" viewbox="0 0 20 20" fill="currentColor">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                class="h-4 w-4 mr-2 text-gray-400"
+                viewbox="0 0 20 20"
+                fill="currentColor"
+              >
                 <path
                   fill-rule="evenodd"
                   d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
@@ -598,7 +615,13 @@ defmodule HousingAppWeb.CoreComponents do
                 />
               </svg>
               Filter
-              <svg class="-mr-1 ml-1.5 w-5 h-5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <svg
+                class="-mr-1 ml-1.5 w-5 h-5"
+                fill="currentColor"
+                viewbox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
                 <path
                   clip-rule="evenodd"
                   fill-rule="evenodd"
@@ -625,7 +648,9 @@ defmodule HousingAppWeb.CoreComponents do
                     value=""
                     class="w-4 h-4 bg-gray-100 border-gray-300 rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
                   />
-                  <label for="fitbit" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100">Microsoft (16)</label>
+                  <label for="fitbit" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Microsoft (16)
+                  </label>
                 </li>
                 <li class="flex items-center">
                   <input
@@ -674,7 +699,11 @@ defmodule HousingAppWeb.CoreComponents do
               <td
                 :for={{col, i} <- Enum.with_index(@col)}
                 phx-click={@row_click && @row_click.(row)}
-                class={["px-4 py-3", @row_click && "hover:cursor-pointer", i == 0 && "font-medium text-gray-900 whitespace-nowrap dark:text-white"]}
+                class={[
+                  "px-4 py-3",
+                  @row_click && "hover:cursor-pointer",
+                  i == 0 && "font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                ]}
               >
                 <%= render_slot(col, @row_item.(row)) %>
               </td>
@@ -685,7 +714,13 @@ defmodule HousingAppWeb.CoreComponents do
                   class="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100"
                   type="button"
                 >
-                  <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <svg
+                    class="w-5 h-5"
+                    aria-hidden="true"
+                    fill="currentColor"
+                    viewbox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
                     <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
                   </svg>
                 </button>
@@ -693,7 +728,10 @@ defmodule HousingAppWeb.CoreComponents do
                   id={@row_id && "#{@row_id.(row)}-dropdown"}
                   class="hidden z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600"
                 >
-                  <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby={@row_id && "#{@row_id.(row)}-dropdown-button"}>
+                  <ul
+                    class="py-1 text-sm text-gray-700 dark:text-gray-200"
+                    aria-labelledby={@row_id && "#{@row_id.(row)}-dropdown-button"}
+                  >
                     <li :for={action <- @action}>
                       <%= render_slot(action, @row_item.(row)) %>
                     </li>
@@ -720,7 +758,13 @@ defmodule HousingAppWeb.CoreComponents do
               class="flex items-center justify-center h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
             >
               <span class="sr-only">Previous</span>
-              <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                class="w-5 h-5"
+                aria-hidden="true"
+                fill="currentColor"
+                viewbox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   fill-rule="evenodd"
                   d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
@@ -776,7 +820,13 @@ defmodule HousingAppWeb.CoreComponents do
               class="flex items-center justify-center h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
             >
               <span class="sr-only">Next</span>
-              <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                class="w-5 h-5"
+                aria-hidden="true"
+                fill="currentColor"
+                viewbox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   fill-rule="evenodd"
                   d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"

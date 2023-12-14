@@ -5,14 +5,19 @@ defmodule HousingAppWeb.Live.Reporting.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Reporting</h1>
-
-    <div id="ag-data-grid" style="width: 100%; height: 400px;" class="ag-theme-quartz-dark" phx-hook="AgGrid"></div>
+    <.data_grid
+      id="ag-data-grid"
+      header="Reporting"
+      count={@count}
+      loading={@loading}
+      current_user_tenant={@current_user_tenant}
+    >
+    </.data_grid>
     """
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, sidebar: :reporting, page_title: "Reporting Dashboard")}
+    {:ok, assign(socket, count: 0, loading: true, sidebar: :reporting, page_title: "Reporting Dashboard")}
   end
 
   def handle_params(params, _url, socket) do
@@ -28,6 +33,6 @@ defmodule HousingAppWeb.Live.Reporting.Index do
          %{make: "Ford", model: "Mondeo", price: 32_000},
          %{make: "Porsche", model: "Boxter", price: 72_000}
        ]
-     }, socket}
+     }, assign(socket, loading: false, count: 3)}
   end
 end
