@@ -4,7 +4,7 @@ defmodule HousingAppWeb.Live.Forms.View do
 
   def render(%{live_action: :view} = assigns) do
     ~H"""
-    <.json_form for={@form} json_schema={@json_schema} />
+    <.json_form form={@form} json_schema={@json_schema} />
     """
   end
 

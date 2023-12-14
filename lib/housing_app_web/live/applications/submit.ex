@@ -5,7 +5,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
   def render(%{live_action: :submit} = assigns) do
     ~H"""
-    <.json_form for={@form} json_schema={@json_schema} />
+    <.json_form form={@form} json_schema={@json_schema} />
     """
   end
 

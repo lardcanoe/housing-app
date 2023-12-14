@@ -224,12 +224,12 @@ defmodule HousingAppWeb.CoreComponents do
     """
   end
 
-  attr :for, :any, required: true, doc: "the datastructure for the form"
+  attr :form, :any, required: true, doc: "the datastructure for the form"
   attr :json_schema, :map, required: true, doc: "the json schema"
 
   def json_form(assigns) do
     ~H"""
-    <.simple_form for={@for} phx-change="validate" phx-submit="submit" autocomplete="off">
+    <.simple_form for={@form} phx-change="validate" phx-submit="submit" autocomplete="off">
       <h1
         :if={!is_nil(@json_schema["title"]) && @json_schema["title"] != ""}
         class="mb-4 text-xl font-bold text-gray-900 dark:text-white"
@@ -237,7 +237,7 @@ defmodule HousingAppWeb.CoreComponents do
         <%= @json_schema["title"] %>
       </h1>
 
-      <%= render_schema(%{definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema), for: @for}) %>
+      <%= render_schema(%{definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema), form: @form}) %>
 
       <:actions>
         <.button>Submit</.button>
@@ -257,9 +257,11 @@ defmodule HousingAppWeb.CoreComponents do
           >
             <%= definition.title %>
           </h3>
-          <%= render_schema(%{definitions: definition.definitions, for: @for}) %>
+          <%= Phoenix.HTML.Form.inputs_for @form, definition.key, fn fp -> %>
+            <%= render_schema(%{definitions: definition.definitions, form: fp}) %>
+          <% end %>
         <% _ -> %>
-          <.input field={@for[String.to_atom(definition.name)]} data-lpignore="true" {definition} />
+          <.input field={@form[definition.key]} data-lpignore="true" {definition |> Map.delete(:key)} />
       <% end %>
     <% end %>
     """

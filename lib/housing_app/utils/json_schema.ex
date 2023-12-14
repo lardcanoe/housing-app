@@ -66,8 +66,6 @@ defmodule HousingApp.Utils.JsonSchema do
   def to_html_form_inputs(%{}, _name_prefix), do: []
 
   defp to_html_input(key, value, name_prefix) do
-    # IO.inspect(value, label: key)
-
     title =
       HousingApp.Utils.String.titlize(value["title"]) || value["description"] || HousingApp.Utils.String.titlize(key)
 
@@ -78,8 +76,16 @@ defmodule HousingApp.Utils.JsonSchema do
         "#{name_prefix}[#{key}]"
       end
 
-    id_prefix = name_prefix |> String.replace(["[", "]"], "")
+    id_prefix =
+      if name_prefix == "" do
+        ""
+      else
+        (name_prefix |> String.replace(["[", "]"], "")) <> "-"
+      end
+
     id = String.replace("#{id_prefix}#{key}", ".", "-") <> "-field"
+
+    key = String.to_atom(key)
 
     case value do
       %{"type" => "string", "template" => template} when is_binary(template) and template != "" ->
@@ -88,6 +94,7 @@ defmodule HousingApp.Utils.JsonSchema do
       %{"type" => "string", "enum" => enum} when is_list(enum) ->
         %{
           type: "select",
+          key: key,
           name: name,
           id: id,
           label: title,
@@ -97,6 +104,7 @@ defmodule HousingApp.Utils.JsonSchema do
       %{"type" => "string"} ->
         %{
           type: value["format"] || "text",
+          key: key,
           name: name,
           id: id,
           label: title,
@@ -105,13 +113,13 @@ defmodule HousingApp.Utils.JsonSchema do
         }
 
       %{"type" => "integer"} ->
-        %{type: "number", name: name, id: id, label: title, min: value["minimum"], max: value["maximum"]}
+        %{type: "number", key: key, name: name, id: id, label: title, min: value["minimum"], max: value["maximum"]}
 
       %{"type" => "boolean"} ->
-        %{type: "checkbox", name: name, id: id, label: title}
+        %{type: "checkbox", key: key, name: name, id: id, label: title}
 
       %{"type" => "object"} ->
-        %{type: "object", title: title, definitions: to_html_form_inputs(value, name)}
+        %{type: "object", key: key, id: id, title: title, definitions: to_html_form_inputs(value, name)}
 
       _ ->
         nil
@@ -312,7 +320,7 @@ defmodule HousingApp.Utils.JsonSchema do
     params = %{name: "Callum", email: "callum@example.com", age: "27"}
     param_strings = params |> Enum.reduce(%{}, fn {key, value}, acc -> Map.put(acc, to_string(key), value) end)
 
-    ExJsonSchema.Validator.validate(schema, param_strings) |> IO.inspect()
+    ExJsonSchema.Validator.validate(schema, param_strings)
 
     {data, types}
     |> Ecto.Changeset.cast(params, Map.keys(types))

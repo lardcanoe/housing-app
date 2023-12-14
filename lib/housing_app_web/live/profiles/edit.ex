@@ -3,12 +3,7 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
 
   def render(%{live_action: :edit} = assigns) do
     ~H"""
-    <div class="bg-white dark:bg-white">
-      <div id="json-schema-form" phx-hook="JSONSchemaForm" />
-      <.button id="json-schema-form-submit" type="submit">
-        Save
-      </.button>
-    </div>
+    <.json_form form={@form} json_schema={@json_schema} />
     """
   end
 
@@ -36,31 +31,46 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
             _ -> nil
           end
 
-        form = HousingApp.Management.Form.get_by_id!(profile_form_id, actor: current_user_tenant, tenant: tenant)
+        profile_form =
+          HousingApp.Management.Form.get_by_id!(profile_form_id, actor: current_user_tenant, tenant: tenant)
 
         {:ok,
          assign(socket,
-           json_schema: form.json_schema |> Jason.decode!(),
+           json_schema: profile_form.json_schema |> Jason.decode!(),
            profile: profile,
+           form: profile.data |> to_form(as: "profile"),
            sidebar: :profiles,
            page_title: "Edit Profile"
          )}
     end
   end
 
-  def handle_event("load-schema", _params, socket) do
-    {:reply, %{schema: socket.assigns.json_schema, data: socket.assigns.profile.data}, socket}
+  def handle_event("validate", _params, socket) do
+    {:noreply, socket}
   end
 
-  def handle_event("submit", data, socket) do
-    ref_schema = ExJsonSchema.Schema.resolve(socket.assigns.json_schema)
+  def handle_event(
+        "submit",
+        data,
+        %{
+          assigns: %{
+            json_schema: json_schema,
+            profile: profile,
+            current_user_tenant: current_user_tenant,
+            current_tenant: tenant
+          }
+        } = socket
+      ) do
+    data = HousingApp.Utils.JsonSchema.cast_params(json_schema, data)
+
+    ref_schema = ExJsonSchema.Schema.resolve(json_schema)
 
     case ExJsonSchema.Validator.validate(ref_schema, data) do
       :ok ->
-        socket.assigns.profile
+        profile
         |> HousingApp.Management.Profile.submit(%{data: data},
-          actor: socket.assigns.current_user_tenant,
-          tenant: socket.assigns.current_tenant
+          actor: current_user_tenant,
+          tenant: tenant
         )
 
         {:noreply,
