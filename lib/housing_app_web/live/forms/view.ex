@@ -4,14 +4,7 @@ defmodule HousingAppWeb.Live.Forms.View do
 
   def render(%{live_action: :view} = assigns) do
     ~H"""
-    <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">View Form</h1>
-
-    <div class="bg-white dark:bg-white">
-      <div id="json-schema-form" phx-hook="JSONSchemaForm" />
-      <.button id="json-schema-form-submit" phx-update="ignore">
-        Save
-      </.button>
-    </div>
+    <.json_form for={@form} json_schema={@json_schema} />
     """
   end
 
@@ -33,14 +26,15 @@ defmodule HousingAppWeb.Live.Forms.View do
          assign(socket,
            form_id: id,
            json_schema: form.json_schema |> Jason.decode!(),
+           form: %{} |> to_form(),
            sidebar: :forms,
            page_title: "View Form"
          )}
     end
   end
 
-  def handle_event("load-schema", _params, socket) do
-    {:reply, %{schema: socket.assigns.json_schema}, socket}
+  def handle_event("validate", _params, socket) do
+    {:noreply, socket}
   end
 
   def handle_event(
@@ -48,6 +42,8 @@ defmodule HousingAppWeb.Live.Forms.View do
         data,
         %{assigns: %{form_id: form_id, current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
+    data = HousingApp.Utils.JsonSchema.cast_params(socket.assigns.json_schema, data)
+
     ref_schema = ExJsonSchema.Schema.resolve(socket.assigns.json_schema)
 
     case ExJsonSchema.Validator.validate(ref_schema, data) do
@@ -58,7 +54,11 @@ defmodule HousingAppWeb.Live.Forms.View do
              ) do
           {:error, errors} ->
             IO.inspect(errors)
-            {:noreply, socket |> put_flash(:error, "Error submitting")}
+
+            {:noreply,
+             socket
+             |> assign(form: data |> to_form())
+             |> put_flash(:error, "Error submitting")}
 
           {:ok, _submission} ->
             {:noreply,
@@ -69,8 +69,11 @@ defmodule HousingAppWeb.Live.Forms.View do
 
       {:error, errors} ->
         IO.inspect(errors)
-        # |> put_flash(:error, "Errors present in form submission.")}
-        {:noreply, socket}
+
+        {:noreply,
+         socket
+         |> assign(form: data |> to_form())
+         |> put_flash(:error, "Errors present in form submission.")}
     end
   end
 end

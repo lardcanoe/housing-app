@@ -57,6 +57,11 @@ defmodule HousingApp.Management.Application do
       attribute_writable? true
       allow_nil? false
     end
+
+    has_many :submissions, HousingApp.Management.ApplicationSubmission do
+      source_attribute :id
+      destination_attribute :application_id
+    end
   end
 
   policies do
@@ -87,7 +92,7 @@ defmodule HousingApp.Management.Application do
     read :list do
       prepare build(
                 select: [:id, :name, :type, :description, :status, :form_id],
-                load: [:form],
+                load: [:form, :count_of_submissions],
                 sort: [:name]
               )
 
@@ -112,7 +117,7 @@ defmodule HousingApp.Management.Application do
 
       prepare build(
                 select: [:id, :name, :type, :description, :status, :form_id],
-                load: [:form],
+                load: [:form, :count_of_submissions],
                 sort: [:name]
               )
 
@@ -126,7 +131,7 @@ defmodule HousingApp.Management.Application do
 
       get? true
 
-      prepare build(load: [:form])
+      prepare build(load: [:form, :count_of_submissions])
 
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
@@ -156,6 +161,12 @@ defmodule HousingApp.Management.Application do
     define :list_by_type, args: [:type]
     define :get_by_id, args: [:id]
     define :get_types
+  end
+
+  aggregates do
+    count :count_of_submissions, :submissions do
+      filter expr(is_nil(archived_at))
+    end
   end
 
   multitenancy do

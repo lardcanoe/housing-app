@@ -1,4 +1,4 @@
-defmodule HousingApp.Management.FormSubmission do
+defmodule HousingApp.Management.ApplicationSubmission do
   @moduledoc false
 
   use Ash.Resource,
@@ -40,7 +40,7 @@ defmodule HousingApp.Management.FormSubmission do
       allow_nil? false
     end
 
-    belongs_to :form, HousingApp.Management.Form do
+    belongs_to :application, HousingApp.Management.Application do
       attribute_writable? true
       allow_nil? false
     end
@@ -48,7 +48,7 @@ defmodule HousingApp.Management.FormSubmission do
 
   # policies do
   #   bypass always() do
-  #     authorize_if HousingApp.Checks.IsPlatformAdmin
+  #     authorize_if HousingApp.Checks.IsPlatapplicationAdmin
   #     authorize_if HousingApp.Checks.IsTenantAdmin
   #   end
 
@@ -58,7 +58,7 @@ defmodule HousingApp.Management.FormSubmission do
   # end
 
   postgres do
-    table "form_submissions"
+    table "application_submissions"
     repo HousingApp.Repo
 
     custom_indexes do
@@ -66,7 +66,7 @@ defmodule HousingApp.Management.FormSubmission do
     end
 
     custom_indexes do
-      index [:form_id]
+      index [:application_id]
     end
 
     custom_indexes do
@@ -78,20 +78,20 @@ defmodule HousingApp.Management.FormSubmission do
     defaults [:create, :read, :update, :destroy]
 
     create :submit do
-      accept [:form_id, :data]
+      accept [:application_id, :data]
 
       change set_attribute(:tenant_id, actor(:tenant_id))
       change set_attribute(:user_tenant_id, actor(:id))
     end
 
-    read :list_by_form do
-      argument :form_id, :uuid do
+    read :list_by_application do
+      argument :application_id, :uuid do
         allow_nil? false
       end
 
       prepare build(load: [user_tenant: [:user]])
 
-      filter expr(form_id == ^arg(:form_id) and is_nil(archived_at))
+      filter expr(application_id == ^arg(:application_id) and is_nil(archived_at))
     end
 
     # read :get_by_id do
@@ -109,7 +109,7 @@ defmodule HousingApp.Management.FormSubmission do
     define_for HousingApp.Management
 
     define :submit
-    define :list_by_form, args: [:form_id]
+    define :list_by_application, args: [:application_id]
     # define :get_by_id, args: [:id]
   end
 

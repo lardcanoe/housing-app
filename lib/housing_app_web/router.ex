@@ -64,6 +64,7 @@ defmodule HousingAppWeb.Router do
         live "/new", New, :new
         live "/:id/edit", Edit, :edit
         live "/:id", Submit, :submit
+        live "/:id/submissions", Submissions, :submissions
       end
 
       scope "/accounting", Live.Accounting do

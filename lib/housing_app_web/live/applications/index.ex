@@ -59,12 +59,25 @@ defmodule HousingAppWeb.Live.Applications.Index do
       <:col :let={application} label="form">
         <.link patch={~p"/applications/#{application.form_id}/edit"}><%= application.form.name %></.link>
       </:col>
+      <:col :let={application} label="Submissions">
+        <.link patch={~p"/applications/#{application.id}/submissions"}>
+          <%= application.count_of_submissions %>
+        </.link>
+      </:col>
       <:action :let={application}>
         <.link
           patch={~p"/applications/#{application.id}/edit"}
           class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
         >
           Edit
+        </.link>
+      </:action>
+      <:action :let={application}>
+        <.link
+          patch={~p"/applications/#{application.id}/submissions"}
+          class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+        >
+          View submissions
         </.link>
       </:action>
     </.table>

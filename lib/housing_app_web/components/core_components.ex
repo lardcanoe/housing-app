@@ -224,6 +224,47 @@ defmodule HousingAppWeb.CoreComponents do
     """
   end
 
+  attr :for, :any, required: true, doc: "the datastructure for the form"
+  attr :json_schema, :map, required: true, doc: "the json schema"
+
+  def json_form(assigns) do
+    ~H"""
+    <.simple_form for={@for} phx-change="validate" phx-submit="submit" autocomplete="off">
+      <h1
+        :if={!is_nil(@json_schema["title"]) && @json_schema["title"] != ""}
+        class="mb-4 text-xl font-bold text-gray-900 dark:text-white"
+      >
+        <%= @json_schema["title"] %>
+      </h1>
+
+      <%= render_schema(%{definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema), for: @for}) %>
+
+      <:actions>
+        <.button>Submit</.button>
+      </:actions>
+    </.simple_form>
+    """
+  end
+
+  defp render_schema(assigns) do
+    ~H"""
+    <%= for definition <- @definitions do %>
+      <%= case definition.type do %>
+        <% "object" -> %>
+          <h3
+            :if={!is_nil(definition.title) && definition.title != ""}
+            class="mb-4 text-base font-bold text-gray-900 dark:text-white"
+          >
+            <%= definition.title %>
+          </h3>
+          <%= render_schema(%{definitions: definition.definitions, for: @for}) %>
+        <% _ -> %>
+          <.input field={@for[String.to_atom(definition.name)]} data-lpignore="true" {definition} />
+      <% end %>
+    <% end %>
+    """
+  end
+
   @doc """
   Renders a button.
   https://flowbite.com/docs/components/buttons/
@@ -433,7 +474,7 @@ defmodule HousingAppWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+    <label for={@for} class="required block mb-2 text-sm font-medium text-gray-900 dark:text-white">
       <%= render_slot(@inner_block) %>
     </label>
     """

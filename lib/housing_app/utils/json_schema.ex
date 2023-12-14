@@ -3,43 +3,52 @@ defmodule HousingApp.Utils.JsonSchema do
 
   # https://www.ag-grid.com/javascript-data-grid/column-definitions/
 
-  def schema_to_aggrid_columns(schema, prefix \\ "") do
-    schema
-    |> Map.get("properties")
+  def schema_to_aggrid_columns(scheman, prefix \\ "")
+
+  def schema_to_aggrid_columns(%{"properties" => properties}, prefix) when not is_nil(properties) do
+    properties
     |> Enum.map(fn {key, value} ->
       case value do
         %{"type" => "integer"} ->
-          %{field: "#{prefix}#{key}", type: "numericColumn", headerName: Map.get(value, "title", key)}
+          %{
+            field: "#{prefix}#{key}",
+            type: "numericColumn",
+            headerName: Map.get(value, "title", key) |> HousingApp.Utils.String.titlize()
+          }
 
         %{"type" => "string", "format" => "date"} ->
           %{
             field: "#{prefix}#{key}",
             type: ["dateColumn", "nonEditableColumn"],
             width: 220,
-            headerName: Map.get(value, "title", key)
+            headerName: Map.get(value, "title", key) |> HousingApp.Utils.String.titlize()
           }
 
         %{"type" => "object"} ->
           %{
             field: "#{prefix}#{key}",
             groupId: "#{prefix}#{key}Group",
-            headerName: Map.get(value, "title", key),
+            headerName: Map.get(value, "title", key) |> HousingApp.Utils.String.titlize(),
             children: schema_to_aggrid_columns(value, "#{prefix}#{key}.")
           }
 
         _ ->
-          %{field: "#{prefix}#{key}", headerName: Map.get(value, "title", key)}
+          %{field: "#{prefix}#{key}", headerName: Map.get(value, "title", key) |> HousingApp.Utils.String.titlize()}
       end
     end)
   end
 
-  def to_html_form_inputs(schema) do
+  def schema_to_aggrid_columns(%{}, _prefix), do: []
+
+  def to_html_form_inputs(schema, name_prefix \\ "")
+
+  def to_html_form_inputs(%{"properties" => properties} = schema, name_prefix) when not is_nil(properties) do
     required = MapSet.new(schema["required"] || [])
 
-    schema["properties"]
+    properties
     |> Enum.sort_by(fn {_, prop} -> prop["propertyOrder"] || 1000 end)
     |> Enum.map(fn {key, value} ->
-      prop = to_html_input(key, value)
+      prop = to_html_input(key, value, name_prefix)
 
       if is_nil(prop) do
         nil
@@ -54,52 +63,69 @@ defmodule HousingApp.Utils.JsonSchema do
     |> Enum.reject(&is_nil/1)
   end
 
-  defp to_html_input(key, value) do
+  def to_html_form_inputs(%{}, _name_prefix), do: []
+
+  defp to_html_input(key, value, name_prefix) do
     # IO.inspect(value, label: key)
 
     title =
       HousingApp.Utils.String.titlize(value["title"]) || value["description"] || HousingApp.Utils.String.titlize(key)
 
-    case Map.get(value, "type") do
-      "string" ->
-        if value["enum"] do
-          %{
-            type: "select",
-            name: key,
-            id: key,
-            label: title,
-            options: value["enum"] |> Enum.map(fn v -> {v, v} end)
-          }
-        else
-          %{
-            type: value["format"] || "text",
-            name: key,
-            id: key,
-            label: title,
-            minlength: value["minLength"],
-            maxlength: value["maxLength"]
-          }
-        end
+    name =
+      if name_prefix == "" do
+        key
+      else
+        "#{name_prefix}[#{key}]"
+      end
 
-      "integer" ->
-        %{type: "number", name: key, id: key, label: title, min: value["minimum"], max: value["maximum"]}
+    id_prefix = name_prefix |> String.replace(["[", "]"], "")
+    id = String.replace("#{id_prefix}#{key}", ".", "-") <> "-field"
 
-      "boolean" ->
-        %{type: "checkbox", name: key, id: key, label: title}
+    case value do
+      %{"type" => "string", "template" => template} when is_binary(template) and template != "" ->
+        nil
 
-      "object" ->
-        %{type: "object", title: title, definitions: to_html_form_inputs(value)}
+      %{"type" => "string", "enum" => enum} when is_list(enum) ->
+        %{
+          type: "select",
+          name: name,
+          id: id,
+          label: title,
+          options: enum |> Enum.map(fn v -> {v, v} end)
+        }
+
+      %{"type" => "string"} ->
+        %{
+          type: value["format"] || "text",
+          name: name,
+          id: id,
+          label: title,
+          minlength: value["minLength"],
+          maxlength: value["maxLength"]
+        }
+
+      %{"type" => "integer"} ->
+        %{type: "number", name: name, id: id, label: title, min: value["minimum"], max: value["maximum"]}
+
+      %{"type" => "boolean"} ->
+        %{type: "checkbox", name: name, id: id, label: title}
+
+      %{"type" => "object"} ->
+        %{type: "object", title: title, definitions: to_html_form_inputs(value, name)}
 
       _ ->
         nil
     end
   end
 
-  def extract_properties(schema) do
-    schema["properties"]
+  def extract_properties(%{"properties" => properties}) when is_map(properties) do
+    properties
     |> Enum.reduce(%{}, fn {key, value}, acc ->
-      case Map.get(value, "type") do
-        type when type == "string" or type == "integer" or type == "boolean" ->
+      case value do
+        %{"template" => template} when is_binary(template) and template != "" ->
+          acc
+
+        %{"type" => type} when type == "string" or type == "integer" or type == "boolean" ->
           Map.put(acc, String.to_atom(key), String.to_atom(type))
 
         _ ->
@@ -108,28 +134,39 @@ defmodule HousingApp.Utils.JsonSchema do
     end)
   end
 
-  def cast_params(schema, params) do
-    types =
-      schema["properties"]
-      |> Enum.reduce(%{}, fn {key, value}, acc ->
-        case Map.get(value, "type") do
-          type when type == "string" or type == "integer" or type == "boolean" ->
-            Map.put(acc, String.to_atom(key), String.to_atom(type))
+  def extract_properties(%{}), do: []
 
-          _ ->
-            acc
-        end
-      end)
+  def cast_params(%{"properties" => properties} = schema, params) when is_map(properties) do
+    types = extract_properties(schema)
 
     changeset =
       {%{}, types}
       |> Ecto.Changeset.cast(params, Map.keys(types))
 
-    changeset.changes
-    |> Enum.reduce(%{}, fn {key, value}, acc ->
-      Map.put(acc, Atom.to_string(key), value)
-    end)
+    converted =
+      changeset.changes
+      |> Enum.reduce(%{}, fn {key, value}, acc ->
+        Map.put(acc, Atom.to_string(key), value)
+      end)
+
+    nested =
+      properties
+      |> Enum.map(fn {key, value} ->
+        case Map.get(value, "type") do
+          "object" ->
+            {key, cast_params(value, params[key])}
+
+          _ ->
+            nil
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+      |> Map.new()
+
+    Map.merge(converted, nested)
   end
+
+  def cast_params(%{}, _params), do: %{}
 
   def validate_against_schema() do
     schema =
@@ -263,7 +300,6 @@ defmodule HousingApp.Utils.JsonSchema do
             acc
         end
       end)
-      |> IO.inspect()
 
     data = %{}
 

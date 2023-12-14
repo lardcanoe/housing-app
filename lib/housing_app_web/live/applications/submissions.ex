@@ -1,4 +1,4 @@
-defmodule HousingAppWeb.Live.Forms.Submissions do
+defmodule HousingAppWeb.Live.Applications.Submissions do
   @moduledoc false
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
@@ -7,7 +7,7 @@ defmodule HousingAppWeb.Live.Forms.Submissions do
     ~H"""
     <.data_grid
       id="ag-data-grid"
-      header="Form Submissions"
+      header="Application Submissions"
       count={@count}
       loading={@loading}
       current_user_tenant={@current_user_tenant}
@@ -21,16 +21,24 @@ defmodule HousingAppWeb.Live.Forms.Submissions do
         _session,
         %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
-    case HousingApp.Management.Form.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
+    case HousingApp.Management.Application.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
          socket
-         |> assign(sidebar: :forms)
+         |> assign(sidebar: :applications)
          |> put_flash(:error, "Not found")
-         |> push_navigate(to: ~p"/forms")}
+         |> push_navigate(to: ~p"/applications")}
 
-      {:ok, form} ->
-        {:ok, socket |> assign(form: form, count: 0, loading: true, sidebar: :forms, page_title: "Form Submissions")}
+      {:ok, application} ->
+        {:ok,
+         socket
+         |> assign(
+           application: application,
+           count: 0,
+           loading: true,
+           sidebar: :applications,
+           page_title: "Application Submissions"
+         )}
     end
   end
 
@@ -41,9 +49,10 @@ defmodule HousingAppWeb.Live.Forms.Submissions do
   def handle_event(
         "load-data",
         %{},
-        %{assigns: %{form: form, current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+        %{assigns: %{application: application, current_user_tenant: current_user_tenant, current_tenant: tenant}} =
+          socket
       ) do
-    schema = form.json_schema |> Jason.decode!()
+    schema = application.form.json_schema |> Jason.decode!()
 
     columns =
       [
@@ -55,7 +64,10 @@ defmodule HousingAppWeb.Live.Forms.Submissions do
         }
       ] ++ HousingApp.Utils.JsonSchema.schema_to_aggrid_columns(schema)
 
-    case HousingApp.Management.FormSubmission.list_by_form(form.id, actor: current_user_tenant, tenant: tenant) do
+    case HousingApp.Management.ApplicationSubmission.list_by_application(application.id,
+           actor: current_user_tenant,
+           tenant: tenant
+         ) do
       {:ok, submissions} ->
         data =
           submissions
