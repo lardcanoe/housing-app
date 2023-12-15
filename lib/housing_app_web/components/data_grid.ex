@@ -117,14 +117,7 @@ defmodule HousingAppWeb.Components.DataGrid do
           </div>
 
           <div class="dashboard-area-height mt-2">
-            <div
-              id={@id}
-              style="width: 100%; height: 100%;"
-              class="ag-theme-quartz-dark"
-              aria-multiselectable="true"
-              phx-hook="AgGrid"
-            >
-            </div>
+            <div id={@id} style="width: 100%; height: 100%;" aria-multiselectable="true" phx-hook="AgGrid"></div>
           </div>
         </div>
       </div>

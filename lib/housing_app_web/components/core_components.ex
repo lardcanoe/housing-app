@@ -190,6 +190,7 @@ defmodule HousingAppWeb.CoreComponents do
   attr :for, :any, required: true, doc: "the datastructure for the form"
   attr :as, :any, default: nil, doc: "the server side parameter to collect all input under"
   attr :class, :string, default: nil
+  attr :autowidth, :boolean, default: true, doc: "the autowidth flag"
 
   attr :rest, :global,
     include: ~w(autocomplete name rel action enctype method novalidate target multipart),
@@ -207,7 +208,7 @@ defmodule HousingAppWeb.CoreComponents do
       as={@as}
       {@rest}
       class={[
-        "max-w-sm mx-auto",
+        @autowidth && "max-w-sm mx-auto",
         @class
       ]}
     >

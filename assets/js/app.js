@@ -23,6 +23,7 @@ import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import "flowbite/dist/flowbite.phoenix.js"
 import AgGrid from "./hooks/ag-grid"
+import './darkmode'
 
 // FUTURE: Load hooks dynamically, https://aswinmohan.me/pagewise-js-liveview
 let Hooks = {}

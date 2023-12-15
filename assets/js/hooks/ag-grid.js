@@ -126,17 +126,15 @@ export default {
             rowData: []
         };
 
-        // setup the grid after the page has finished loading
-        const gridDiv = document.querySelector('#ag-data-grid');
-        this.gridInstance = agGrid.createGrid(gridDiv, this.gridOptions);
+        this.setColorTheme();
 
-        window.addEventListener("view:clicked", (e) => {
-            this.pushEvent("view-row", { id: e.id });
-        });
+        this.gridInstance = agGrid.createGrid(this.el, this.gridOptions);
 
-        window.addEventListener("edit:clicked", (e) => {
-            this.pushEvent("edit-row", { id: e.id });
-        });
+        this.handleViewClick = (e) => { this.pushEvent("view-row", { id: e.id }) };
+        this.handleEditClick = (e) => { this.pushEvent("edit-row", { id: e.id }) };
+
+        window.addEventListener("view:clicked", this.handleViewClick);
+        window.addEventListener("edit:clicked", this.handleEditClick);
 
         this.pushEvent("load-data", {}, (reply, ref) => {
             reply.columns.forEach(c => {
@@ -151,17 +149,35 @@ export default {
             });
 
             // FUTURE: There is some bug that forces us to recreate instead of just update
-            const gridDiv = document.querySelector('#ag-data-grid');
+            this.setColorTheme();
             this.gridOptions.columnDefs = reply.columns
             this.gridOptions.rowData = reply.data
-            this.gridInstance = agGrid.createGrid(gridDiv, this.gridOptions);
+            this.gridInstance = agGrid.createGrid(this.el, this.gridOptions);
 
             // Ideally do this:
             // this.gridInstance.updateGridOptions({ columnDefs: reply.columns, rowData: reply.data });
         });
     },
 
+    setColorTheme() {
+        if (localStorage.getItem('color-theme')) {
+            if (localStorage.getItem('color-theme') === 'light') {
+                this.el.classList.add('ag-theme-quartz');
+            } else {
+                this.el.classList.add('ag-theme-quartz-dark');
+
+            }
+        } else if (document.documentElement.classList.contains('dark')) {
+            this.el.classList.add('ag-theme-quartz-dark');
+        } else {
+            this.el.classList.add('ag-theme-quartz');
+        }
+    },
+
     destroy() {
+        window.removeEventListener("view:clicked", this.handleViewClick);
+        window.removeEventListener("edit:clicked", this.handleEditClick);
+
         if (this.gridInstance) {
             this.gridInstance.destroy();
         }

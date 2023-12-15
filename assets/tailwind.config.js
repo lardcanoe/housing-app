@@ -13,6 +13,7 @@ export const content = [
   // './node_modules/@rjsf/**/*.{js,ts,jsx,tsx}',
   '../deps/ash_authentication_phoenix/**/*.ex'
 ]
+
 export const theme = {
   extend: {
     colors: {
@@ -21,6 +22,9 @@ export const theme = {
     }
   },
 }
+
+export const darkMode = 'class';
+
 export const plugins = [
   require("@tailwindcss/forms"),
   require('flowbite/plugin'),
@@ -71,6 +75,7 @@ export const plugins = [
     }, { values })
   })
 ]
+
 export const fontFamily = {
   'body': [
     'Inter',
