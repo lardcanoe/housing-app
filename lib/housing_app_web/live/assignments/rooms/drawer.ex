@@ -3,7 +3,7 @@ defmodule HousingAppWeb.Components.Drawer.Room do
 
   use HousingAppWeb, :live_component
 
-  import HousingAppWeb.CoreComponents, only: [icon: 1]
+  import HousingAppWeb.CoreComponents, only: [icon: 1, json_view: 1]
 
   attr :id, :string, required: true
   attr :current_user_tenant, :any, required: true
@@ -65,23 +65,32 @@ defmodule HousingAppWeb.Components.Drawer.Room do
           </dd>
         <% end %>
       </dl>
+
+      <.json_view :if={@json_schema} data={@room.data} json_schema={@json_schema} />
     </div>
     """
   end
 
   def mount(socket) do
-    {:ok, socket |> assign(room: nil, bookings: [])}
+    {:ok, socket |> assign(json_schema: nil, room: nil, bookings: [])}
   end
 
   def update(
         %{room_id: room_id},
         %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
-    case HousingApp.Assignments.Room.get_by_id(room_id, actor: current_user_tenant, tenant: tenant) do
-      {:ok, room} ->
-        bookings = HousingApp.Assignments.Booking.list_by_room!(room.id, actor: current_user_tenant, tenant: tenant)
-        {:ok, assign(socket, room: room, bookings: bookings)}
+    with {:ok, room} <-
+           HousingApp.Assignments.Room.get_by_id(room_id, actor: current_user_tenant, tenant: tenant),
+         bookings <-
+           HousingApp.Assignments.Booking.list_by_room!(room.id, actor: current_user_tenant, tenant: tenant) do
+      json_schema =
+        case HousingApp.Management.get_room_form(actor: current_user_tenant, tenant: tenant) do
+          {:ok, form} -> form.json_schema |> Jason.decode!()
+          {:error, _} -> nil
+        end
 
+      {:ok, assign(socket, json_schema: json_schema, room: room, bookings: bookings)}
+    else
       {:error, _} ->
         {:ok, assign(socket, room: nil, bookings: [])}
     end

@@ -67,9 +67,21 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
           "location" => p.location,
           "floors" => p.floors,
           "rooms" => p.rooms,
+          "data" => p.data,
           "actions" => [["Edit"], ["View"]]
         }
       end)
+
+    form_columns =
+      case HousingApp.Management.get_building_form(actor: current_user_tenant, tenant: tenant) do
+        {:ok, form} ->
+          form.json_schema
+          |> Jason.decode!()
+          |> HousingApp.Utils.JsonSchema.schema_to_aggrid_columns("data.")
+
+        _ ->
+          []
+      end
 
     columns =
       [
@@ -77,18 +89,21 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
         %{field: "id", minWidth: 120, pinned: "left", hide: true},
         %{field: "location"},
         %{field: "floors"},
-        %{field: "rooms"},
-        %{
-          field: "actions",
-          pinned: "right",
-          minWidth: 120,
-          maxWidth: 120,
-          filter: false,
-          editable: false,
-          sortable: false,
-          resizable: false
-        }
-      ]
+        %{field: "rooms"}
+      ] ++
+        form_columns ++
+        [
+          %{
+            field: "actions",
+            pinned: "right",
+            minWidth: 120,
+            maxWidth: 120,
+            filter: false,
+            editable: false,
+            sortable: false,
+            resizable: false
+          }
+        ]
 
     {:reply,
      %{

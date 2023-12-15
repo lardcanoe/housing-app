@@ -26,6 +26,10 @@ defmodule HousingApp.Management do
     get_form_for(:system, :profile_form_id, actor: current_user_tenant, tenant: tenant)
   end
 
+  def get_building_form(actor: current_user_tenant, tenant: tenant) do
+    get_form_for(:system, :building_form_id, actor: current_user_tenant, tenant: tenant)
+  end
+
   def get_room_form(actor: current_user_tenant, tenant: tenant) do
     get_form_for(:system, :room_form_id, actor: current_user_tenant, tenant: tenant)
   end

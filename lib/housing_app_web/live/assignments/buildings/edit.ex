@@ -5,12 +5,20 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Edit do
 
   def render(%{live_action: :edit} = assigns) do
     ~H"""
-    <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
+    <.simple_form :let={f} for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update building</h2>
       <.input field={@ash_form[:name]} label="Name" />
       <.input field={@ash_form[:location]} label="Location" />
       <.input type="number" field={@ash_form[:floors]} label="Floors" />
       <.input type="number" field={@ash_form[:rooms]} label="Rooms" />
+
+      <.json_form
+        :if={@json_schema}
+        form={%{"data" => f.data.data} |> to_form(as: "data")}
+        json_schema={@json_schema}
+        embed={true}
+      />
+
       <:actions>
         <.button>Save</.button>
       </:actions>
@@ -42,9 +50,16 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Edit do
           )
           |> to_form()
 
+        json_schema =
+          case HousingApp.Management.get_building_form(actor: current_user_tenant, tenant: tenant) do
+            {:ok, form} -> form.json_schema |> Jason.decode!()
+            {:error, _} -> nil
+          end
+
         {:ok,
          assign(socket,
            ash_form: ash_form,
+           json_schema: json_schema,
            sidebar: :assignments,
            page_title: "Edit Building"
          )}
@@ -56,9 +71,11 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Edit do
     {:noreply, assign(socket, ash_form: ash_form)}
   end
 
-  def handle_event("submit", %{"form" => params}, socket) do
+  def handle_event("submit", %{"form" => params, "data" => data}, socket) do
+    # TODO: Validate "data" against JSON schema of form
+
     with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
+         {:ok, _app} <- AshPhoenix.Form.submit(ash_form, override_params: %{"data" => data}) do
       {:noreply,
        socket
        |> put_flash(:info, "Successfully updated the building.")
