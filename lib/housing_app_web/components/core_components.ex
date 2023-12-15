@@ -268,6 +268,46 @@ defmodule HousingAppWeb.CoreComponents do
     """
   end
 
+  attr :data, :map, required: true, doc: "the data for viewing"
+  attr :json_schema, :map, required: true, doc: "the json schema"
+
+  def json_view(assigns) do
+    ~H"""
+    <dl>
+      <dt
+        :if={!is_nil(@json_schema["title"]) && @json_schema["title"] != ""}
+        class="mb-2 font-semibold leading-none text-gray-900 dark:text-white"
+      >
+        <%= @json_schema["title"] %>
+      </dt>
+      <%= render_json_view(%{definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema), data: @data}) %>
+    </dl>
+    """
+  end
+
+  defp render_json_view(assigns) do
+    ~H"""
+    <%= for definition <- @definitions do %>
+      <%= case definition.type do %>
+        <% "object" -> %>
+          <dt
+            :if={!is_nil(definition.title) && definition.title != ""}
+            class="mb-2 font-semibold leading-none text-gray-900 dark:text-white"
+          >
+            <%= definition.title %>
+          </dt>
+          <%= render_json_view(%{definitions: definition.definitions, data: @data[Atom.to_string(definition.key)]}) %>
+        <% _ -> %>
+          <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
+            <%= Atom.to_string(definition.key) |> HousingApp.Utils.String.titlize() %>: <%= @data[
+              Atom.to_string(definition.key)
+            ] %>
+          </dd>
+      <% end %>
+    <% end %>
+    """
+  end
+
   @doc """
   Renders a button.
   https://flowbite.com/docs/components/buttons/

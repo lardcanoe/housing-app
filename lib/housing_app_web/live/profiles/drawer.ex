@@ -3,7 +3,7 @@ defmodule HousingAppWeb.Components.Drawer.Profile do
 
   use HousingAppWeb, :live_component
 
-  import HousingAppWeb.CoreComponents, only: [icon: 1]
+  import HousingAppWeb.CoreComponents, only: [icon: 1, json_view: 1]
 
   attr :id, :string, required: true
   attr :current_user_tenant, :any, required: true
@@ -59,6 +59,8 @@ defmodule HousingAppWeb.Components.Drawer.Profile do
           </dd>
         <% end %>
       </dl>
+
+      <.json_view data={@profile.data} json_schema={@json_schema} />
     </div>
     """
   end
@@ -73,9 +75,11 @@ defmodule HousingAppWeb.Components.Drawer.Profile do
       ) do
     with {:ok, profile} <-
            HousingApp.Management.Profile.get_by_id(profile_id, actor: current_user_tenant, tenant: tenant),
+         {:ok, profile_form} <- HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant),
          bookings <-
            HousingApp.Assignments.Booking.list_by_profile!(profile.id, actor: current_user_tenant, tenant: tenant) do
-      {:ok, assign(socket, profile: profile, bookings: bookings)}
+      {:ok,
+       assign(socket, json_schema: profile_form.json_schema |> Jason.decode!(), profile: profile, bookings: bookings)}
     else
       {:error, _} ->
         {:ok, assign(socket, profile: nil, bookings: [])}

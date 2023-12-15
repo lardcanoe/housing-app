@@ -57,6 +57,7 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
     columns =
       [
         %{"field" => "metadata.user", "headerName" => "User", "pinned" => true},
+        %{"field" => "id", "headerName" => "Id", "pinned" => true, "hide" => true},
         %{
           "field" => "metadata.created_at",
           "headerName" => "Submitted At",
@@ -72,7 +73,10 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
         data =
           submissions
           |> Enum.map(
-            &Enum.into(&1.data, %{"metadata" => %{"created_at" => &1.created_at, "user" => &1.user_tenant.user.name}})
+            &Enum.into(&1.data, %{
+              "id" => &1.id,
+              "metadata" => %{"created_at" => &1.created_at, "user" => &1.user_tenant.user.name}
+            })
           )
 
         {:reply, %{columns: columns, data: data}, assign(socket, loading: false, count: length(data))}
