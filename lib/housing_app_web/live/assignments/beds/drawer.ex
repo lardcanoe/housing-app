@@ -3,7 +3,7 @@ defmodule HousingAppWeb.Components.Drawer.Bed do
 
   use HousingAppWeb, :live_component
 
-  import HousingAppWeb.CoreComponents, only: [icon: 1]
+  import HousingAppWeb.CoreComponents, only: [icon: 1, json_view: 1]
 
   attr :id, :string, required: true
   attr :current_user_tenant, :any, required: true
@@ -65,12 +65,14 @@ defmodule HousingAppWeb.Components.Drawer.Bed do
           </dd>
         <% end %>
       </dl>
+
+      <.json_view :if={@json_schema} data={@bed.data} json_schema={@json_schema} />
     </div>
     """
   end
 
   def mount(socket) do
-    {:ok, socket |> assign(bed: nil, bookings: [])}
+    {:ok, socket |> assign(json_schema: nil, bed: nil, bookings: [])}
   end
 
   def update(
@@ -80,7 +82,14 @@ defmodule HousingAppWeb.Components.Drawer.Bed do
     case HousingApp.Assignments.Bed.get_by_id(bed_id, actor: current_user_tenant, tenant: tenant) do
       {:ok, bed} ->
         bookings = HousingApp.Assignments.Booking.list_by_bed!(bed.id, actor: current_user_tenant, tenant: tenant)
-        {:ok, assign(socket, bed: bed, bookings: bookings)}
+
+        json_schema =
+          case HousingApp.Management.get_bed_form(actor: current_user_tenant, tenant: tenant) do
+            {:ok, form} -> form.json_schema |> Jason.decode!()
+            {:error, _} -> nil
+          end
+
+        {:ok, assign(socket, bed: bed, json_schema: json_schema, bookings: bookings)}
 
       {:error, _} ->
         {:ok, assign(socket, bed: nil, bookings: [])}
