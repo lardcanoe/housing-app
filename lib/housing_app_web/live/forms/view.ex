@@ -26,7 +26,7 @@ defmodule HousingAppWeb.Live.Forms.View do
          assign(socket,
            form_id: id,
            json_schema: form.json_schema |> Jason.decode!(),
-           form: %{} |> to_form(),
+           form: %{} |> to_form(as: "submit-form"),
            sidebar: :forms,
            page_title: "View Form"
          )}

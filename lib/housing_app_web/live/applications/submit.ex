@@ -29,7 +29,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
          assign(socket,
            application_id: app.id,
            json_schema: json_schema,
-           form: %{} |> to_form(),
+           form: %{} |> to_form(as: "submit-application"),
            sidebar: :applications,
            page_title: "Submit Application"
          )}
