@@ -75,6 +75,7 @@ defmodule HousingAppWeb.Live.Assignments.Beds.Index do
           field: "actions",
           pinned: "right",
           maxWidth: 120,
+          minWidth: 120,
           filter: false,
           editable: false,
           sortable: false,

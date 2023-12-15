@@ -69,6 +69,7 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
         %{
           field: "actions",
           pinned: "right",
+          minWidth: 120,
           maxWidth: 90,
           filter: false,
           editable: false,

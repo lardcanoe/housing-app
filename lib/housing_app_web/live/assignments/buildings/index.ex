@@ -81,6 +81,7 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
         %{
           field: "actions",
           pinned: "right",
+          minWidth: 120,
           maxWidth: 120,
           filter: false,
           editable: false,

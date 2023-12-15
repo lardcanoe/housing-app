@@ -12,36 +12,23 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
         _session,
         %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
-    case HousingApp.Management.Profile.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
+    with {:ok, profile} <- HousingApp.Management.Profile.get_by_id(id, actor: current_user_tenant, tenant: tenant),
+         {:ok, profile_form} <- HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
+      {:ok,
+       assign(socket,
+         json_schema: profile_form.json_schema |> Jason.decode!(),
+         profile: profile,
+         form: profile.data |> to_form(as: "profile"),
+         sidebar: :profiles,
+         page_title: "Edit Profile"
+       )}
+    else
       {:error, _} ->
         {:ok,
          socket
          |> assign(sidebar: :profiles)
          |> put_flash(:error, "Not found")
          |> push_navigate(to: ~p"/profiles")}
-
-      {:ok, profile} ->
-        profile_form_id =
-          case HousingApp.Management.TenantSetting.get_setting(:system, :profile_form_id,
-                 actor: current_user_tenant,
-                 tenant: tenant,
-                 not_found_error?: false
-               ) do
-            {:ok, setting} -> setting.value
-            _ -> nil
-          end
-
-        profile_form =
-          HousingApp.Management.Form.get_by_id!(profile_form_id, actor: current_user_tenant, tenant: tenant)
-
-        {:ok,
-         assign(socket,
-           json_schema: profile_form.json_schema |> Jason.decode!(),
-           profile: profile,
-           form: profile.data |> to_form(as: "profile"),
-           sidebar: :profiles,
-           page_title: "Edit Profile"
-         )}
     end
   end
 

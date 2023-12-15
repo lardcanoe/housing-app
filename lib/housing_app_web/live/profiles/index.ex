@@ -28,8 +28,18 @@ defmodule HousingAppWeb.Live.Profiles.Index do
     """
   end
 
-  def mount(_params, _session, socket) do
-    {:ok, assign(socket, loading: true, count: 0, sidebar: :profiles, page_title: "Profiles")}
+  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+    case HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
+      {:ok, profile_form} ->
+        {:ok,
+         assign(socket, profile_form: profile_form, loading: true, count: 0, sidebar: :profiles, page_title: "Profiles")}
+
+      _ ->
+        {:ok,
+         socket
+         |> put_flash(:error, "Error loading profile form.")
+         |> push_navigate(~p"/")}
+    end
   end
 
   def handle_params(params, _url, socket) do
@@ -48,35 +58,52 @@ defmodule HousingAppWeb.Live.Profiles.Index do
   def handle_event(
         "load-data",
         %{},
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+        %{assigns: %{profile_form: profile_form, current_user_tenant: current_user_tenant, current_tenant: tenant}} =
+          socket
       ) do
     profiles =
       HousingApp.Management.Profile.list!(actor: current_user_tenant, tenant: tenant)
       |> Enum.sort_by(& &1.user_tenant.user.name)
       |> Enum.map(fn p ->
-        %{
-          "id" => p.id,
-          "name" => p.user_tenant.user.name,
-          "email" => p.user_tenant.user.email,
-          "actions" => [["Edit"], ["View"]]
-        }
+        Map.merge(
+          p.data,
+          %{
+            "id" => p.id,
+            "user_name" => p.user_tenant.user.name,
+            "user_email" => p.user_tenant.user.email,
+            "actions" => [["Edit"], ["View"]]
+          }
+        )
       end)
+
+    schema = profile_form.json_schema |> Jason.decode!()
 
     columns =
       [
-        %{field: "name", minWidth: 160, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-        %{field: "id", minWidth: 120, pinned: "left", hide: true},
-        %{field: "email", minWidth: 160},
         %{
-          field: "actions",
-          pinned: "right",
-          maxWidth: 120,
-          filter: false,
-          editable: false,
-          sortable: false,
-          resizable: false
-        }
-      ]
+          field: "user_name",
+          headerName: "User",
+          minWidth: 160,
+          pinned: "left",
+          checkboxSelection: true,
+          headerCheckboxSelection: true
+        },
+        %{field: "id", minWidth: 120, pinned: "left", hide: true},
+        %{field: "user_email", headerName: "Email", minWidth: 160}
+      ] ++
+        HousingApp.Utils.JsonSchema.schema_to_aggrid_columns(schema) ++
+        [
+          %{
+            field: "actions",
+            pinned: "right",
+            minWidth: 120,
+            maxWidth: 120,
+            filter: false,
+            editable: false,
+            sortable: false,
+            resizable: false
+          }
+        ]
 
     {:reply,
      %{

@@ -22,6 +22,20 @@ defmodule HousingApp.Management do
     registry HousingApp.Management.Registry
   end
 
+  def get_profile_form(actor: current_user_tenant, tenant: tenant) do
+    case HousingApp.Management.TenantSetting.get_setting(:system, :profile_form_id,
+           actor: current_user_tenant,
+           tenant: tenant,
+           not_found_error?: false
+         ) do
+      {:ok, setting} ->
+        HousingApp.Management.Form.get_by_id(setting.value, actor: current_user_tenant, tenant: tenant)
+
+      _ ->
+        {:error, nil}
+    end
+  end
+
   def create_profile(attrs, tenant_id, opts \\ []) do
     attrs = Enum.into(attrs, %{"tenant_id" => tenant_id})
 
