@@ -48,6 +48,10 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
     {:noreply, socket}
   end
 
+  def handle_event("edit-row", %{"id" => id}, socket) do
+    {:noreply, socket |> push_navigate(to: ~p"/assignments/buildings/#{id}/edit")}
+  end
+
   def handle_event(
         "load-data",
         %{},
@@ -63,7 +67,7 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
           "location" => p.location,
           "floors" => p.floors,
           "rooms" => p.rooms,
-          "actions" => [["Edit", ~p"/assignments/buildings/#{p.id}/edit"], ["View", ""]]
+          "actions" => [["Edit"], ["View"]]
         }
       end)
 

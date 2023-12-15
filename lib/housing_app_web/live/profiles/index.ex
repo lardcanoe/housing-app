@@ -41,6 +41,10 @@ defmodule HousingAppWeb.Live.Profiles.Index do
     {:noreply, socket}
   end
 
+  def handle_event("edit-row", %{"id" => id}, socket) do
+    {:noreply, socket |> push_navigate(to: ~p"/profiles/#{id}/edit")}
+  end
+
   def handle_event(
         "load-data",
         %{},
@@ -54,7 +58,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
           "id" => p.id,
           "name" => p.user_tenant.user.name,
           "email" => p.user_tenant.user.email,
-          "actions" => [["Edit", ~p"/profiles/#{p.id}/edit"], ["View", ""]]
+          "actions" => [["Edit"], ["View"]]
         }
       end)
 

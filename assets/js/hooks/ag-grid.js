@@ -4,6 +4,8 @@ import agGrid from "../../vendor/ag-grid-community.min";
 
 class ActionsValueRenderer {
     eGui;
+    vButton;
+    vListener;
     eButton;
     eventListener;
 
@@ -11,18 +13,27 @@ class ActionsValueRenderer {
     init(params) {
         this.eGui = document.createElement('div');
         this.eGui.innerHTML = params.value.map((action) => {
-            if (action[0] === 'View') {
-                return '<a class="ml-2" name="' + action[0] + '">' + action[0] + '</a>'
-            }
-            return '<a class="ml-2" name="' + action[0] + '" href="' + action[1] + '">' + action[0] + '</a>'
+            return '<a class="ml-2" name="' + action[0] + '">' + action[0] + '</a>'
         }).join('');
 
-        this.eButton = this.eGui.querySelector('a[name=\'View\']');
+        this.eButton = this.eGui.querySelector('a[name=\'Edit\']');
 
         if (this.eButton) {
-            this.eventListener = () => {
+            this.eListener = () => {
+                const event = new Event('edit:clicked');
+                event.id = params.data.id
+                window.dispatchEvent(event);
+                return false;
+            };
 
-                const event = new Event('row:clicked');
+            this.eButton.addEventListener('click', this.eListener);
+        }
+
+        this.vButton = this.eGui.querySelector('a[name=\'View\']');
+
+        if (this.vButton) {
+            this.vListener = () => {
+                const event = new Event('view:clicked');
                 event.id = params.data.id
                 window.dispatchEvent(event);
 
@@ -34,7 +45,7 @@ class ActionsValueRenderer {
                 return false;
             };
 
-            this.eButton.addEventListener('click', this.eventListener);
+            this.vButton.addEventListener('click', this.vListener);
         }
     }
 
@@ -49,7 +60,10 @@ class ActionsValueRenderer {
     // gets called when the cell is removed from the grid
     destroy() {
         if (this.eButton) {
-            this.eButton.removeEventListener('click', this.eventListener);
+            this.eButton.removeEventListener('click', this.eListener);
+        }
+        if (this.vButton) {
+            this.vButton.removeEventListener('click', this.vListener);
         }
     }
 }
@@ -116,8 +130,12 @@ export default {
         const gridDiv = document.querySelector('#ag-data-grid');
         this.gridInstance = agGrid.createGrid(gridDiv, this.gridOptions);
 
-        window.addEventListener("row:clicked", (e) => {
+        window.addEventListener("view:clicked", (e) => {
             this.pushEvent("view-row", { id: e.id });
+        });
+
+        window.addEventListener("edit:clicked", (e) => {
+            this.pushEvent("edit-row", { id: e.id });
         });
 
         this.pushEvent("load-data", {}, (reply, ref) => {

@@ -71,13 +71,12 @@ defmodule HousingAppWeb.Components.Drawer.Profile do
         %{profile_id: profile_id},
         %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
-    case HousingApp.Management.Profile.get_by_id(profile_id, actor: current_user_tenant, tenant: tenant) do
-      {:ok, profile} ->
-        bookings =
-          HousingApp.Assignments.Booking.list_by_profile!(profile.id, actor: current_user_tenant, tenant: tenant)
-
-        {:ok, assign(socket, profile: profile, bookings: bookings)}
-
+    with {:ok, profile} <-
+           HousingApp.Management.Profile.get_by_id(profile_id, actor: current_user_tenant, tenant: tenant),
+         bookings <-
+           HousingApp.Assignments.Booking.list_by_profile!(profile.id, actor: current_user_tenant, tenant: tenant) do
+      {:ok, assign(socket, profile: profile, bookings: bookings)}
+    else
       {:error, _} ->
         {:ok, assign(socket, profile: nil, bookings: [])}
     end
