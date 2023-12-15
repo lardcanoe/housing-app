@@ -5,7 +5,7 @@ defmodule HousingApp.Utils.String do
   def titlize(""), do: ""
 
   def titlize(string) when is_binary(string) do
-    string |> String.split(" ", trim: true) |> Enum.map_join(" ", &capitalize_first_grapheme/1)
+    string |> String.split([" ", "_"], trim: true) |> Enum.map_join(" ", &capitalize_first_grapheme/1)
   end
 
   def capitalize_first_grapheme(nil), do: nil

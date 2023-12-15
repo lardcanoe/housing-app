@@ -8,12 +8,15 @@ defmodule HousingApp.Utils.JsonSchema do
   def schema_to_aggrid_columns(%{"properties" => properties}, prefix) when not is_nil(properties) do
     properties
     |> Enum.map(fn {key, value} ->
+      headerName = HousingApp.Utils.String.titlize(key)
+
       case value do
         %{"type" => "integer"} ->
           %{
             field: "#{prefix}#{key}",
             type: "numericColumn",
-            headerName: Map.get(value, "title", key) |> HousingApp.Utils.String.titlize()
+            headerName: headerName,
+            headerTooltip: Map.get(value, "title")
           }
 
         %{"type" => "string", "format" => "date"} ->
@@ -21,19 +24,21 @@ defmodule HousingApp.Utils.JsonSchema do
             field: "#{prefix}#{key}",
             type: ["dateColumn", "nonEditableColumn"],
             width: 220,
-            headerName: Map.get(value, "title", key) |> HousingApp.Utils.String.titlize()
+            headerName: headerName,
+            headerTooltip: Map.get(value, "title")
           }
 
         %{"type" => "object"} ->
           %{
             field: "#{prefix}#{key}",
             groupId: "#{prefix}#{key}Group",
-            headerName: Map.get(value, "title", key) |> HousingApp.Utils.String.titlize(),
-            children: schema_to_aggrid_columns(value, "#{prefix}#{key}.")
+            headerName: headerName,
+            children: schema_to_aggrid_columns(value, "#{prefix}#{key}."),
+            headerTooltip: Map.get(value, "title")
           }
 
         _ ->
-          %{field: "#{prefix}#{key}", headerName: Map.get(value, "title", key) |> HousingApp.Utils.String.titlize()}
+          %{field: "#{prefix}#{key}", headerName: headerName, headerTooltip: Map.get(value, "title")}
       end
     end)
   end
