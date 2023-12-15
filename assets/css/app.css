@@ -2,9 +2,6 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-/* This file is for your main application CSS */
-@import "jsoneditor.min.css";
-
 .dashboard-area-height {
     height: calc(100vh - (160px));
 }
