@@ -68,6 +68,27 @@ class ActionsValueRenderer {
     }
 }
 
+class BooleanCheckmarkValueRenderer {
+    eGui;
+
+    init(params) {
+        this.eGui = document.createElement('div');
+        if (params.value === true || params.value === "true") {
+            this.eGui.innerHTML = `<span class="hero-check-solid w-4 h-4 mr-2 text-gray-900 dark:text-white"></span>`;
+        }
+    }
+
+    getGui() {
+        return this.eGui;
+    }
+
+    refresh(params) {
+        return true;
+    }
+
+    destroy() { }
+}
+
 export default {
     mounted() {
         let selectElements = document.querySelectorAll('[name="table-settings-size"]');
@@ -116,6 +137,9 @@ export default {
                     // specify we want to use the date filter
                     filter: 'agDateColumnFilter'
                 }
+            },
+            components: {
+                booleanCheckmark: BooleanCheckmarkValueRenderer
             },
             autoSizeStrategy: {
                 type: 'fitGridWidth',

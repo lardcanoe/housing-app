@@ -19,6 +19,14 @@ defmodule HousingApp.Utils.JsonSchema do
             headerTooltip: Map.get(value, "title")
           }
 
+        %{"type" => "boolean"} ->
+          %{
+            field: "#{prefix}#{key}",
+            cellRenderer: "booleanCheckmark",
+            headerName: headerName,
+            headerTooltip: Map.get(value, "title")
+          }
+
         %{"type" => "string", "format" => "date"} ->
           %{
             field: "#{prefix}#{key}",
