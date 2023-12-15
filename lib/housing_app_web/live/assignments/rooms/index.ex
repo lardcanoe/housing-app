@@ -61,9 +61,21 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
           "floor" => p.floor,
           "block" => p.block,
           "max_capacity" => p.max_capacity,
+          "data" => p.data,
           "actions" => [["Edit"], ["View"]]
         }
       end)
+
+    form_columns =
+      case HousingApp.Management.get_room_form(actor: current_user_tenant, tenant: tenant) do
+        {:ok, form} ->
+          form.json_schema
+          |> Jason.decode!()
+          |> HousingApp.Utils.JsonSchema.schema_to_aggrid_columns("data.")
+
+        _ ->
+          []
+      end
 
     columns =
       [
@@ -72,18 +84,21 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
         %{field: "id", pinned: "left", hide: true},
         %{field: "floor"},
         %{field: "block"},
-        %{field: "max_capacity"},
-        %{
-          field: "actions",
-          pinned: "right",
-          minWidth: 120,
-          maxWidth: 120,
-          filter: false,
-          editable: false,
-          sortable: false,
-          resizable: false
-        }
-      ]
+        %{field: "max_capacity"}
+      ] ++
+        form_columns ++
+        [
+          %{
+            field: "actions",
+            pinned: "right",
+            minWidth: 120,
+            maxWidth: 120,
+            filter: false,
+            editable: false,
+            sortable: false,
+            resizable: false
+          }
+        ]
 
     {:reply,
      %{

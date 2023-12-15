@@ -23,7 +23,15 @@ defmodule HousingApp.Management do
   end
 
   def get_profile_form(actor: current_user_tenant, tenant: tenant) do
-    case HousingApp.Management.TenantSetting.get_setting(:system, :profile_form_id,
+    get_form_for(:system, :profile_form_id, actor: current_user_tenant, tenant: tenant)
+  end
+
+  def get_room_form(actor: current_user_tenant, tenant: tenant) do
+    get_form_for(:system, :room_form_id, actor: current_user_tenant, tenant: tenant)
+  end
+
+  defp get_form_for(namespace, setting, actor: current_user_tenant, tenant: tenant) do
+    case HousingApp.Management.TenantSetting.get_setting(namespace, setting,
            actor: current_user_tenant,
            tenant: tenant,
            not_found_error?: false

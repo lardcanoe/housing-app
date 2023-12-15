@@ -5,7 +5,7 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
 
   def render(%{live_action: :edit} = assigns) do
     ~H"""
-    <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
+    <.simple_form :let={f} for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update room</h2>
       <.input
         type="select"
@@ -26,6 +26,14 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
         label="Product"
         prompt="Select a product for pricing..."
       />
+
+      <.json_form
+        :if={@json_schema}
+        form={%{"data" => f.data.data} |> to_form(as: "data")}
+        json_schema={@json_schema}
+        embed={true}
+      />
+
       <:actions>
         <.button>Save</.button>
       </:actions>
@@ -55,7 +63,7 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
             actor: current_user_tenant,
             tenant: tenant
           )
-          |> to_form()
+          |> to_form(as: "room")
 
         buildings =
           HousingApp.Assignments.Building.list!(actor: current_user_tenant, tenant: tenant)
@@ -65,8 +73,15 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
           HousingApp.Accounting.Product.list!(actor: current_user_tenant, tenant: tenant)
           |> Enum.map(&{&1.name, &1.id})
 
+        json_schema =
+          case HousingApp.Management.get_room_form(actor: current_user_tenant, tenant: tenant) do
+            {:ok, room_form} -> room_form.json_schema |> Jason.decode!()
+            {:error, _} -> nil
+          end
+
         {:ok,
          assign(socket,
+           json_schema: json_schema,
            ash_form: ash_form,
            buildings: buildings,
            products: products,
@@ -81,9 +96,10 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
     {:noreply, assign(socket, ash_form: ash_form)}
   end
 
-  def handle_event("submit", %{"form" => params}, socket) do
+  def handle_event("submit", %{"form" => params, "data" => data}, socket) do
+    # TODO: Validate "data" against JSON schema of form
     with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
+         {:ok, _app} <- AshPhoenix.Form.submit(ash_form, override_params: %{"data" => data}) do
       {:noreply,
        socket
        |> put_flash(:info, "Successfully updated the room.")
