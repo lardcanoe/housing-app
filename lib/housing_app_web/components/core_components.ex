@@ -228,16 +228,20 @@ defmodule HousingAppWeb.CoreComponents do
   attr :form, :any, required: true, doc: "the datastructure for the form"
   attr :json_schema, :map, required: true, doc: "the json schema"
   attr :embed, :boolean, default: false
+  attr :prefix, :string, default: ""
 
   def json_form(%{embed: true} = assigns) do
     ~H"""
     <%= render_schema(%{
       definitions:
-        HousingApp.Utils.JsonSchema.to_html_form_inputs(%{
-          "properties" => %{
-            "data" => %{"type" => "object", "title" => "Custom Fields", "properties" => @json_schema["properties"]}
-          }
-        }),
+        HousingApp.Utils.JsonSchema.to_html_form_inputs(
+          %{
+            "properties" => %{
+              "data" => %{"type" => "object", "title" => "Custom Fields", "properties" => @json_schema["properties"]}
+            }
+          },
+          @prefix
+        ),
       form: @form
     }) %>
     """

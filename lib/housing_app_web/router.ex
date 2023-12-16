@@ -117,9 +117,9 @@ defmodule HousingAppWeb.Router do
 
         scope "/bookings", Bookings do
           live "/", Index, :index
-          live "/new", New, :new
+          live "/new", Form, :new
           live "/:id", Index, :view
-          live "/:id/edit", Edit, :edit
+          live "/:id/edit", Form, :edit
         end
       end
 

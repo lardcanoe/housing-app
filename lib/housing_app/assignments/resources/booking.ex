@@ -84,7 +84,7 @@ defmodule HousingApp.Assignments.Booking do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:bed_id, :profile_id, :product_id, :start_at, :end_at]
+      accept [:bed_id, :profile_id, :product_id, :start_at, :end_at, :data]
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
 
