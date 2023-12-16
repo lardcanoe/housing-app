@@ -38,6 +38,10 @@ defmodule HousingApp.Management do
     get_form_for(:system, :bed_form_id, actor: current_user_tenant, tenant: tenant)
   end
 
+  def get_booking_form(actor: current_user_tenant, tenant: tenant) do
+    get_form_for(:system, :booking_form_id, actor: current_user_tenant, tenant: tenant)
+  end
+
   defp get_form_for(namespace, setting, actor: current_user_tenant, tenant: tenant) do
     case HousingApp.Management.TenantSetting.get_setting(namespace, setting,
            actor: current_user_tenant,

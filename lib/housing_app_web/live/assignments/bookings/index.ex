@@ -10,7 +10,9 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
       header="Bookings"
       count={@count}
       loading={@loading}
+      drawer={HousingAppWeb.Components.Drawer.Booking}
       current_user_tenant={@current_user_tenant}
+      current_tenant={@current_tenant}
     >
       <:actions>
         <.link patch={~p"/assignments/bookings/new"}>
@@ -34,6 +36,15 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
     {:noreply, assign(socket, loading: true, count: 0, sidebar: :assignments, page_title: "Bookings")}
   end
 
+  def handle_event("view-row", %{"id" => id}, socket) do
+    send_update(HousingAppWeb.Components.Drawer.Booking, id: "drawer-right", booking_id: id)
+    {:noreply, socket}
+  end
+
+  def handle_event("edit-row", %{"id" => id}, socket) do
+    {:noreply, socket |> push_navigate(to: ~p"/assignments/bookings/#{id}/edit")}
+  end
+
   def handle_event(
         "load-data",
         %{},
@@ -52,9 +63,21 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
           "rate" => "#{b.product.name} ($#{b.product.rate})",
           "start_at" => b.start_at,
           "end_at" => b.end_at,
-          "actions" => [["Edit", ~p"/assignments/bookings/#{b.id}/edit"]]
+          "data" => b.data,
+          "actions" => [["Edit"], ["View"]]
         }
       end)
+
+    form_columns =
+      case HousingApp.Management.get_booking_form(actor: current_user_tenant, tenant: tenant) do
+        {:ok, form} ->
+          form.json_schema
+          |> Jason.decode!()
+          |> HousingApp.Utils.JsonSchema.schema_to_aggrid_columns("data.")
+
+        _ ->
+          []
+      end
 
     columns =
       [
@@ -65,18 +88,21 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
         %{field: "bed"},
         %{field: "rate"},
         %{field: "start_at", headerName: "Start", type: "dateColumn"},
-        %{field: "end_at", headerName: "End", type: "dateColumn"},
-        %{
-          field: "actions",
-          pinned: "right",
-          minWidth: 120,
-          maxWidth: 90,
-          filter: false,
-          editable: false,
-          sortable: false,
-          resizable: false
-        }
-      ]
+        %{field: "end_at", headerName: "End", type: "dateColumn"}
+      ] ++
+        form_columns ++
+        [
+          %{
+            field: "actions",
+            pinned: "right",
+            minWidth: 120,
+            maxWidth: 120,
+            filter: false,
+            editable: false,
+            sortable: false,
+            resizable: false
+          }
+        ]
 
     {:reply,
      %{

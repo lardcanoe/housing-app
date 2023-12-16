@@ -5,13 +5,21 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Edit do
 
   def render(%{live_action: :edit} = assigns) do
     ~H"""
-    <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
+    <.simple_form :let={f} for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update booking</h2>
       <.input type="select" field={@ash_form[:profile_id]} options={@profiles} label="Profile" prompt="Select a profile..." />
       <.input type="select" field={@ash_form[:bed_id]} options={@beds} label="Bed" prompt="Select a bed..." />
       <.input type="select" field={@ash_form[:product_id]} options={@products} label="Rate" prompt="Select a rate..." />
       <.input type="date" field={@ash_form[:start_at]} label="Start At" />
       <.input type="date" field={@ash_form[:end_at]} label="End At" />
+
+      <.json_form
+        :if={@json_schema}
+        form={%{"data" => f.data.data} |> to_form(as: "data")}
+        json_schema={@json_schema}
+        embed={true}
+      />
+
       <:actions>
         <.button>Save</.button>
       </:actions>
@@ -43,6 +51,12 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Edit do
           )
           |> to_form()
 
+        json_schema =
+          case HousingApp.Management.get_booking_form(actor: current_user_tenant, tenant: tenant) do
+            {:ok, form} -> form.json_schema |> Jason.decode!()
+            {:error, _} -> nil
+          end
+
         beds =
           HousingApp.Assignments.Bed.list!(actor: current_user_tenant, tenant: tenant)
           |> Enum.map(&{"#{&1.room.building.name} / #{&1.room.name} / #{&1.name}", &1.id})
@@ -58,6 +72,7 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Edit do
         {:ok,
          assign(socket,
            ash_form: ash_form,
+           json_schema: json_schema,
            beds: beds,
            profiles: profiles,
            products: products,
@@ -88,9 +103,10 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Edit do
     {:noreply, assign(socket, ash_form: ash_form)}
   end
 
-  def handle_event("submit", %{"form" => params}, socket) do
+  def handle_event("submit", %{"form" => params} = payload, socket) do
+    # TODO: Validate "data" against JSON schema of form
     with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
+         {:ok, _app} <- AshPhoenix.Form.submit(ash_form, override_params: %{"data" => payload["data"] || %{}}) do
       {:noreply,
        socket
        |> put_flash(:info, "Successfully updated the booking.")

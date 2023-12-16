@@ -18,6 +18,7 @@ defmodule HousingAppWeb.Live.TenantSettings do
       <.input type="select" options={@forms} field={@ash_form[:building_form_id]} label="Building Form" />
       <.input type="select" options={@forms} field={@ash_form[:room_form_id]} label="Room Form" />
       <.input type="select" options={@forms} field={@ash_form[:bed_form_id]} label="Bed Form" />
+      <.input type="select" options={@forms} field={@ash_form[:booking_form_id]} label="Booking Form" />
 
       <:actions>
         <.button>Save</.button>
@@ -40,7 +41,8 @@ defmodule HousingAppWeb.Live.TenantSettings do
         "application_types" => settings[{:system, :application_types}] || "",
         "building_form_id" => settings[{:system, :building_form_id}] || nil,
         "room_form_id" => settings[{:system, :room_form_id}] || nil,
-        "bed_form_id" => settings[{:system, :bed_form_id}] || nil
+        "bed_form_id" => settings[{:system, :bed_form_id}] || nil,
+        "booking_form_id" => settings[{:system, :booking_form_id}] || nil
       }
       |> to_form()
 
