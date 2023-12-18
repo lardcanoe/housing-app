@@ -13,7 +13,9 @@ defmodule HousingAppWeb.Components.Navbar do
   attr :current_user_tenant, :any, required: true
   attr :available_user_tenants, :any, required: true
 
-  def navbar(assigns) do
+  def navbar(%{current_user_tenant: %{user_type: user_type}, current_user: %{role: role}} = assigns) do
+    assigns = assign(assigns, role: role, user_type: user_type)
+
     ~H"""
     <nav class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
       <div class="flex flex-wrap justify-between items-center">
@@ -60,7 +62,7 @@ defmodule HousingAppWeb.Components.Navbar do
               Housing App
             </span>
           </.link>
-          <form :if={@current_user_tenant.user_type != :user} action="#" method="GET" class="hidden md:block md:pl-2">
+          <form :if={@user_type != :user} action="#" method="GET" class="hidden md:block md:pl-2">
             <label for="topbar-search" class="sr-only">Search</label>
             <div class="relative md:w-64 md:w-96">
               <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
@@ -90,7 +92,7 @@ defmodule HousingAppWeb.Components.Navbar do
         </div>
         <div class="flex items-center lg:order-2">
           <button
-            :if={@current_user_tenant.user_type != :user}
+            :if={@user_type != :user}
             type="button"
             data-drawer-toggle="drawer-navigation"
             aria-controls="drawer-navigation"
@@ -167,6 +169,7 @@ defmodule HousingAppWeb.Components.Navbar do
           </div>
           <!-- Apps -->
           <button
+            :if={@user_type != :user}
             type="button"
             data-dropdown-toggle="apps-dropdown"
             class="p-2 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
@@ -180,6 +183,7 @@ defmodule HousingAppWeb.Components.Navbar do
           </button>
           <!-- Dropdown menu -->
           <div
+            :if={@user_type != :user}
             class="hidden overflow-hidden z-50 my-4 max-w-sm text-base list-none bg-white rounded divide-y divide-gray-100 shadow-lg dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
             id="apps-dropdown"
           >
@@ -322,7 +326,7 @@ defmodule HousingAppWeb.Components.Navbar do
                 </div>
               </.link>
               <.link
-                :if={@current_user.role == :platform_admin}
+                :if={@role == :platform_admin}
                 href={~p"/admin"}
                 class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group"
               >
@@ -369,23 +373,20 @@ defmodule HousingAppWeb.Components.Navbar do
               <span :if={@current_user_tenant.tenant.name} class="block text-sm font-semibold text-gray-900 dark:text-white">
                 <%= @current_user_tenant.tenant.name %>
               </span>
-              <span :if={@current_user.role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
+              <span :if={@role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
                 <%= @current_user_tenant.tenant_id %>
               </span>
               <span :if={@current_user.email} class="block text-sm text-gray-900 truncate dark:text-white">
                 <%= @current_user.email %>
               </span>
-              <span :if={@current_user.role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
+              <span :if={@role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
                 Id: <%= @current_user_tenant.user_id %>
               </span>
-              <span :if={@current_user.role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
+              <span :if={@role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
                 UT: <%= @current_user_tenant.id %>
               </span>
-              <span :if={@current_user.role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
-                Role: <%= @current_user_tenant.user.role %>
-              </span>
-              <span :if={@current_user.role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
-                Type: <%= @current_user_tenant.user_type %>
+              <span :if={@role == :platform_admin} class="block text-xs text-gray-900 dark:text-white">
+                Type: <%= @user_type %>
               </span>
             </div>
             <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
@@ -397,7 +398,7 @@ defmodule HousingAppWeb.Components.Navbar do
                   My profile
                 </.link>
               </li>
-              <li>
+              <li :if={@user_type != :user}>
                 <.link
                   patch={~p"/settings/account"}
                   class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
@@ -408,7 +409,7 @@ defmodule HousingAppWeb.Components.Navbar do
             </ul>
 
             <ul
-              :if={Enum.any?(@available_user_tenants)}
+              :if={Enum.count(@available_user_tenants) > 1}
               class="py-1 text-gray-700 dark:text-gray-300"
               aria-labelledby="dropdown"
             >
