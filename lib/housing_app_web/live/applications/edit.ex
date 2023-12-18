@@ -10,6 +10,7 @@ defmodule HousingAppWeb.Live.Applications.Edit do
       <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
       <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
       <.input field={@ash_form[:type]} label="Type" />
+      <.input type="select" options={@submission_types} field={@ash_form[:submission_type]} label="Submission Type" />
       <:actions>
         <.button>Save</.button>
         <.button :if={false} type="delete">Delete</.button>
@@ -48,6 +49,11 @@ defmodule HousingAppWeb.Live.Applications.Edit do
           {"Archived", :archived}
         ]
 
+        submission_types = [
+          {"Once", :once},
+          {"Many", :many}
+        ]
+
         forms =
           HousingApp.Management.Form.list_approved!(actor: current_user_tenant, tenant: tenant)
           |> Enum.map(&{&1.name, &1.id})
@@ -57,6 +63,7 @@ defmodule HousingAppWeb.Live.Applications.Edit do
            ash_form: ash_form,
            forms: forms,
            status_options: status_options,
+           submission_types: submission_types,
            sidebar: :applications,
            page_title: "Edit Application"
          )}

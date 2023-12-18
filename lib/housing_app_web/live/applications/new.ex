@@ -8,6 +8,7 @@ defmodule HousingAppWeb.Live.Applications.New do
       <.input field={@ash_form[:name]} label="Name" />
       <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
       <.input field={@ash_form[:type]} label="Type" />
+      <.input type="select" options={@submission_types} field={@ash_form[:submission_type]} label="Submission Type" />
       <:actions>
         <.button>Create</.button>
       </:actions>
@@ -30,7 +31,19 @@ defmodule HousingAppWeb.Live.Applications.New do
       HousingApp.Management.Form.list_approved!(actor: current_user_tenant, tenant: tenant)
       |> Enum.map(&{&1.name, &1.id})
 
-    {:ok, assign(socket, ash_form: ash_form, forms: forms, sidebar: :applications, page_title: "New Application")}
+    submission_types = [
+      {"Once", :once},
+      {"Many", :many}
+    ]
+
+    {:ok,
+     assign(socket,
+       ash_form: ash_form,
+       forms: forms,
+       submission_types: submission_types,
+       sidebar: :applications,
+       page_title: "New Application"
+     )}
   end
 
   def handle_params(params, _url, socket) do

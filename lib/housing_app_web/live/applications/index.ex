@@ -3,48 +3,48 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
   def render(%{live_action: :index, current_user_tenant: %{user_type: :user}} = assigns) do
     ~H"""
-    <.async_result :let={applications} assign={@applications}>
-      <:loading>
-        <p>Loading...</p>
-      </:loading>
-      <:failed :let={reason}><%= reason %></:failed>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div
-          :for={application <- applications}
-          class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+    <p :if={@applications.loading || @submissions.loading}>Loading...</p>
+    <div :if={@applications.ok? && @applications.result} class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div
+        :for={application <- @applications.result}
+        class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+      >
+        <.link patch={~p"/applications/#{application.id}"}>
+          <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <%= application.name %>
+          </h5>
+        </.link>
+        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+          <%= application.description %>
+        </p>
+        <.link
+          patch={~p"/applications/#{application.id}"}
+          class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
-          <.link patch={~p"/applications/#{application.id}"}>
-            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-              <%= application.name %>
-            </h5>
-          </.link>
-          <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-            <%= application.description %>
-          </p>
-          <.link
-            patch={~p"/applications/#{application.id}"}
-            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >
+          <span :if={application.submission_type == :once && MapSet.member?(@submissions.result, application.id)}>
+            Resubmit
+          </span>
+          <span :if={application.submission_type != :once || !MapSet.member?(@submissions.result, application.id)}>
             Submit
-            <svg
-              class="rtl:rotate-180 w-3.5 h-3.5 ms-2"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 14 10"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M1 5h12m0 0L9 1m4 4L9 9"
-              />
-            </svg>
-          </.link>
-        </div>
+          </span>
+          <svg
+            class="rtl:rotate-180 w-3.5 h-3.5 ms-2"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 10"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M1 5h12m0 0L9 1m4 4L9 9"
+            />
+          </svg>
+        </.link>
       </div>
-    </.async_result>
+    </div>
     """
   end
 
@@ -154,7 +154,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
         } = socket
       ) do
     socket
-    |> assign_async([:applications], fn ->
+    |> assign_async([:applications, :submissions], fn ->
       applications =
         if connected?(socket) do
           HousingApp.Management.Application.list_approved!(actor: current_user_tenant, tenant: tenant)
@@ -163,9 +163,21 @@ defmodule HousingAppWeb.Live.Applications.Index do
           []
         end
 
+      submissions =
+        if connected?(socket) do
+          HousingApp.Management.ApplicationSubmission.list_by_user_tenant!(current_user_tenant.id,
+            actor: current_user_tenant,
+            tenant: tenant
+          )
+          |> MapSet.new(& &1.application_id)
+        else
+          MapSet.new()
+        end
+
       {:ok,
        %{
-         applications: applications
+         applications: applications,
+         submissions: submissions
        }}
     end)
   end

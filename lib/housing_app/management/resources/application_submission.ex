@@ -84,6 +84,10 @@ defmodule HousingApp.Management.ApplicationSubmission do
       change set_attribute(:user_tenant_id, actor(:id))
     end
 
+    update :resubmit do
+      accept [:data]
+    end
+
     read :list_by_application do
       argument :application_id, :uuid do
         allow_nil? false
@@ -94,23 +98,40 @@ defmodule HousingApp.Management.ApplicationSubmission do
       filter expr(application_id == ^arg(:application_id) and is_nil(archived_at))
     end
 
-    # read :get_by_id do
-    #   argument :id, :uuid do
-    #     allow_nil? false
-    #   end
+    read :list_by_user_tenant do
+      argument :user_tenant_id, :uuid do
+        allow_nil? false
+      end
 
-    #   get? true
+      filter expr(user_tenant_id == ^arg(:user_tenant_id) and is_nil(archived_at))
+    end
 
-    #   filter expr(id == ^arg(:id))
-    # end
+    read :get_submission do
+      argument :application_id, :uuid do
+        allow_nil? false
+      end
+
+      argument :user_tenant_id, :uuid do
+        allow_nil? false
+      end
+
+      get? true
+
+      filter expr(
+               user_tenant_id == ^arg(:user_tenant_id) and application_id == ^arg(:application_id) and
+                 is_nil(archived_at)
+             )
+    end
   end
 
   code_interface do
     define_for HousingApp.Management
 
     define :submit
+    define :resubmit
     define :list_by_application, args: [:application_id]
-    # define :get_by_id, args: [:id]
+    define :list_by_user_tenant, args: [:user_tenant_id]
+    define :get_submission, args: [:application_id, :user_tenant_id]
   end
 
   multitenancy do

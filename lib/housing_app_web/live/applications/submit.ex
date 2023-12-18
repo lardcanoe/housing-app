@@ -8,7 +8,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     <.simple_form for={@form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white"><%= @application_name %></h2>
 
-      <.json_form form={%{"data" => %{}} |> to_form(as: "data")} json_schema={@json_schema} embed={true} prefix="form" />
+      <.json_form form={@data_form} json_schema={@json_schema} embed={true} prefix="form" />
 
       <:actions>
         <.button>Submit</.button>
@@ -43,7 +43,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
         />
       </.async_result>
 
-      <.json_form form={%{"data" => %{}} |> to_form(as: "data")} json_schema={@json_schema} embed={true} prefix="form" />
+      <.json_form form={@data_form} json_schema={@json_schema} embed={true} prefix="form" />
 
       <:actions>
         <.button>Submit</.button>
@@ -66,18 +66,34 @@ defmodule HousingAppWeb.Live.Applications.Submit do
          |> push_navigate(to: ~p"/applications")}
 
       {:ok, app} ->
-        json_schema = app.form.json_schema |> Jason.decode!()
-
         {:ok,
          assign(socket,
            application_id: app.id,
            application_name: app.name,
-           json_schema: json_schema,
+           json_schema: app.form.json_schema |> Jason.decode!(),
            form: %{"profile_id" => "", "data" => %{}} |> to_form(as: "form"),
            sidebar: :applications,
            page_title: "Submit Application"
          )
+         |> load_form(app)
          |> load_async_assigns()}
+    end
+  end
+
+  def load_form(socket, %{submission_type: :many}) do
+    socket |> assign(submission: nil, data_form: %{"profile_id" => "", "data" => %{}} |> to_form(as: "data"))
+  end
+
+  def load_form(%{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket, application) do
+    case HousingApp.Management.ApplicationSubmission.get_submission(application.id, current_user_tenant.id,
+           actor: current_user_tenant,
+           tenant: tenant
+         ) do
+      {:ok, submission} ->
+        assign(socket, submission: submission, data_form: %{"data" => submission.data} |> to_form(as: "data"))
+
+      {:error, _} ->
+        assign(socket, submission: nil, data_form: %{"profile_id" => "", "data" => %{}} |> to_form(as: "data"))
     end
   end
 
@@ -107,26 +123,68 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   def handle_event(
         "submit",
         %{"form" => %{"data" => json_data}} = form,
-        %{assigns: %{application_id: application_id, current_user_tenant: current_user_tenant, current_tenant: tenant}} =
-          socket
+        %{
+          assigns: %{
+            submission: submission,
+            current_user_tenant: current_user_tenant,
+            current_tenant: tenant
+          }
+        } = socket
+      )
+      when not is_nil(submission) do
+    json_data = HousingApp.Utils.JsonSchema.cast_params(socket.assigns.json_schema, json_data)
+
+    ref_schema = ExJsonSchema.Schema.resolve(socket.assigns.json_schema)
+
+    actor = get_actor(current_user_tenant, tenant, form)
+
+    case ExJsonSchema.Validator.validate(ref_schema, json_data) do
+      :ok ->
+        case HousingApp.Management.ApplicationSubmission.resubmit(submission, %{data: json_data},
+               actor: actor,
+               tenant: tenant
+             ) do
+          {:error, errors} ->
+            IO.inspect(errors)
+
+            {:noreply,
+             socket
+             |> assign(form: form |> to_form())
+             |> put_flash(:error, "Error resubmitting")}
+
+          {:ok, _submission} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Thank you for updating submission!")
+             |> push_navigate(to: ~p"/applications")}
+        end
+
+      {:error, errors} ->
+        IO.inspect(errors)
+
+        {:noreply,
+         socket
+         |> assign(form: form |> to_form())
+         |> put_flash(:error, "Errors present in form submission.")}
+    end
+  end
+
+  def handle_event(
+        "submit",
+        %{"form" => %{"data" => json_data}} = form,
+        %{
+          assigns: %{
+            application_id: application_id,
+            current_user_tenant: current_user_tenant,
+            current_tenant: tenant
+          }
+        } = socket
       ) do
     json_data = HousingApp.Utils.JsonSchema.cast_params(socket.assigns.json_schema, json_data)
 
     ref_schema = ExJsonSchema.Schema.resolve(socket.assigns.json_schema)
 
-    actor =
-      case current_user_tenant.user_type do
-        :user ->
-          current_user_tenant
-
-        _ ->
-          # TODO: Validation
-          HousingApp.Management.Profile.get_by_id!(form["form"]["profile_id"],
-            actor: current_user_tenant,
-            tenant: tenant
-          )
-          |> then(& &1.user_tenant)
-      end
+    actor = get_actor(current_user_tenant, tenant, form)
 
     case ExJsonSchema.Validator.validate(ref_schema, json_data) do
       :ok ->
@@ -157,6 +215,21 @@ defmodule HousingAppWeb.Live.Applications.Submit do
          socket
          |> assign(form: form |> to_form())
          |> put_flash(:error, "Errors present in form submission.")}
+    end
+  end
+
+  defp get_actor(current_user_tenant, tenant, form) do
+    case current_user_tenant.user_type do
+      :user ->
+        current_user_tenant
+
+      _ ->
+        # TODO: Validation
+        HousingApp.Management.Profile.get_by_id!(form["form"]["profile_id"],
+          actor: current_user_tenant,
+          tenant: tenant
+        )
+        |> then(& &1.user_tenant)
     end
   end
 end

@@ -33,6 +33,12 @@ defmodule HousingApp.Management.Application do
       allow_nil? false
     end
 
+    attribute :submission_type, :atom do
+      constraints one_of: [:once, :many]
+      default :once
+      allow_nil? false
+    end
+
     create_timestamp :created_at
     update_timestamp :updated_at
 
@@ -84,14 +90,14 @@ defmodule HousingApp.Management.Application do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:name, :description, :form_id, :type]
+      accept [:name, :description, :form_id, :type, :submission_type]
 
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
 
     read :list do
       prepare build(
-                select: [:id, :name, :type, :description, :status, :form_id],
+                select: [:id, :name, :type, :submission_type, :description, :status, :form_id],
                 load: [:form, :count_of_submissions],
                 sort: [:name]
               )
@@ -101,7 +107,7 @@ defmodule HousingApp.Management.Application do
 
     read :list_approved do
       prepare build(
-                select: [:id, :name, :type, :description, :status, :form_id],
+                select: [:id, :name, :type, :submission_type, :description, :status, :form_id],
                 load: [:form],
                 sort: [:name]
               )
@@ -116,7 +122,7 @@ defmodule HousingApp.Management.Application do
       end
 
       prepare build(
-                select: [:id, :name, :type, :description, :status, :form_id],
+                select: [:id, :name, :type, :submission_type, :description, :status, :form_id],
                 load: [:form, :count_of_submissions],
                 sort: [:name]
               )
