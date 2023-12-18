@@ -225,6 +225,7 @@ defmodule HousingAppWeb.CoreComponents do
     """
   end
 
+  slot :inner_block
   attr :form, :any, required: true, doc: "the datastructure for the form"
   attr :json_schema, :map, required: true, doc: "the json schema"
   attr :embed, :boolean, default: false
@@ -250,6 +251,8 @@ defmodule HousingAppWeb.CoreComponents do
   def json_form(assigns) do
     ~H"""
     <.simple_form for={@form} phx-change="validate" phx-submit="submit" autocomplete="off">
+      <%= render_slot(@inner_block, @form) %>
+
       <h1
         :if={!is_nil(@json_schema["title"]) && @json_schema["title"] != ""}
         class="mb-4 text-xl font-bold text-gray-900 dark:text-white"

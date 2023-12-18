@@ -113,9 +113,9 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Form do
       |> AshPhoenix.Form.for_create(:new,
         api: HousingApp.Assignments,
         forms: [auto?: true],
-        prepare_source: fn changeset -> Ash.Changeset.set_argument(changeset, :data, %{}) end,
         actor: current_user_tenant,
-        tenant: tenant
+        tenant: tenant,
+        params: %{"data" => %{}}
       )
       |> to_form()
 
