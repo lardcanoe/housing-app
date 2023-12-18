@@ -52,82 +52,83 @@ defmodule HousingAppWeb.Live.Applications.Index do
     ~H"""
     <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Applications</h1>
 
-    <.async_result :let={applications} assign={@applications}>
-      <:loading>
-        <p>Loading...</p>
-      </:loading>
-      <:failed :let={reason}><%= reason %></:failed>
-      <.table id="applications" rows={applications} pagination={false} row_id={fn row -> "applications-row-#{row.id}" end}>
-        <:button>
-          <svg
-            class="h-3.5 w-3.5 mr-2"
-            fill="currentColor"
-            viewbox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path
-              clip-rule="evenodd"
-              fill-rule="evenodd"
-              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-            />
-          </svg>
-          <.link patch={~p"/applications/new"}>
-            Add application
-          </.link>
-        </:button>
-        <:col :let={application} label="name">
-          <.link patch={~p"/applications/#{application.id}"}><%= application.name %></.link>
-        </:col>
-        <:col :let={application} label="type">
-          <%= application.type %>
-        </:col>
-        <:col :let={application} label="status">
-          <span
-            :if={application.status == :draft}
-            class="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300"
-          >
-            Draft
-          </span>
-          <span
-            :if={application.status == :approved}
-            class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300"
-          >
-            Approved
-          </span>
-          <span
-            :if={application.status == :archived}
-            class="bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300"
-          >
-            Archived
-          </span>
-        </:col>
-        <:col :let={application} label="form">
-          <.link patch={~p"/applications/#{application.form_id}/edit"}><%= application.form.name %></.link>
-        </:col>
-        <:col :let={application} label="Submissions">
-          <.link patch={~p"/applications/#{application.id}/submissions"}>
-            <%= application.count_of_submissions %>
-          </.link>
-        </:col>
-        <:action :let={application}>
-          <.link
-            patch={~p"/applications/#{application.id}/edit"}
-            class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-          >
-            Edit
-          </.link>
-        </:action>
-        <:action :let={application}>
-          <.link
-            patch={~p"/applications/#{application.id}/submissions"}
-            class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-          >
-            View submissions
-          </.link>
-        </:action>
-      </.table>
-    </.async_result>
+    <p :if={@applications.loading}>Loading...</p>
+    <.table
+      :if={@applications.ok? and @applications.result}
+      id="applications"
+      rows={@applications.result}
+      pagination={false}
+      row_id={fn row -> "applications-row-#{row.id}" end}
+    >
+      <:button>
+        <svg
+          class="h-3.5 w-3.5 mr-2"
+          fill="currentColor"
+          viewbox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            clip-rule="evenodd"
+            fill-rule="evenodd"
+            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+          />
+        </svg>
+        <.link patch={~p"/applications/new"}>
+          Add application
+        </.link>
+      </:button>
+      <:col :let={application} label="name">
+        <.link patch={~p"/applications/#{application.id}"}><%= application.name %></.link>
+      </:col>
+      <:col :let={application} label="type">
+        <%= application.type %>
+      </:col>
+      <:col :let={application} label="status">
+        <span
+          :if={application.status == :draft}
+          class="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300"
+        >
+          Draft
+        </span>
+        <span
+          :if={application.status == :approved}
+          class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300"
+        >
+          Approved
+        </span>
+        <span
+          :if={application.status == :archived}
+          class="bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300"
+        >
+          Archived
+        </span>
+      </:col>
+      <:col :let={application} label="form">
+        <.link patch={~p"/applications/#{application.form_id}/edit"}><%= application.form.name %></.link>
+      </:col>
+      <:col :let={application} label="Submissions">
+        <.link patch={~p"/applications/#{application.id}/submissions"}>
+          <%= application.count_of_submissions %>
+        </.link>
+      </:col>
+      <:action :let={application}>
+        <.link
+          patch={~p"/applications/#{application.id}/edit"}
+          class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+        >
+          Edit
+        </.link>
+      </:action>
+      <:action :let={application}>
+        <.link
+          patch={~p"/applications/#{application.id}/submissions"}
+          class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+        >
+          View submissions
+        </.link>
+      </:action>
+    </.table>
     """
   end
 

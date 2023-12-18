@@ -75,7 +75,10 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
           |> Enum.map(
             &Enum.into(&1.data, %{
               "id" => &1.id,
-              "metadata" => %{"created_at" => &1.created_at, "user" => &1.user_tenant.user.name}
+              "metadata" => %{
+                "created_at" => if(application.submission_type == :once, do: &1.updated_at, else: &1.created_at),
+                "user" => &1.user_tenant.user.name
+              }
             })
           )
 
