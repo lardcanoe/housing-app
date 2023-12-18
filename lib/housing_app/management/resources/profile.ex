@@ -54,6 +54,11 @@ defmodule HousingApp.Management.Profile do
       authorize_if HousingApp.Checks.IsTenantAdmin
       authorize_if relates_to_actor_via(:user_tenant)
     end
+
+    policy action_type(:update) do
+      authorize_if HousingApp.Checks.IsTenantAdmin
+      authorize_if relates_to_actor_via(:user_tenant)
+    end
   end
 
   postgres do
@@ -86,6 +91,16 @@ defmodule HousingApp.Management.Profile do
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
 
+    read :get_by_user_tenant do
+      argument :user_tenant_id, :uuid do
+        allow_nil? false
+      end
+
+      get? true
+
+      filter expr(user_tenant_id == ^arg(:user_tenant_id) and is_nil(archived_at))
+    end
+
     update :submit do
       accept [:data]
     end
@@ -96,6 +111,7 @@ defmodule HousingApp.Management.Profile do
 
     define :list
     define :get_by_id, args: [:id]
+    define :get_by_user_tenant, args: [:user_tenant_id]
     define :submit
   end
 

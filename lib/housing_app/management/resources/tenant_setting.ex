@@ -36,6 +36,7 @@ defmodule HousingApp.Management.TenantSetting do
     bypass always() do
       authorize_if HousingApp.Checks.IsPlatformAdmin
       authorize_if HousingApp.Checks.IsTenantAdmin
+      authorize_if action_type(:read)
     end
   end
 

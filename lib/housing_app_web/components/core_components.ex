@@ -230,6 +230,8 @@ defmodule HousingAppWeb.CoreComponents do
   attr :json_schema, :map, required: true, doc: "the json schema"
   attr :embed, :boolean, default: false
   attr :prefix, :string, default: ""
+  attr :autowidth, :boolean, default: true, doc: "the autowidth flag"
+  attr :class, :string, default: nil
 
   def json_form(%{embed: true} = assigns) do
     ~H"""
@@ -250,7 +252,14 @@ defmodule HousingAppWeb.CoreComponents do
 
   def json_form(assigns) do
     ~H"""
-    <.simple_form for={@form} phx-change="validate" phx-submit="submit" autocomplete="off">
+    <.simple_form
+      for={@form}
+      autowidth={@autowidth}
+      class={@class}
+      phx-change="validate"
+      phx-submit="submit"
+      autocomplete="off"
+    >
       <%= render_slot(@inner_block, @form) %>
 
       <h1
@@ -260,7 +269,7 @@ defmodule HousingAppWeb.CoreComponents do
         <%= @json_schema["title"] %>
       </h1>
 
-      <%= render_schema(%{definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema), form: @form}) %>
+      <%= render_schema(%{definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema, @prefix), form: @form}) %>
 
       <:actions>
         <.button>Submit</.button>
