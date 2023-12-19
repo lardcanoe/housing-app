@@ -6,7 +6,8 @@ defmodule HousingApp.Management.Application do
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
     extensions: [AshAdmin.Api],
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    notifiers: [Ash.Notifier.PubSub]
 
   attributes do
     uuid_primary_key :id
@@ -70,6 +71,15 @@ defmodule HousingApp.Management.Application do
     end
   end
 
+  pub_sub do
+    module HousingAppWeb.Endpoint
+    prefix "application"
+    broadcast_type :broadcast
+
+    publish :new, [[:_tenant], ["created"]], event: "application-created"
+    publish :update, [[:_tenant], ["updated"]], event: "application-updated"
+  end
+
   policies do
     bypass always() do
       authorize_if HousingApp.Checks.IsPlatformAdmin
@@ -90,7 +100,7 @@ defmodule HousingApp.Management.Application do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:name, :description, :form_id, :type, :submission_type]
+      accept [:name, :description, :form_id, :status, :type, :submission_type]
 
       change set_attribute(:tenant_id, actor(:tenant_id))
     end

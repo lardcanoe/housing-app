@@ -7,6 +7,7 @@ defmodule HousingAppWeb.Live.Applications.New do
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Application</h2>
       <.input field={@ash_form[:name]} label="Name" />
       <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
+      <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
       <.input field={@ash_form[:type]} label="Type" />
       <.input type="select" options={@submission_types} field={@ash_form[:submission_type]} label="Submission Type" />
       <:actions>
@@ -31,6 +32,12 @@ defmodule HousingAppWeb.Live.Applications.New do
       HousingApp.Management.Form.list_approved!(actor: current_user_tenant, tenant: tenant)
       |> Enum.map(&{&1.name, &1.id})
 
+    status_options = [
+      {"Draft", :draft},
+      {"Approved (Published)", :approved},
+      {"Archived", :archived}
+    ]
+
     submission_types = [
       {"Once", :once},
       {"Many", :many}
@@ -40,6 +47,7 @@ defmodule HousingAppWeb.Live.Applications.New do
      assign(socket,
        ash_form: ash_form,
        forms: forms,
+       status_options: status_options,
        submission_types: submission_types,
        sidebar: :applications,
        page_title: "New Application"

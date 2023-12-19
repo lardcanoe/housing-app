@@ -119,7 +119,7 @@ defmodule HousingAppWeb.Live.UserSettingsLive do
     {:noreply, assign(socket, params: params)}
   end
 
-  def handle_event("validate", %{"profile" => params}, socket) do
+  def handle_event("validate", %{"profile" => _params}, socket) do
     {:noreply, socket}
   end
 

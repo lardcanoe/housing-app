@@ -85,4 +85,7 @@ config :swoosh, :api_client, false
 # https://hexdocs.pm/ash/policies.html#logging
 config :ash, :policies, show_policy_breakdowns?: true
 
+# https://hexdocs.pm/ash/pub_sub.html#debugging-pubsub
+config :ash, :pub_sub, debug?: true
+
 import_config "#{config_env()}.local.exs"

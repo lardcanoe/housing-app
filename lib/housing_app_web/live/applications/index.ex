@@ -132,7 +132,16 @@ defmodule HousingAppWeb.Live.Applications.Index do
     """
   end
 
-  def mount(_params, _session, socket) do
+  def mount(
+        _params,
+        _session,
+        %{assigns: %{current_user_tenant: %{user_type: user_type}, current_tenant: tenant}} = socket
+      ) do
+    if user_type == :user and connected?(socket) do
+      HousingAppWeb.Endpoint.subscribe("application:#{tenant}:created")
+      HousingAppWeb.Endpoint.subscribe("application:#{tenant}:updated")
+    end
+
     {:ok,
      socket
      |> assign(sidebar: :applications, page_title: "Applications")
@@ -146,14 +155,14 @@ defmodule HousingAppWeb.Live.Applications.Index do
      |> load_async_assigns()}
   end
 
-  def load_async_assigns(
-        %{
-          assigns: %{
-            current_user_tenant: %{user_type: :user} = current_user_tenant,
-            current_tenant: tenant
-          }
-        } = socket
-      ) do
+  defp load_async_assigns(
+         %{
+           assigns: %{
+             current_user_tenant: %{user_type: :user} = current_user_tenant,
+             current_tenant: tenant
+           }
+         } = socket
+       ) do
     socket
     |> assign_async([:applications, :submissions], fn ->
       applications =
@@ -183,7 +192,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
     end)
   end
 
-  def load_async_assigns(%{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+  defp load_async_assigns(%{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
     socket
     |> assign_async([:applications], fn ->
       applications =
@@ -199,5 +208,17 @@ defmodule HousingAppWeb.Live.Applications.Index do
          applications: applications
        }}
     end)
+  end
+
+  def handle_info(%{event: "application-created", payload: %{payload: %{data: %{status: :approved}}}}, socket) do
+    {:noreply, socket |> load_async_assigns()}
+  end
+
+  def handle_info(%{event: "application-updated", payload: %{payload: %{data: %{status: :approved}}}}, socket) do
+    {:noreply, socket |> load_async_assigns()}
+  end
+
+  def handle_info(_, socket) do
+    {:noreply, socket}
   end
 end
