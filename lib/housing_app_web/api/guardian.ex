@@ -1,4 +1,4 @@
-defmodule HousingAppWeb.Guardian do
+defmodule HousingAppWeb.Api.Guardian do
   use Guardian, otp_app: :housing_app
 
   def subject_for_token(%{id: id}, _claims) do

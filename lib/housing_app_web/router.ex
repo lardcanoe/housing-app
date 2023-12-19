@@ -21,7 +21,7 @@ defmodule HousingAppWeb.Router do
 
   pipeline :api_auth do
     plug :accepts, ["json"]
-    plug HousingAppWeb.ApiAuthPipeline
+    plug HousingAppWeb.Api.AuthPipeline
   end
 
   scope "/", HousingAppWeb do

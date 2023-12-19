@@ -48,7 +48,7 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  config :housing_app, HousingAppWeb.Guardian,
+  config :housing_app, HousingAppWeb.Api.Guardian,
     issuer: "housing_app",
     secret_key: secret_key_base
 

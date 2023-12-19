@@ -1,8 +1,8 @@
-defmodule HousingAppWeb.ApiAuthPipeline do
+defmodule HousingAppWeb.Api.AuthPipeline do
   use Guardian.Plug.Pipeline,
     otp_app: :housing_app,
-    error_handler: HousingAppWeb.AuthErrorHandler,
-    module: HousingAppWeb.Guardian
+    error_handler: HousingAppWeb.Api.AuthErrorHandler,
+    module: HousingAppWeb.Api.Guardian
 
   plug Guardian.Plug.VerifyHeader, claims: %{typ: "access"}, key: :current_user_tenant
   plug Guardian.Plug.LoadResource, key: :current_user_tenant
