@@ -92,6 +92,19 @@ defmodule HousingApp.Accounts.UserTenant do
 
       filter expr(user_id == ^actor(:id) and is_nil(archived_at))
     end
+
+    # No actor set, and no auth performed
+    read :find_for_api do
+      argument :id, :uuid do
+        allow_nil? false
+      end
+
+      get? true
+
+      prepare build(load: [:user, :tenant])
+
+      filter expr(id == ^arg(:id) and is_nil(archived_at))
+    end
   end
 
   code_interface do
@@ -100,6 +113,7 @@ defmodule HousingApp.Accounts.UserTenant do
     define :get_default
     define :get_for_tenant, args: [:tenant_id]
     define :get_by_id, args: [:id]
+    define :find_for_api, args: [:id]
   end
 
   identities do

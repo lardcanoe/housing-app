@@ -17,7 +17,11 @@ defmodule HousingAppWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
-    plug :load_from_bearer
+  end
+
+  pipeline :api_auth do
+    plug :accepts, ["json"]
+    plug HousingAppWeb.ApiAuthPipeline
   end
 
   scope "/", HousingAppWeb do
@@ -146,6 +150,10 @@ defmodule HousingAppWeb.Router do
     forward "/redoc",
             Redoc.Plug.RedocUI,
             spec_url: "/api/open_api"
+  end
+
+  scope "/api" do
+    pipe_through :api_auth
 
     # https://hexdocs.pm/ash_json_api/getting-started-with-json-api.html#add-the-routes-from-your-api-module-s
     forward "/", HousingAppWeb.Api.Router
