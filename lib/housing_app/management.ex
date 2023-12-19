@@ -6,7 +6,7 @@ defmodule HousingApp.Management do
 
   use Ash.Api,
     otp_app: :housing_app,
-    extensions: [AshAdmin.Api]
+    extensions: [AshAdmin.Api, AshJsonApi.Api]
 
   # https://hexdocs.pm/ash/dsl-ash-api.html#authorization
   # https://hexdocs.pm/ash/security.html#authorization-configuration

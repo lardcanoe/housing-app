@@ -133,10 +133,23 @@ defmodule HousingAppWeb.Router do
     end
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", RealworldWeb do
-  #   pipe_through :api
-  # end
+  # https://hexdocs.pm/ash_json_api/open-api.html#use-with-phoenix
+  scope "/api" do
+    pipe_through :api
+
+    forward "/swaggerui",
+            OpenApiSpex.Plug.SwaggerUI,
+            path: "/api/open_api",
+            title: "Housing App - Swagger UI",
+            default_model_expand_depth: 4
+
+    forward "/redoc",
+            Redoc.Plug.RedocUI,
+            spec_url: "/api/open_api"
+
+    # https://hexdocs.pm/ash_json_api/getting-started-with-json-api.html#add-the-routes-from-your-api-module-s
+    forward "/", HousingAppWeb.Api.Router
+  end
 
   # Enables LiveDashboard only for development
   #

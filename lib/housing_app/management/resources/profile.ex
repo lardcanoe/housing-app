@@ -3,7 +3,7 @@ defmodule HousingApp.Management.Profile do
 
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshAdmin.Api],
+    extensions: [AshAdmin.Api, AshJsonApi.Resource],
     authorizers: [Ash.Policy.Authorizer]
 
   attributes do
@@ -24,6 +24,18 @@ defmodule HousingApp.Management.Profile do
 
   admin do
     show?(true)
+  end
+
+  json_api do
+    type "profile"
+
+    routes do
+      base("/profiles")
+
+      get(:read)
+      index :read
+      post(:create)
+    end
   end
 
   relationships do

@@ -75,6 +75,11 @@ config :housing_app,
 # https://hexdocs.pm/ash/policies.html#logging
 config :ash, :policies, log_policy_breakdowns: :error
 
+# https://hexdocs.pm/ash_json_api/getting-started-with-json-api.html#accept-json_api-content-type
+config :mime, :types, %{"application/vnd.api+json" => ["json"]}
+
+config :mime, :extensions, %{"json" => "application/vnd.api+json"}
+
 config :spark, :formatter,
   remove_parens?: true,
   "Ash.Resource": [
