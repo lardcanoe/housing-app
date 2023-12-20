@@ -20,7 +20,7 @@ defmodule HousingAppWeb.Endpoint do
   plug Plug.Static,
     at: "/",
     from: :housing_app,
-    gzip: false,
+    gzip: true,
     only: HousingAppWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the

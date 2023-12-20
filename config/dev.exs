@@ -25,7 +25,7 @@ config :housing_app, HousingAppWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "hGqHvy0LuIUP1hZQIfIytb65wf8dXjlN0WPKuDkDazD1Hw6t2hbNw8RVKpOcNXUz",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch --external:ag-grid-community)]},
     tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
 

@@ -1,4 +1,3 @@
-import agGrid from "../../vendor/ag-grid-community.min";
 import { ActionsValueRenderer } from '../ag-grid/actions-renderer';
 import { BooleanCheckmarkValueRenderer } from '../ag-grid/boolean-renderer';
 import { DraftStatusValueRenderer } from '../ag-grid/status-renderer';
