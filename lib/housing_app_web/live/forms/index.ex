@@ -3,119 +3,109 @@ defmodule HousingAppWeb.Live.Forms.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Forms</h1>
-
-    <.table id="forms" rows={@forms} pagination={false} row_id={fn row -> "forms-row-#{row.id}" end}>
-      <:button>
-        <svg
-          class="h-3.5 w-3.5 mr-2"
-          fill="currentColor"
-          viewbox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            clip-rule="evenodd"
-            fill-rule="evenodd"
-            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-          />
-        </svg>
+    <.data_grid
+      id="ag-data-grid"
+      header="Forms"
+      count={@count}
+      loading={@loading}
+      drawer={HousingAppWeb.Components.Drawer.Form}
+      current_user_tenant={@current_user_tenant}
+      current_tenant={@current_tenant}
+    >
+      <:actions>
         <.link patch={~p"/forms/new"}>
-          Add form
+          <button
+            type="button"
+            class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
+          >
+            <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add form
+          </button>
         </.link>
-      </:button>
-      <:col :let={form} :if={@current_user.role == :platform_admin} label="id">
-        <%= form.id %>
-      </:col>
-      <:col :let={form} label="name">
-        <.link patch={~p"/forms/#{form.id}"}><%= form.name %></.link>
-      </:col>
-      <:col :let={form} label="type">
-        <%= form.type %>
-      </:col>
-      <:col :let={form} label="status">
-        <span
-          :if={form.status == :draft}
-          class="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300"
-        >
-          Draft
-        </span>
-        <span
-          :if={form.status == :approved}
-          class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300"
-        >
-          Approved
-        </span>
-        <span
-          :if={form.status == :archived}
-          class="bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300"
-        >
-          Archived
-        </span>
-      </:col>
-      <:col :let={form} label="Submissions">
-        <.link patch={~p"/forms/#{form.id}/submissions"}>
-          <%= form.count_of_submissions %>
-        </.link>
-      </:col>
-      <:action :let={form}>
-        <.link
-          patch={~p"/forms/#{form.id}/edit"}
-          class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-        >
-          Edit
-        </.link>
-      </:action>
-      <:action :let={form}>
-        <.link
-          patch={~p"/forms/#{form.id}/submissions"}
-          class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-        >
-          View submissions
-        </.link>
-      </:action>
-    </.table>
+      </:actions>
+    </.data_grid>
     """
   end
 
   def mount(params, _session, socket) do
-    case fetch_forms(params, socket) do
-      {:ok, forms} ->
-        {:ok, assign(socket, forms: forms, sidebar: :forms, page_title: "Forms")}
-
-      _ ->
-        {:ok,
-         socket |> assign(forms: [], sidebar: :forms, page_title: "Forms") |> put_flash(:error, "Error loading forms.")}
-    end
+    {:ok,
+     socket
+     |> assign(params: params, loading: true, count: 0, sidebar: :forms, page_title: "Forms")}
   end
 
   def handle_params(params, _url, socket) do
-    case fetch_forms(params, socket) do
-      {:ok, forms} ->
-        {:noreply, assign(socket, forms: forms, sidebar: :forms, page_title: "Forms")}
-
-      _ ->
-        {:noreply,
-         socket |> assign(forms: [], sidebar: :forms, page_title: "Forms") |> put_flash(:error, "Error loading forms.")}
-    end
+    {:noreply,
+     socket
+     |> assign(params: params, loading: true, count: 0, sidebar: :forms, page_title: "Forms")}
   end
 
-  defp fetch_forms(%{"type" => type}, %{
-         assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
-       })
-       when is_binary(type) and type != "" do
-    case HousingApp.Management.Form.list_by_type(type, actor: current_user_tenant, tenant: current_tenant) do
-      {:ok, forms} -> {:ok, forms}
-      _ -> {:error, []}
-    end
+  def handle_event("view-row", %{"id" => id}, socket) do
+    send_update(HousingAppWeb.Components.Drawer.Form, id: "drawer-right", form_id: id)
+    {:noreply, socket}
   end
 
-  defp fetch_forms(_type, %{
-         assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
-       }) do
-    case HousingApp.Management.Form.list(actor: current_user_tenant, tenant: current_tenant) do
-      {:ok, forms} -> {:ok, forms}
-      _ -> {:error, []}
-    end
+  def handle_event("edit-row", %{"id" => id}, socket) do
+    {:noreply, socket |> push_navigate(to: ~p"/forms/#{id}/edit")}
+  end
+
+  def handle_event("redirect", %{"url" => url}, socket) do
+    {:noreply, socket |> push_navigate(to: url)}
+  end
+
+  def handle_event("load-data", %{}, socket) do
+    forms =
+      socket
+      |> fetch_forms()
+      |> Enum.sort_by(& &1.name)
+      |> map_forms()
+
+    columns =
+      [
+        %{field: "name", minWidth: 200, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+        %{field: "id", minWidth: 120, pinned: "left", hide: true},
+        %{field: "status", maxWidth: 140, cellRenderer: "draftStatus"},
+        %{field: "type"},
+        %{field: "submissions", headerName: "Submissions", cellRenderer: "link"},
+        %{
+          field: "actions",
+          pinned: "right",
+          minWidth: 120,
+          maxWidth: 120,
+          filter: false,
+          editable: false,
+          sortable: false,
+          resizable: false
+        }
+      ]
+
+    {:reply,
+     %{
+       columns: columns,
+       data: forms
+     }, assign(socket, loading: false, count: length(forms))}
+  end
+
+  defp fetch_forms(%{assigns: %{params: %{"type" => app_type}}} = socket)
+       when is_binary(app_type) and app_type != "" do
+    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    HousingApp.Management.Form.list_by_type!(app_type, actor: current_user_tenant, tenant: tenant)
+  end
+
+  defp fetch_forms(socket) do
+    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    HousingApp.Management.Form.list!(actor: current_user_tenant, tenant: tenant)
+  end
+
+  defp map_forms(forms) do
+    Enum.map(forms, fn b ->
+      %{
+        "id" => b.id,
+        "name" => b.name,
+        "status" => b.status,
+        "type" => b.type,
+        "submissions" => b.count_of_submissions,
+        "submissions_link" => ~p"/forms/#{b.id}/submissions",
+        "actions" => [["Edit"], ["View"]]
+      }
+    end)
   end
 end
