@@ -1,93 +1,10 @@
 import agGrid from "../../vendor/ag-grid-community.min";
+import { ActionsValueRenderer } from '../ag-grid/actions-renderer';
+import { BooleanCheckmarkValueRenderer } from '../ag-grid/boolean-renderer';
+import { DraftStatusValueRenderer } from '../ag-grid/status-renderer';
+import { LinkValueRenderer } from '../ag-grid/link-renderer';
 
 // https://www.ag-grid.com/javascript-data-grid/esm-packages/
-
-class ActionsValueRenderer {
-    eGui;
-    vButton;
-    vListener;
-    eButton;
-    eventListener;
-
-    // gets called once before the renderer is used
-    init(params) {
-        this.eGui = document.createElement('div');
-        this.eGui.innerHTML = params.value.map((action) => {
-            return '<a class="ml-2" name="' + action[0] + '">' + action[0] + '</a>'
-        }).join('');
-
-        this.eButton = this.eGui.querySelector('a[name=\'Edit\']');
-
-        if (this.eButton) {
-            this.eListener = () => {
-                const event = new Event('edit:clicked');
-                event.id = params.data.id
-                window.dispatchEvent(event);
-                return false;
-            };
-
-            this.eButton.addEventListener('click', this.eListener);
-        }
-
-        this.vButton = this.eGui.querySelector('a[name=\'View\']');
-
-        if (this.vButton) {
-            this.vListener = () => {
-                const event = new Event('view:clicked');
-                event.id = params.data.id
-                window.dispatchEvent(event);
-
-                let el = document.querySelector('#drawer-right-parent');
-                if (el) {
-                    el.classList.remove('hidden');
-                }
-
-                return false;
-            };
-
-            this.vButton.addEventListener('click', this.vListener);
-        }
-    }
-
-    getGui() {
-        return this.eGui;
-    }
-
-    refresh(params) {
-        return true;
-    }
-
-    // gets called when the cell is removed from the grid
-    destroy() {
-        if (this.eButton) {
-            this.eButton.removeEventListener('click', this.eListener);
-        }
-        if (this.vButton) {
-            this.vButton.removeEventListener('click', this.vListener);
-        }
-    }
-}
-
-class BooleanCheckmarkValueRenderer {
-    eGui;
-
-    init(params) {
-        this.eGui = document.createElement('div');
-        if (params.value === true || params.value === "true") {
-            this.eGui.innerHTML = `<span class="hero-check-solid w-4 h-4 mr-2 text-gray-900 dark:text-white"></span>`;
-        }
-    }
-
-    getGui() {
-        return this.eGui;
-    }
-
-    refresh(params) {
-        return true;
-    }
-
-    destroy() { }
-}
 
 export default {
     mounted() {
@@ -139,7 +56,9 @@ export default {
                 }
             },
             components: {
-                booleanCheckmark: BooleanCheckmarkValueRenderer
+                booleanCheckmark: BooleanCheckmarkValueRenderer,
+                draftStatus: DraftStatusValueRenderer,
+                link: LinkValueRenderer
             },
             autoSizeStrategy: {
                 type: 'fitGridWidth',
@@ -156,9 +75,11 @@ export default {
 
         this.handleViewClick = (e) => { this.pushEvent("view-row", { id: e.id }) };
         this.handleEditClick = (e) => { this.pushEvent("edit-row", { id: e.id }) };
+        this.handleLinkClick = (e) => { this.pushEvent("redirect", { url: e.url }) };
 
         window.addEventListener("view:clicked", this.handleViewClick);
         window.addEventListener("edit:clicked", this.handleEditClick);
+        window.addEventListener("link:clicked", this.handleLinkClick);
 
         this.pushEvent("load-data", {}, (reply, ref) => {
             reply.columns.forEach(c => {
@@ -201,6 +122,7 @@ export default {
     destroy() {
         window.removeEventListener("view:clicked", this.handleViewClick);
         window.removeEventListener("edit:clicked", this.handleEditClick);
+        window.removeEventListener("link:clicked", this.handleLinkClick);
 
         if (this.gridInstance) {
             this.gridInstance.destroy();

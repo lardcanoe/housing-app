@@ -141,6 +141,8 @@ defmodule HousingAppWeb.Router do
   scope "/api" do
     pipe_through :api
 
+    # FUTURE: The problem is that "/api/open_api" is locked down below
+    #         So even though these are public, the open_api is not
     forward "/swaggerui",
             OpenApiSpex.Plug.SwaggerUI,
             path: "/api/open_api",

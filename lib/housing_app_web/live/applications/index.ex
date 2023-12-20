@@ -50,94 +50,35 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
   def render(%{live_action: :index} = assigns) do
     ~H"""
-    <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Applications</h1>
-
-    <p :if={@applications.loading}>Loading...</p>
-    <.table
-      :if={@applications.ok? and @applications.result}
-      id="applications"
-      rows={@applications.result}
-      pagination={false}
-      row_id={fn row -> "applications-row-#{row.id}" end}
+    <.data_grid
+      id="ag-data-grid"
+      header="Applications"
+      count={@count}
+      loading={@loading}
+      drawer={HousingAppWeb.Components.Drawer.Application}
+      current_user_tenant={@current_user_tenant}
+      current_tenant={@current_tenant}
     >
-      <:button>
-        <svg
-          class="h-3.5 w-3.5 mr-2"
-          fill="currentColor"
-          viewbox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            clip-rule="evenodd"
-            fill-rule="evenodd"
-            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-          />
-        </svg>
+      <:actions>
         <.link patch={~p"/applications/new"}>
-          Add application
+          <button
+            type="button"
+            class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
+          >
+            <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add application
+          </button>
         </.link>
-      </:button>
-      <:col :let={application} label="name">
-        <.link patch={~p"/applications/#{application.id}"}><%= application.name %></.link>
-      </:col>
-      <:col :let={application} label="type">
-        <%= application.type %>
-      </:col>
-      <:col :let={application} label="status">
-        <span
-          :if={application.status == :draft}
-          class="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300"
-        >
-          Draft
-        </span>
-        <span
-          :if={application.status == :approved}
-          class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300"
-        >
-          Approved
-        </span>
-        <span
-          :if={application.status == :archived}
-          class="bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300"
-        >
-          Archived
-        </span>
-      </:col>
-      <:col :let={application} label="form">
-        <.link patch={~p"/applications/#{application.form_id}/edit"}><%= application.form.name %></.link>
-      </:col>
-      <:col :let={application} label="Submissions">
-        <.link patch={~p"/applications/#{application.id}/submissions"}>
-          <%= application.count_of_submissions %>
-        </.link>
-      </:col>
-      <:action :let={application}>
-        <.link
-          patch={~p"/applications/#{application.id}/edit"}
-          class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-        >
-          Edit
-        </.link>
-      </:action>
-      <:action :let={application}>
-        <.link
-          patch={~p"/applications/#{application.id}/submissions"}
-          class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-        >
-          View submissions
-        </.link>
-      </:action>
-    </.table>
+      </:actions>
+    </.data_grid>
     """
   end
 
   def mount(
         _params,
         _session,
-        %{assigns: %{current_user_tenant: %{user_type: user_type}, current_tenant: tenant}} = socket
+        %{assigns: %{current_user_tenant: %{user_type: :user}, current_tenant: tenant}} = socket
       ) do
-    if user_type == :user and connected?(socket) do
+    if connected?(socket) do
       HousingAppWeb.Endpoint.subscribe("application:#{tenant}:created")
       HousingAppWeb.Endpoint.subscribe("application:#{tenant}:updated")
     end
@@ -148,11 +89,27 @@ defmodule HousingAppWeb.Live.Applications.Index do
      |> load_async_assigns()}
   end
 
-  def handle_params(_params, _url, socket) do
+  def mount(_params, _session, socket) do
+    {:ok,
+     socket
+     |> assign(loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
+  end
+
+  def handle_params(
+        _params,
+        _url,
+        %{assigns: %{current_user_tenant: %{user_type: :user}, current_tenant: tenant}} = socket
+      ) do
     {:noreply,
      socket
      |> assign(sidebar: :applications, page_title: "Applications")
      |> load_async_assigns()}
+  end
+
+  def handle_params(_params, _url, socket) do
+    {:noreply,
+     socket
+     |> assign(loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
   end
 
   defp load_async_assigns(
@@ -192,24 +149,6 @@ defmodule HousingAppWeb.Live.Applications.Index do
     end)
   end
 
-  defp load_async_assigns(%{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
-    socket
-    |> assign_async([:applications], fn ->
-      applications =
-        if connected?(socket) do
-          HousingApp.Management.Application.list!(actor: current_user_tenant, tenant: tenant)
-          |> Enum.sort_by(& &1.name)
-        else
-          []
-        end
-
-      {:ok,
-       %{
-         applications: applications
-       }}
-    end)
-  end
-
   def handle_info(%{event: "application-created", payload: %{payload: %{data: %{status: :approved}}}}, socket) do
     {:noreply, socket |> load_async_assigns()}
   end
@@ -220,5 +159,69 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
   def handle_info(_, socket) do
     {:noreply, socket}
+  end
+
+  def handle_event("view-row", %{"id" => id}, socket) do
+    send_update(HousingAppWeb.Components.Drawer.Application, id: "drawer-right", application_id: id)
+    {:noreply, socket}
+  end
+
+  def handle_event("edit-row", %{"id" => id}, socket) do
+    {:noreply, socket |> push_navigate(to: ~p"/applications/#{id}/edit")}
+  end
+
+  def handle_event("redirect", %{"url" => url}, socket) do
+    {:noreply, socket |> push_navigate(to: url)}
+  end
+
+  def handle_event(
+        "load-data",
+        %{},
+        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+      ) do
+    applications =
+      HousingApp.Management.Application.list!(actor: current_user_tenant, tenant: tenant)
+      |> Enum.sort_by(& &1.name)
+      |> Enum.map(fn b ->
+        %{
+          "id" => b.id,
+          "name" => b.name,
+          "status" => b.status,
+          "type" => b.type,
+          "submission_type" => b.submission_type,
+          "submissions" => b.count_of_submissions,
+          "submissions_link" => ~p"/applications/#{b.id}/submissions",
+          "form" => b.form.name,
+          "form_link" => ~p"/forms/#{b.form.id}/edit",
+          "actions" => [["Edit"], ["View"]]
+        }
+      end)
+
+    columns =
+      [
+        %{field: "name", minWidth: 200, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+        %{field: "id", minWidth: 120, pinned: "left", hide: true},
+        %{field: "status", maxWidth: 140, cellRenderer: "draftStatus"},
+        %{field: "type"},
+        %{field: "submission_type", headerName: "Submission Type"},
+        %{field: "submissions", headerName: "Submissions", cellRenderer: "link"},
+        %{field: "form", headerName: "Form", cellRenderer: "link"},
+        %{
+          field: "actions",
+          pinned: "right",
+          minWidth: 120,
+          maxWidth: 120,
+          filter: false,
+          editable: false,
+          sortable: false,
+          resizable: false
+        }
+      ]
+
+    {:reply,
+     %{
+       columns: columns,
+       data: applications
+     }, assign(socket, loading: false, count: length(applications))}
   end
 end
