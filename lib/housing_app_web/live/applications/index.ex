@@ -89,16 +89,16 @@ defmodule HousingAppWeb.Live.Applications.Index do
      |> load_async_assigns()}
   end
 
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     {:ok,
      socket
-     |> assign(loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
+     |> assign(params: params, loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
   end
 
   def handle_params(
         _params,
         _url,
-        %{assigns: %{current_user_tenant: %{user_type: :user}, current_tenant: tenant}} = socket
+        %{assigns: %{current_user_tenant: %{user_type: :user}}} = socket
       ) do
     {:noreply,
      socket
@@ -106,10 +106,10 @@ defmodule HousingAppWeb.Live.Applications.Index do
      |> load_async_assigns()}
   end
 
-  def handle_params(_params, _url, socket) do
+  def handle_params(params, _url, socket) do
     {:noreply,
      socket
-     |> assign(loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
+     |> assign(params: params, loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
   end
 
   defp load_async_assigns(
@@ -174,28 +174,12 @@ defmodule HousingAppWeb.Live.Applications.Index do
     {:noreply, socket |> push_navigate(to: url)}
   end
 
-  def handle_event(
-        "load-data",
-        %{},
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def handle_event("load-data", %{}, socket) do
     applications =
-      HousingApp.Management.Application.list!(actor: current_user_tenant, tenant: tenant)
+      socket
+      |> fetch_applications()
       |> Enum.sort_by(& &1.name)
-      |> Enum.map(fn b ->
-        %{
-          "id" => b.id,
-          "name" => b.name,
-          "status" => b.status,
-          "type" => b.type,
-          "submission_type" => b.submission_type,
-          "submissions" => b.count_of_submissions,
-          "submissions_link" => ~p"/applications/#{b.id}/submissions",
-          "form" => b.form.name,
-          "form_link" => ~p"/forms/#{b.form.id}/edit",
-          "actions" => [["Edit"], ["View"]]
-        }
-      end)
+      |> map_applications()
 
     columns =
       [
@@ -223,5 +207,33 @@ defmodule HousingAppWeb.Live.Applications.Index do
        columns: columns,
        data: applications
      }, assign(socket, loading: false, count: length(applications))}
+  end
+
+  defp fetch_applications(%{assigns: %{params: %{"type" => app_type}}} = socket)
+       when is_binary(app_type) and app_type != "" do
+    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    HousingApp.Management.Application.list_by_type!(app_type, actor: current_user_tenant, tenant: tenant)
+  end
+
+  defp fetch_applications(socket) do
+    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    HousingApp.Management.Application.list!(actor: current_user_tenant, tenant: tenant)
+  end
+
+  defp map_applications(applications) do
+    Enum.map(applications, fn b ->
+      %{
+        "id" => b.id,
+        "name" => b.name,
+        "status" => b.status,
+        "type" => b.type,
+        "submission_type" => b.submission_type,
+        "submissions" => b.count_of_submissions,
+        "submissions_link" => ~p"/applications/#{b.id}/submissions",
+        "form" => b.form.name,
+        "form_link" => ~p"/forms/#{b.form.id}/edit",
+        "actions" => [["Edit"], ["View"]]
+      }
+    end)
   end
 end

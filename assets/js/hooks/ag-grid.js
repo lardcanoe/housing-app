@@ -80,28 +80,29 @@ export default {
         window.addEventListener("view:clicked", this.handleViewClick);
         window.addEventListener("edit:clicked", this.handleEditClick);
         window.addEventListener("link:clicked", this.handleLinkClick);
-
-        this.pushEvent("load-data", {}, (reply, ref) => {
-            reply.columns.forEach(c => {
-                if (c.field === 'actions') {
-                    c.cellRenderer = ActionsValueRenderer
-                    c.valueFormatter = (_) => ''
-                } else if (c.field === 'email') {
-                    c.cellRenderer = function (params) {
-                        return '<a href="mailto:' + params.value + '" target="_blank">' + params.value + '</a>'
+        window.addEventListener("phx:page-loading-stop", info => {
+            this.pushEvent("load-data", {}, (reply, ref) => {
+                reply.columns.forEach(c => {
+                    if (c.field === 'actions') {
+                        c.cellRenderer = ActionsValueRenderer
+                        c.valueFormatter = (_) => ''
+                    } else if (c.field === 'email') {
+                        c.cellRenderer = function (params) {
+                            return '<a href="mailto:' + params.value + '" target="_blank">' + params.value + '</a>'
+                        }
                     }
-                }
+                });
+
+                // FUTURE: There is some bug that forces us to recreate instead of just update
+                this.setColorTheme();
+                this.gridOptions.columnDefs = reply.columns
+                this.gridOptions.rowData = reply.data
+                this.gridInstance = agGrid.createGrid(this.el, this.gridOptions);
+
+                // Ideally do this:
+                // this.gridInstance.updateGridOptions({ columnDefs: reply.columns, rowData: reply.data });
             });
-
-            // FUTURE: There is some bug that forces us to recreate instead of just update
-            this.setColorTheme();
-            this.gridOptions.columnDefs = reply.columns
-            this.gridOptions.rowData = reply.data
-            this.gridInstance = agGrid.createGrid(this.el, this.gridOptions);
-
-            // Ideally do this:
-            // this.gridInstance.updateGridOptions({ columnDefs: reply.columns, rowData: reply.data });
-        });
+        })
     },
 
     setColorTheme() {
