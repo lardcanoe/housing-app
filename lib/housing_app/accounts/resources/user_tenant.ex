@@ -14,6 +14,8 @@ defmodule HousingApp.Accounts.UserTenant do
       allow_nil? false
     end
 
+    attribute :api_key, :string, sensitive?: true
+
     create_timestamp :created_at
     update_timestamp :updated_at
 
@@ -49,6 +51,10 @@ defmodule HousingApp.Accounts.UserTenant do
     end
 
     policy action_type(:update) do
+      authorize_if HousingApp.Checks.IsTenantAdmin
+    end
+
+    policy action_type(:generate_api_key) do
       authorize_if HousingApp.Checks.IsTenantAdmin
     end
   end
@@ -94,8 +100,8 @@ defmodule HousingApp.Accounts.UserTenant do
     end
 
     # No actor set, and no auth performed
-    read :find_for_api do
-      argument :id, :uuid do
+    read :find_by_api_key do
+      argument :key, :string do
         allow_nil? false
       end
 
@@ -103,7 +109,17 @@ defmodule HousingApp.Accounts.UserTenant do
 
       prepare build(load: [:user, :tenant])
 
-      filter expr(id == ^arg(:id) and is_nil(archived_at))
+      filter expr(api_key == ^arg(:key) and is_nil(archived_at))
+    end
+
+    update :generate_api_key do
+      accept []
+      change set_attribute(:api_key, &HousingApp.Utils.Random.Token.generate/0)
+    end
+
+    update :revoke_api_key do
+      accept []
+      change set_attribute(:api_key, nil)
     end
   end
 
@@ -113,10 +129,14 @@ defmodule HousingApp.Accounts.UserTenant do
     define :get_default
     define :get_for_tenant, args: [:tenant_id]
     define :get_by_id, args: [:id]
-    define :find_for_api, args: [:id]
+    define :find_by_api_key, args: [:key]
+    define :generate_api_key
+    define :revoke_api_key
   end
 
   identities do
     identity :unique_user_and_tenant, [:user_id, :tenant_id]
+
+    identity :unique_api_key, [:api_key]
   end
 end

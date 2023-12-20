@@ -49,6 +49,7 @@ defmodule HousingApp.MixProject do
       {:open_api_spex, "~> 3.18"},
       {:redoc_ui_plug, "~> 0.2.1"},
       {:guardian, "~> 2.3.2"},
+      {:puid, "~> 2.3"},
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.2"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
