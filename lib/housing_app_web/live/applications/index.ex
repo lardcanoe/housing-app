@@ -190,6 +190,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
         %{field: "submission_type", headerName: "Submission Type"},
         %{field: "submissions", headerName: "Submissions", cellRenderer: "link"},
         %{field: "form", headerName: "Form", cellRenderer: "link"},
+        %{field: "time_period", headerName: "Time Period"},
         %{
           field: "actions",
           pinned: "right",
@@ -230,6 +231,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
         "submission_type" => b.submission_type,
         "submissions" => b.count_of_submissions,
         "submissions_link" => ~p"/applications/#{b.id}/submissions",
+        "time_period" => if(b.time_period, do: b.time_period.name, else: ""),
         "form" => b.form.name,
         "form_link" => ~p"/forms/#{b.form.id}/edit",
         "actions" => [["Edit"], ["View"]]

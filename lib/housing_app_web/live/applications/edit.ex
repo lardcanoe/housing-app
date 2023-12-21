@@ -7,7 +7,8 @@ defmodule HousingAppWeb.Live.Applications.Edit do
     <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update application</h2>
       <.input field={@ash_form[:name]} label="Name" />
-      <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
+      <.input type="select" options={@forms} field={@ash_form[:form_id]} label="Form" prompt="Select a form..." />
+      <.input type="select" options={@time_periods} field={@ash_form[:time_period_id]} label="Time Period" />
       <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
       <.input field={@ash_form[:type]} label="Type" />
       <.input type="select" options={@submission_types} field={@ash_form[:submission_type]} label="Submission Type" />
@@ -19,11 +20,9 @@ defmodule HousingAppWeb.Live.Applications.Edit do
     """
   end
 
-  def mount(
-        %{"id" => id},
-        _session,
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def mount(%{"id" => id}, _session, socket) do
+    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+
     case HousingApp.Management.Application.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
@@ -46,7 +45,8 @@ defmodule HousingAppWeb.Live.Applications.Edit do
         {:ok,
          assign(socket,
            ash_form: ash_form,
-           forms: approved_forms(current_user_tenant, tenant),
+           forms: all_form_options(current_user_tenant, tenant),
+           time_periods: time_period_options(current_user_tenant, tenant),
            status_options: status_options(),
            submission_types: submission_type_options(),
            sidebar: :applications,

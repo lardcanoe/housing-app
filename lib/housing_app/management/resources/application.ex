@@ -105,7 +105,7 @@ defmodule HousingApp.Management.Application do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:name, :description, :form_id, :status, :type, :submission_type]
+      accept [:name, :description, :form_id, :time_period_id, :status, :type, :submission_type]
 
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
@@ -113,7 +113,7 @@ defmodule HousingApp.Management.Application do
     read :list do
       prepare build(
                 select: [:id, :name, :type, :submission_type, :description, :status, :form_id],
-                load: [:form, :count_of_submissions],
+                load: [:form, :time_period, :count_of_submissions],
                 sort: [:name]
               )
 
@@ -138,7 +138,7 @@ defmodule HousingApp.Management.Application do
 
       prepare build(
                 select: [:id, :name, :type, :submission_type, :description, :status, :form_id],
-                load: [:form, :count_of_submissions],
+                load: [:form, :time_period, :count_of_submissions],
                 sort: [:name]
               )
 
@@ -152,7 +152,7 @@ defmodule HousingApp.Management.Application do
 
       get? true
 
-      prepare build(load: [:form, :count_of_submissions])
+      prepare build(load: [:form, :time_period, :count_of_submissions])
 
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end

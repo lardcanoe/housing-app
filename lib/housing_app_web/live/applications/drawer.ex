@@ -56,6 +56,12 @@ defmodule HousingAppWeb.Components.Drawer.Application do
         </dd>
         <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Status</dt>
         <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400"><%= @application.status %></dd>
+        <dt :if={@application.time_period} class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">
+          Time Period
+        </dt>
+        <dd :if={@application.time_period} class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
+          <%= @application.time_period.name %>
+        </dd>
       </dl>
     </div>
     """
