@@ -65,6 +65,11 @@ defmodule HousingApp.Management.Application do
       allow_nil? false
     end
 
+    belongs_to :time_period, HousingApp.Management.TimePeriod do
+      attribute_writable? true
+      # FUTURE:      allow_nil? false
+    end
+
     has_many :submissions, HousingApp.Management.ApplicationSubmission do
       source_attribute :id
       destination_attribute :application_id

@@ -5,6 +5,7 @@ defmodule HousingApp.Management.Registry do
 
   entries do
     entry HousingApp.Management.TenantSetting
+    entry HousingApp.Management.TimePeriod
     entry HousingApp.Management.Profile
     entry HousingApp.Management.Application
     entry HousingApp.Management.ApplicationSubmission
