@@ -43,14 +43,8 @@ defmodule HousingAppWeb.Live.Forms.Edit do
           )
           |> to_form()
 
-        status_options = [
-          {"Draft", :draft},
-          {"Approved (Published)", :approved},
-          {"Archived", :archived}
-        ]
-
         {:ok,
-         assign(socket, ash_form: ash_form, status_options: status_options, sidebar: :forms, page_title: "Edit Form")}
+         assign(socket, ash_form: ash_form, status_options: status_options(), sidebar: :forms, page_title: "Edit Form")}
     end
   end
 

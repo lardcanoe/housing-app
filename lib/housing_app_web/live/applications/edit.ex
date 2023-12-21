@@ -43,27 +43,12 @@ defmodule HousingAppWeb.Live.Applications.Edit do
           )
           |> to_form()
 
-        status_options = [
-          {"Draft", :draft},
-          {"Approved (Published)", :approved},
-          {"Archived", :archived}
-        ]
-
-        submission_types = [
-          {"Once", :once},
-          {"Many", :many}
-        ]
-
-        forms =
-          HousingApp.Management.Form.list_approved!(actor: current_user_tenant, tenant: tenant)
-          |> Enum.map(&{&1.name, &1.id})
-
         {:ok,
          assign(socket,
            ash_form: ash_form,
-           forms: forms,
-           status_options: status_options,
-           submission_types: submission_types,
+           forms: approved_forms(current_user_tenant, tenant),
+           status_options: status_options(),
+           submission_types: submission_type_options(),
            sidebar: :applications,
            page_title: "Edit Application"
          )}

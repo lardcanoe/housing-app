@@ -7,6 +7,7 @@ defmodule HousingAppWeb.Live.Applications.New do
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Application</h2>
       <.input field={@ash_form[:name]} label="Name" />
       <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
+      <.input type="select" options={@time_periods} field={@ash_form[:time_period_id]} label="Time Period" />
       <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
       <.input field={@ash_form[:type]} label="Type" />
       <.input type="select" options={@submission_types} field={@ash_form[:submission_type]} label="Submission Type" />
@@ -17,38 +18,16 @@ defmodule HousingAppWeb.Live.Applications.New do
     """
   end
 
-  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
-    ash_form =
-      HousingApp.Management.Application
-      |> AshPhoenix.Form.for_create(:new,
-        api: HousingApp.Management,
-        forms: [auto?: true],
-        actor: current_user_tenant,
-        tenant: tenant
-      )
-      |> to_form()
-
-    forms =
-      HousingApp.Management.Form.list_approved!(actor: current_user_tenant, tenant: tenant)
-      |> Enum.map(&{&1.name, &1.id})
-
-    status_options = [
-      {"Draft", :draft},
-      {"Approved (Published)", :approved},
-      {"Archived", :archived}
-    ]
-
-    submission_types = [
-      {"Once", :once},
-      {"Many", :many}
-    ]
+  def mount(_params, _session, socket) do
+    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
 
     {:ok,
      assign(socket,
-       ash_form: ash_form,
-       forms: forms,
-       status_options: status_options,
-       submission_types: submission_types,
+       ash_form: new_management_ash_form(HousingApp.Management.Application, current_user_tenant, tenant),
+       forms: approved_forms(current_user_tenant, tenant),
+       status_options: status_options(),
+       submission_types: submission_type_options(),
+       time_periods: time_period_options(current_user_tenant, tenant),
        sidebar: :applications,
        page_title: "New Application"
      )}

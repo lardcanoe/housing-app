@@ -67,18 +67,11 @@ defmodule HousingAppWeb.Components.TenantForms do
       }
       |> to_form()
 
-    db_forms =
-      HousingApp.Management.Form.list_approved!(actor: current_user_tenant, tenant: tenant)
-      |> Enum.map(&{&1.name, &1.id})
-
-    forms =
-      [{"-- Select a default --", nil}] ++ db_forms
-
     {:ok,
      socket
      |> assign(
        ash_form: ash_form,
-       forms: forms,
+       forms: approved_forms_with_empty(current_user_tenant, tenant),
        current_user_tenant: current_user_tenant,
        current_tenant: tenant
      )}

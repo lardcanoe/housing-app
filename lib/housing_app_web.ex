@@ -113,6 +113,7 @@ defmodule HousingAppWeb do
       import Phoenix.HTML
       import Phoenix.HTML.Form
       import HousingAppWeb.CoreComponents
+      import HousingAppWeb.PlatformTypes
       import HousingAppWeb.Components.DataGrid
       import HousingAppWeb.Gettext
 

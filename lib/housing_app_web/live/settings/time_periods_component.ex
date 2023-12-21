@@ -64,26 +64,10 @@ defmodule HousingAppWeb.Components.TimePeriodsForm do
   end
 
   def update(%{current_user_tenant: current_user_tenant, current_tenant: tenant}, socket) do
-    time_periods =
-      HousingApp.Management.TimePeriod.list!(
-        actor: current_user_tenant,
-        tenant: tenant
-      )
-
-    tp_form =
-      HousingApp.Management.TimePeriod
-      |> AshPhoenix.Form.for_create(:new,
-        api: HousingApp.Management,
-        forms: [auto?: true],
-        actor: current_user_tenant,
-        tenant: tenant
-      )
-      |> to_form()
-
     {:ok,
      assign(socket,
-       time_periods: time_periods,
-       tp_form: tp_form,
+       time_periods: time_periods(current_user_tenant, tenant),
+       tp_form: new_management_ash_form(HousingApp.Management.TimePeriod, current_user_tenant, tenant),
        current_user_tenant: current_user_tenant,
        current_tenant: tenant
      )}
@@ -98,25 +82,12 @@ defmodule HousingAppWeb.Components.TimePeriodsForm do
 
     case AshPhoenix.Form.submit(tp_form, params: data) do
       {:ok, _tp} ->
-        time_periods =
-          HousingApp.Management.TimePeriod.list!(
-            actor: current_user_tenant,
-            tenant: tenant
-          )
-
-        tp_form =
-          HousingApp.Management.TimePeriod
-          |> AshPhoenix.Form.for_create(:new,
-            api: HousingApp.Management,
-            forms: [auto?: true],
-            actor: current_user_tenant,
-            tenant: tenant
-          )
-          |> to_form()
-
         {:noreply,
          socket
-         |> assign(tp_form: tp_form, time_periods: time_periods)}
+         |> assign(
+           tp_form: new_management_ash_form(HousingApp.Management.TimePeriod, current_user_tenant, tenant),
+           time_periods: time_periods(current_user_tenant, tenant)
+         )}
 
       {:error, tp_form} ->
         {:noreply, assign(socket, tp_form: tp_form)}
