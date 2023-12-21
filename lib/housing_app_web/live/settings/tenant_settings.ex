@@ -1,4 +1,4 @@
-defmodule HousingAppWeb.Live.TenantSettings do
+defmodule HousingAppWeb.Live.Settings.TenantSettings do
   @moduledoc false
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}

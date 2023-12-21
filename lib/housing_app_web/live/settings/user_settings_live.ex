@@ -1,4 +1,4 @@
-defmodule HousingAppWeb.Live.UserSettingsLive do
+defmodule HousingAppWeb.Live.Settings.UserSettings do
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   # https://flowbite.com/blocks/application/crud-update-forms/#update-user-form
