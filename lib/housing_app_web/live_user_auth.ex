@@ -30,7 +30,8 @@ defmodule HousingAppWeb.LiveUserAuth do
     end
   end
 
-  def on_mount(:live_user_required, _params, %{"user" => user}, %{assigns: %{current_user: current_user}} = socket) when is_binary(user) do
+  def on_mount(:live_user_required, _params, %{"user" => user}, %{assigns: %{current_user: current_user}} = socket)
+      when is_binary(user) do
     case HousingApp.Accounts.UserTenant.get_default(actor: current_user) do
       {:error, _} ->
         {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
@@ -58,7 +59,7 @@ defmodule HousingAppWeb.LiveUserAuth do
   def mount_user_success(socket, current_user, user_tenant) do
     Ash.set_tenant("tenant_#{user_tenant.tenant_id}")
 
-    available_user_tenants = HousingApp.Accounts.list_user_tenants!(current_user.id, actor: current_user)
+    available_user_tenants = HousingApp.Accounts.UserTenant.find_for_user!(actor: current_user)
 
     socket
     |> assign(:current_user_tenant, user_tenant)

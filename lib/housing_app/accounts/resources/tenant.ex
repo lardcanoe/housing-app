@@ -36,5 +36,25 @@ defmodule HousingApp.Accounts.Tenant do
 
   actions do
     defaults [:create, :read, :update, :destroy]
+
+    read :get_by_id do
+      argument :id, :uuid do
+        allow_nil? false
+      end
+
+      get? true
+
+      filter expr(id == ^arg(:id) and is_nil(archived_at))
+    end
+
+    read :list_unscoped do
+    end
+  end
+
+  code_interface do
+    define_for HousingApp.Accounts
+
+    define :list_unscoped
+    define :get_by_id, args: [:id]
   end
 end

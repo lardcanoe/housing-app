@@ -79,6 +79,11 @@ defmodule HousingApp.Accounts.UserTenant do
       filter expr(user_id == ^actor(:id) and tenant_id == ^arg(:tenant_id) and is_nil(archived_at))
     end
 
+    read :find_for_user do
+      prepare build(load: [:user, :tenant])
+      filter expr(user_id == ^actor(:id) and is_nil(archived_at))
+    end
+
     read :get_by_id do
       argument :id, :uuid do
         allow_nil? false
@@ -100,7 +105,7 @@ defmodule HousingApp.Accounts.UserTenant do
     end
 
     # No actor set, and no auth performed
-    read :find_by_api_key do
+    read :get_by_api_key do
       argument :key, :string do
         allow_nil? false
       end
@@ -128,8 +133,9 @@ defmodule HousingApp.Accounts.UserTenant do
 
     define :get_default
     define :get_for_tenant, args: [:tenant_id]
+    define :find_for_user
     define :get_by_id, args: [:id]
-    define :find_by_api_key, args: [:key]
+    define :get_by_api_key, args: [:key]
     define :generate_api_key
     define :revoke_api_key
   end

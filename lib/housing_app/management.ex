@@ -55,45 +55,4 @@ defmodule HousingApp.Management do
         {:error, nil}
     end
   end
-
-  def create_profile(attrs, tenant_id, opts \\ []) do
-    attrs = Enum.into(attrs, %{"tenant_id" => tenant_id})
-
-    HousingApp.Management.Profile
-    |> Ash.Changeset.for_create(:create, attrs, opts)
-    |> Ash.Changeset.set_tenant("tenant_" <> tenant_id)
-    |> HousingApp.Management.create()
-  end
-
-  def list_profiles(tenant_id, opts \\ []) do
-    HousingApp.Management.Profile
-    |> Ash.Query.filter(tenant_id == ^tenant_id)
-    |> Ash.Query.set_actor(opts)
-    |> Ash.Query.set_tenant("tenant_" <> tenant_id)
-    |> HousingApp.Management.read!()
-  end
-
-  def get_profile!(id, tenant_id, opts \\ []) do
-    HousingApp.Management.Profile
-    |> Ash.Query.filter(id == ^id and tenant_id == ^tenant_id)
-    |> Ash.Query.set_actor(opts)
-    |> Ash.Query.set_tenant("tenant_" <> tenant_id)
-    |> HousingApp.Management.read_one!()
-  end
-
-  def get_application!(id, tenant_id, opts \\ []) do
-    HousingApp.Management.Application
-    |> Ash.Query.filter(id == ^id and tenant_id == ^tenant_id)
-    |> Ash.Query.set_actor(opts)
-    |> Ash.Query.set_tenant("tenant_" <> tenant_id)
-    |> HousingApp.Management.read_one!()
-  end
-
-  def list_applications!(tenant_id, opts \\ []) do
-    HousingApp.Management.Application
-    |> Ash.Query.filter(tenant_id == ^tenant_id)
-    |> Ash.Query.set_actor(opts)
-    |> Ash.Query.set_tenant("tenant_" <> tenant_id)
-    |> HousingApp.Management.read!()
-  end
 end

@@ -91,7 +91,9 @@ defmodule HousingAppWeb.Live.HomeLive do
     case AshPhoenix.Form.submit(socket.assigns.create_form, params: params) do
       {:ok, tenant} ->
         {:ok, _ut} =
-          HousingApp.Accounts.create_user_tenant(
+          HousingApp.Accounts.UserTenant
+          |> Ash.Changeset.for_create(
+            :create,
             %{
               tenant_id: tenant.id,
               user_id: socket.assigns.current_user.id,
@@ -99,6 +101,8 @@ defmodule HousingAppWeb.Live.HomeLive do
             },
             actor: socket.assigns.current_user
           )
+          |> Ash.Changeset.load([:user, :tenant])
+          |> HousingApp.Accounts.create()
 
         {:noreply,
          socket

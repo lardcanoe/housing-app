@@ -6,6 +6,6 @@ defmodule HousingApp.Repo do
   end
 
   def all_tenants do
-    HousingApp.Accounts.all_tenants!() |> Enum.map(fn t -> "tenant_#{t.id}" end)
+    HousingApp.Accounts.Tenant.list_unscoped!() |> Enum.map(fn t -> "tenant_#{t.id}" end)
   end
 end

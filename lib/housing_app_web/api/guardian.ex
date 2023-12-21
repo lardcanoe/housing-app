@@ -14,7 +14,7 @@ defmodule HousingAppWeb.Api.Guardian do
   end
 
   def resource_from_claims(%{"sub" => api_key}) do
-    case HousingApp.Accounts.UserTenant.find_by_api_key(api_key, authorize?: false) do
+    case HousingApp.Accounts.UserTenant.get_by_api_key(api_key, authorize?: false) do
       {:ok, resource} -> {:ok, resource}
       _ -> {:error, :reason_for_error}
     end

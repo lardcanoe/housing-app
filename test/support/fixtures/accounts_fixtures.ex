@@ -13,8 +13,18 @@ defmodule HousingApp.AccountsFixtures do
         "name" => "some name"
       })
 
-    {:ok, tenant} = HousingApp.Accounts.create_tenant(attrs)
+    {:ok, tenant} =
+      HousingApp.Accounts.Tenant
+      |> Ash.Changeset.for_create(:create, attrs)
+      |> HousingApp.Accounts.create()
+
     tenant
+  end
+
+  def tenant_direct(attrs) do
+    HousingApp.Accounts.Tenant
+    |> Ash.Changeset.for_create(:create, attrs)
+    |> HousingApp.Accounts.create()
   end
 
   @doc """
@@ -36,8 +46,20 @@ defmodule HousingApp.AccountsFixtures do
   @doc """
   Generate a user_tenant.
   """
-  def user_tenant_fixture(params, attrs) do
-    {:ok, ut} = HousingApp.Accounts.create_user_tenant(params, attrs)
+  def user_tenant_fixture!(params, opts) do
+    {:ok, ut} =
+      HousingApp.Accounts.UserTenant
+      |> Ash.Changeset.for_create(:create, params, opts)
+      |> Ash.Changeset.load([:user, :tenant])
+      |> HousingApp.Accounts.create()
+
     ut
+  end
+
+  def user_tenant_fixture(params, opts) do
+    HousingApp.Accounts.UserTenant
+    |> Ash.Changeset.for_create(:create, params, opts)
+    |> Ash.Changeset.load([:user, :tenant])
+    |> HousingApp.Accounts.create()
   end
 end
