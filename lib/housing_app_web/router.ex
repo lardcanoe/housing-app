@@ -132,7 +132,7 @@ defmodule HousingAppWeb.Router do
         live "/", Index, :index
       end
 
-      scope "/settings", Live.Settings.Settings do
+      scope "/settings", Live.Settings do
         live "/profile", UserSettings, :index
         live "/account", TenantSettings, :index
       end
