@@ -8,7 +8,7 @@ defmodule HousingAppWeb.Live.Forms.Edit do
     <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update form</h2>
       <.input field={@ash_form[:name]} label="Name" />
-      <.input type="textarea" field={@ash_form[:json_schema]} label="Schema" />
+      <.input type="textarea" rows="20" field={@ash_form[:json_schema]} label="Schema" />
       <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
       <.input field={@ash_form[:type]} label="Type" />
       <:actions>

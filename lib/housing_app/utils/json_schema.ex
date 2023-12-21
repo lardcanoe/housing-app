@@ -8,14 +8,14 @@ defmodule HousingApp.Utils.JsonSchema do
   def schema_to_aggrid_columns(%{"properties" => properties}, prefix) when not is_nil(properties) do
     properties
     |> Enum.map(fn {key, value} ->
-      headerName = HousingApp.Utils.String.titlize(key)
+      header_name = HousingApp.Utils.String.titlize(key)
 
       case value do
         %{"type" => "integer"} ->
           %{
             field: "#{prefix}#{key}",
             type: "numericColumn",
-            headerName: headerName,
+            headerName: header_name,
             headerTooltip: Map.get(value, "title")
           }
 
@@ -23,7 +23,7 @@ defmodule HousingApp.Utils.JsonSchema do
           %{
             field: "#{prefix}#{key}",
             cellRenderer: "booleanCheckmark",
-            headerName: headerName,
+            headerName: header_name,
             headerTooltip: Map.get(value, "title")
           }
 
@@ -32,7 +32,7 @@ defmodule HousingApp.Utils.JsonSchema do
             field: "#{prefix}#{key}",
             type: ["dateColumn", "nonEditableColumn"],
             width: 220,
-            headerName: headerName,
+            headerName: header_name,
             headerTooltip: Map.get(value, "title")
           }
 
@@ -40,13 +40,13 @@ defmodule HousingApp.Utils.JsonSchema do
           %{
             field: "#{prefix}#{key}",
             groupId: "#{prefix}#{key}Group",
-            headerName: headerName,
+            headerName: header_name,
             children: schema_to_aggrid_columns(value, "#{prefix}#{key}."),
             headerTooltip: Map.get(value, "title")
           }
 
         _ ->
-          %{field: "#{prefix}#{key}", headerName: headerName, headerTooltip: Map.get(value, "title")}
+          %{field: "#{prefix}#{key}", headerName: header_name, headerTooltip: Map.get(value, "title")}
       end
     end)
   end
@@ -63,14 +63,10 @@ defmodule HousingApp.Utils.JsonSchema do
     |> Enum.map(fn {key, value} ->
       prop = to_html_input(key, value, name_prefix)
 
-      if is_nil(prop) do
-        nil
-      else
-        if MapSet.member?(required, key) do
-          Map.put(prop, :required, "")
-        else
-          prop
-        end
+      cond do
+        is_nil(prop) -> nil
+        MapSet.member?(required, key) -> Map.put(prop, :required, "")
+        true -> prop
       end
     end)
     |> Enum.reject(&is_nil/1)
