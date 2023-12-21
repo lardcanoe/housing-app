@@ -58,6 +58,11 @@ defmodule HousingApp.Assignments.Booking do
       attribute_writable? true
       allow_nil? false
     end
+
+    belongs_to :application_submission, HousingApp.Management.ApplicationSubmission do
+      api HousingApp.Management
+      attribute_writable? true
+    end
   end
 
   policies do
@@ -84,12 +89,20 @@ defmodule HousingApp.Assignments.Booking do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:bed_id, :profile_id, :product_id, :start_at, :end_at, :data]
+      accept [:bed_id, :profile_id, :product_id, :application_submission_id, :start_at, :end_at, :data]
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
 
     read :list do
-      prepare build(load: [:product, profile: [user_tenant: [:user]], bed: [room: [:building]]])
+      prepare build(
+                load: [
+                  :product,
+                  :application_submission,
+                  profile: [user_tenant: [:user]],
+                  bed: [room: [:building]]
+                ]
+              )
+
       filter expr(is_nil(archived_at))
     end
 
@@ -125,7 +138,9 @@ defmodule HousingApp.Assignments.Booking do
         allow_nil? false
       end
 
-      prepare build(load: [:product, profile: [user_tenant: [:user]], bed: [room: [:building]]])
+      prepare build(
+                load: [:product, :application_submission, profile: [user_tenant: [:user]], bed: [room: [:building]]]
+              )
 
       get? true
 

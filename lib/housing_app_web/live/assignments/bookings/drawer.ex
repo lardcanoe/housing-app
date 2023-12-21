@@ -51,6 +51,16 @@ defmodule HousingAppWeb.Components.Drawer.Booking do
         >
           <%= @booking.id %>
         </dd>
+        <dt :if={@booking.application_submission} class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">
+          Application Submission
+        </dt>
+        <dd :if={@booking.application_submission} class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
+          <.link patch={
+            ~p"/applications/#{@booking.application_submission.application_id}/submissions/#{@booking.application_submission_id}"
+          }>
+            View
+          </.link>
+        </dd>
       </dl>
 
       <.json_view :if={@json_schema} data={@booking.data} json_schema={@json_schema} />

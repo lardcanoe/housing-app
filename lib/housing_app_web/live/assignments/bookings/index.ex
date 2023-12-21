@@ -61,6 +61,13 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
           "room" => b.bed.room.name,
           "bed" => b.bed.name,
           "rate" => "#{b.product.name} ($#{b.product.rate})",
+          "submission" => b.application_submission_id || "",
+          "submission_link" =>
+            if(b.application_submission_id,
+              do:
+                ~p"/applications/#{b.application_submission.application_id}/submissions/#{b.application_submission_id}",
+              else: ""
+            ),
           "start_at" => b.start_at,
           "end_at" => b.end_at,
           "data" => b.data,
@@ -88,7 +95,8 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
         %{field: "bed"},
         %{field: "rate"},
         %{field: "start_at", headerName: "Start", type: "dateColumn"},
-        %{field: "end_at", headerName: "End", type: "dateColumn"}
+        %{field: "end_at", headerName: "End", type: "dateColumn"},
+        %{field: "submission", headerName: "Submission", cellRenderer: "link"}
       ] ++
         form_columns ++
         [
