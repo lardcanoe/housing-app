@@ -6,6 +6,7 @@ defmodule HousingAppWeb.Live.Forms.New do
     <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Form</h2>
       <.input field={@ash_form[:name]} label="Name" />
+      <.input field={@ash_form[:description]} label="Description" />
       <.input type="textarea" field={@ash_form[:json_schema]} label="Schema" />
       <.input field={@ash_form[:type]} label="Type" />
       <:actions>
@@ -51,9 +52,11 @@ defmodule HousingAppWeb.Live.Forms.New do
        |> push_navigate(to: ~p"/forms")}
     else
       %{source: %{valid?: false}} = ash_form ->
+        IO.inspect(ash_form)
         {:noreply, assign(socket, ash_form: ash_form)}
 
       {:error, ash_form} ->
+        IO.inspect(ash_form)
         {:noreply, assign(socket, ash_form: ash_form)}
     end
   end

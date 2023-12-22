@@ -14,6 +14,12 @@ defmodule HousingApp.Management.ApplicationSubmission do
       allow_nil? false
     end
 
+    attribute :status, :atom do
+      constraints one_of: [:started, :completed, :rejected]
+      default :started
+      allow_nil? false
+    end
+
     create_timestamp :created_at
     update_timestamp :updated_at
 
@@ -43,6 +49,11 @@ defmodule HousingApp.Management.ApplicationSubmission do
     belongs_to :application, HousingApp.Management.Application do
       attribute_writable? true
       allow_nil? false
+    end
+
+    has_many :step_submissions, HousingApp.Management.ApplicationStepSubmission do
+      source_attribute :id
+      destination_attribute :application_submission_id
     end
   end
 
@@ -77,15 +88,23 @@ defmodule HousingApp.Management.ApplicationSubmission do
   actions do
     defaults [:create, :read, :update, :destroy]
 
+    create :start do
+      accept [:application_id]
+
+      change set_attribute(:data, %{})
+      change set_attribute(:tenant_id, actor(:tenant_id))
+      change set_attribute(:user_tenant_id, actor(:id))
+    end
+
     create :submit do
-      accept [:application_id, :data]
+      accept [:application_id, :data, :status]
 
       change set_attribute(:tenant_id, actor(:tenant_id))
       change set_attribute(:user_tenant_id, actor(:id))
     end
 
     update :resubmit do
-      accept [:data]
+      accept [:data, :status]
     end
 
     read :list_by_application do
@@ -127,6 +146,7 @@ defmodule HousingApp.Management.ApplicationSubmission do
   code_interface do
     define_for HousingApp.Management
 
+    define :start
     define :submit
     define :resubmit
     define :list_by_application, args: [:application_id]

@@ -61,6 +61,13 @@ defmodule HousingAppWeb.Live.Applications.Edit do
   end
 
   def handle_event("submit", %{"form" => params}, socket) do
+    # params =
+    #   Map.put(params, "steps", [
+    #     %{"title" => "Step 1", "step" => 1, "form_id" => "838a331e-93dd-4fb6-8099-0f88e660fbe4"},
+    #     %{"title" => "Step 2", "step" => 2, "form_id" => "cbd88d90-9cef-4689-ae1f-027984d4c91d"}
+    #   ])
+    #   |> IO.inspect()
+
     with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
          {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
       {:noreply,
@@ -69,9 +76,11 @@ defmodule HousingAppWeb.Live.Applications.Edit do
        |> push_navigate(to: ~p"/applications")}
     else
       %{source: %{valid?: false}} = ash_form ->
+        IO.inspect(ash_form.source)
         {:noreply, assign(socket, ash_form: ash_form)}
 
       {:error, ash_form} ->
+        IO.inspect(ash_form.source)
         {:noreply, assign(socket, ash_form: ash_form)}
     end
   end

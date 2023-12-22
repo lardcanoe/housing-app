@@ -40,6 +40,11 @@ defmodule HousingApp.Management.Application do
       allow_nil? false
     end
 
+    attribute :steps, {:array, HousingApp.Management.ApplicationStep} do
+      default []
+      allow_nil? false
+    end
+
     create_timestamp :created_at
     update_timestamp :updated_at
 
@@ -152,7 +157,7 @@ defmodule HousingApp.Management.Application do
 
       get? true
 
-      prepare build(load: [:form, :time_period, :count_of_submissions])
+      prepare build(load: [:form, :time_period, :count_of_submissions, steps: [:form]])
 
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
