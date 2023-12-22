@@ -10,16 +10,47 @@ defmodule HousingAppWeb.Live.Applications.Submit do
       <ol class="space-y-4 w-72 flex-column pr-8">
         <li :for={step <- @application.steps}>
           <div
-            class="w-full p-4 text-green-700 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:border-green-800 dark:text-green-400"
+            class={[
+              @current_step.id == step.id &&
+                "w-full p-4 text-blue-700 bg-blue-100 border border-blue-300 rounded-lg dark:bg-gray-800 dark:border-blue-800 dark:text-blue-400",
+              @current_step.id != step.id && !MapSet.member?(@completed_steps, step.id) &&
+                "w-full p-4 text-gray-900 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400",
+              @current_step.id != step.id && MapSet.member?(@completed_steps, step.id) &&
+                "w-full p-4 text-green-700 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:border-green-800 dark:text-green-400"
+            ]}
             role="alert"
             phx-click="navigate"
             phx-value-field="step"
-            phx-value-id={step.step}
+            phx-value-id={step.id}
+            style={@current_step.id != step.id && MapSet.member?(@completed_steps, step.id) && "cursor: pointer"}
           >
             <div class="flex items-center justify-between">
               <span class="sr-only"><%= step.title %></span>
               <h3 class="font-medium"><%= step.step %>. <%= step.title %></h3>
-              <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+              <svg
+                :if={@current_step.id == step.id}
+                class="rtl:rotate-180 w-4 h-4"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 14 10"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M1 5h12m0 0L9 1m4 4L9 9"
+                />
+              </svg>
+              <svg
+                :if={@current_step.id != step.id && MapSet.member?(@completed_steps, step.id)}
+                class="w-4 h-4"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 16 12"
+              >
                 <path
                   stroke="currentColor"
                   stroke-linecap="round"
@@ -36,7 +67,8 @@ defmodule HousingAppWeb.Live.Applications.Submit do
       <.simple_form autowidth={false} for={@form} phx-change="validate" phx-submit="submit-next">
         <.json_form form={@data_form} json_schema={@json_schema} embed={true} prefix="form" />
         <:actions>
-          <.button>Next</.button>
+          <.button :if={@current_step.id == @last_step_id}>Submit</.button>
+          <.button :if={@current_step.id != @last_step_id}>Next</.button>
         </:actions>
       </.simple_form>
     </div>
@@ -95,18 +127,22 @@ defmodule HousingAppWeb.Live.Applications.Submit do
         if app.steps != [] do
           step = app.steps |> Enum.find(&(&1.step == 1))
 
+          last_step_id = app.steps |> Enum.sort(&(&1.step > &2.step)) |> hd() |> then(& &1.id)
+
           {:ok,
            assign(socket,
              application: app,
              json_schema: step.form.json_schema |> Jason.decode!(),
              multi_step: true,
              current_step: step,
+             last_step_id: last_step_id,
              form: %{"data" => %{}} |> to_form(as: "form"),
              sidebar: :applications,
              page_title: "Submit Application"
            )
            |> load_form()
            |> load_step_submission()
+           |> load_completed_step_submissions()
            |> load_async_assigns()}
         else
           {:ok,
@@ -280,18 +316,21 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   end
 
   def handle_event("navigate", %{"field" => "step", "id" => id}, socket) do
-    %{assigns: %{application: application}} = socket
-    id = String.to_integer(id)
+    %{assigns: %{application: application, completed_steps: completed_steps}} = socket
 
-    step = application.steps |> Enum.find(&(&1.step == id))
+    if MapSet.member?(completed_steps, id) do
+      step = application.steps |> Enum.find(&(&1.id == id))
 
-    {:noreply,
-     socket
-     |> assign(
-       current_step: step,
-       json_schema: step.form.json_schema |> Jason.decode!(),
-       form: %{"data" => %{}} |> to_form(as: "form")
-     )}
+      {:noreply,
+       socket
+       |> assign(
+         current_step: step,
+         json_schema: step.form.json_schema |> Jason.decode!()
+       )
+       |> load_step_submission()}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("submit-next", %{"form" => %{"data" => json_data}}, socket) do
@@ -300,16 +339,17 @@ defmodule HousingAppWeb.Live.Applications.Submit do
         current_step: current_step,
         application: application,
         submission: submission,
+        completed_steps: completed_steps,
         current_user_tenant: current_user_tenant,
         current_tenant: tenant
       }
     } = socket
 
-    step = application.steps |> Enum.find(&(&1.id == current_step.id))
-
     update_step_submission(socket, json_data)
 
-    case application.steps |> Enum.find(&(&1.step == step.step + 1)) do
+    completed_steps = MapSet.put(completed_steps, current_step.id)
+
+    case application.steps |> Enum.find(&(&1.step == current_step.step + 1)) do
       nil ->
         HousingApp.Management.ApplicationSubmission.resubmit(
           submission,
@@ -328,6 +368,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
          socket
          |> assign(
            current_step: next_step,
+           completed_steps: completed_steps,
            json_schema: next_step.form.json_schema |> Jason.decode!()
          )
          |> load_step_submission()}
@@ -362,12 +403,34 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
       {:error, _} ->
         socket
-        |> assign(data_form: %{"data" => %{}} |> to_form(as: "data"))
+        |> assign(step_submission: nil, data_form: %{"data" => %{}} |> to_form(as: "data"))
     end
   end
 
-  defp update_step_submission(%{assigns: %{step_submission: step_submission}} = socket, json_data)
-       when not is_nil(step_submission) do
+  defp load_completed_step_submissions(socket) do
+    %{
+      assigns: %{
+        submission: submission,
+        current_user_tenant: current_user_tenant,
+        current_tenant: tenant
+      }
+    } = socket
+
+    completed_steps =
+      HousingApp.Management.ApplicationStepSubmission.list_by_application_submission!(submission.id,
+        actor: current_user_tenant,
+        tenant: tenant
+      )
+      |> MapSet.new(& &1.step_id)
+
+    socket |> assign(completed_steps: completed_steps)
+  end
+
+  defp update_step_submission(
+         %{assigns: %{current_step: current_step, step_submission: step_submission}} = socket,
+         json_data
+       )
+       when not is_nil(step_submission) and current_step.id == step_submission.id do
     %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
 
     HousingApp.Management.ApplicationStepSubmission.resubmit(

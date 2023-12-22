@@ -65,7 +65,8 @@ defmodule HousingAppWeb.Live.Applications.Edit do
     #   Map.put(params, "steps", [
     #     %{"title" => "Welcome", "step" => 1, "form_id" => "86dced97-9cd8-4a8d-bbc3-f4e0a4676a8a"},
     #     %{"title" => "Confirm ADA", "step" => 2, "form_id" => "838a331e-93dd-4fb6-8099-0f88e660fbe4"},
-    #     %{"title" => "Select a Learning Community", "step" => 3, "form_id" => "cbd88d90-9cef-4689-ae1f-027984d4c91d"}
+    #     %{"title" => "Select a Learning Community", "step" => 3, "form_id" => "cbd88d90-9cef-4689-ae1f-027984d4c91d"},
+    #     %{"title" => "Finish and submit", "step" => 4, "form_id" => "5105c01b-2cb4-4504-a4ae-fb99561d6432"}
     #   ])
 
     #   |> IO.inspect()
