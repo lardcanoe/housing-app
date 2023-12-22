@@ -63,9 +63,11 @@ defmodule HousingAppWeb.Live.Applications.Edit do
   def handle_event("submit", %{"form" => params}, socket) do
     # params =
     #   Map.put(params, "steps", [
-    #     %{"title" => "Step 1", "step" => 1, "form_id" => "838a331e-93dd-4fb6-8099-0f88e660fbe4"},
-    #     %{"title" => "Step 2", "step" => 2, "form_id" => "cbd88d90-9cef-4689-ae1f-027984d4c91d"}
+    #     %{"title" => "Welcome", "step" => 1, "form_id" => "86dced97-9cd8-4a8d-bbc3-f4e0a4676a8a"},
+    #     %{"title" => "Confirm ADA", "step" => 2, "form_id" => "838a331e-93dd-4fb6-8099-0f88e660fbe4"},
+    #     %{"title" => "Select a Learning Community", "step" => 3, "form_id" => "cbd88d90-9cef-4689-ae1f-027984d4c91d"}
     #   ])
+
     #   |> IO.inspect()
 
     with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),

@@ -110,6 +110,16 @@ defmodule HousingApp.Utils.JsonSchema do
           options: enum |> Enum.map(fn v -> {v, v} end)
         }
 
+      %{"type" => "string", "format" => "message"} ->
+        %{
+          type: "message",
+          key: key,
+          name: name,
+          id: id,
+          label: value["title"],
+          value: value["description"]
+        }
+
       %{"type" => "string"} ->
         %{
           type: value["format"] || "text",

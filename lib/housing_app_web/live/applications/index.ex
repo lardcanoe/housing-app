@@ -21,10 +21,16 @@ defmodule HousingAppWeb.Live.Applications.Index do
           patch={~p"/applications/#{application.id}"}
           class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
-          <span :if={application.submission_type == :once && MapSet.member?(@submissions.result, application.id)}>
+          <span :if={application.submission_type == :once && :completed == Map.get(@submissions.result, application.id)}>
+            Update
+          </span>
+          <span :if={application.submission_type == :once && :started == Map.get(@submissions.result, application.id)}>
+            Continue
+          </span>
+          <span :if={application.submission_type == :once && :rejected == Map.get(@submissions.result, application.id)}>
             Resubmit
           </span>
-          <span :if={application.submission_type != :once || !MapSet.member?(@submissions.result, application.id)}>
+          <span :if={application.submission_type != :once || !Map.has_key?(@submissions.result, application.id)}>
             Submit
           </span>
           <svg
@@ -136,9 +142,9 @@ defmodule HousingAppWeb.Live.Applications.Index do
             actor: current_user_tenant,
             tenant: tenant
           )
-          |> MapSet.new(& &1.application_id)
+          |> Map.new(&{&1.application_id, &1.status})
         else
-          MapSet.new()
+          Map.new()
         end
 
       {:ok,

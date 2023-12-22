@@ -100,12 +100,12 @@ defmodule HousingAppWeb.Live.Applications.Submit do
              application: app,
              json_schema: step.form.json_schema |> Jason.decode!(),
              multi_step: true,
-             current_step_id: step.id,
+             current_step: step,
              form: %{"data" => %{}} |> to_form(as: "form"),
              sidebar: :applications,
              page_title: "Submit Application"
            )
-           |> load_form(app)
+           |> load_form()
            |> load_step_submission()
            |> load_async_assigns()}
         else
@@ -118,17 +118,21 @@ defmodule HousingAppWeb.Live.Applications.Submit do
              sidebar: :applications,
              page_title: "Submit Application"
            )
-           |> load_form(app)
+           |> load_form()
            |> load_async_assigns()}
         end
     end
   end
 
-  def load_form(socket, %{submission_type: :many}) do
+  def load_form(%{assigns: %{application: %{submission_type: :many}}} = socket) do
+    # FUTURE: Should really find most recent, and if :started, then continue it
     socket |> assign(submission: nil, data_form: %{"profile_id" => "", "data" => %{}} |> to_form(as: "data"))
   end
 
-  def load_form(%{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket, application) do
+  def load_form(
+        %{assigns: %{application: application, current_user_tenant: current_user_tenant, current_tenant: tenant}} =
+          socket
+      ) do
     case HousingApp.Management.ApplicationSubmission.get_submission(application.id, current_user_tenant.id,
            actor: current_user_tenant,
            tenant: tenant
@@ -284,7 +288,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     {:noreply,
      socket
      |> assign(
-       current_step_id: step.id,
+       current_step: step,
        json_schema: step.form.json_schema |> Jason.decode!(),
        form: %{"data" => %{}} |> to_form(as: "form")
      )}
@@ -293,7 +297,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   def handle_event("submit-next", %{"form" => %{"data" => json_data}}, socket) do
     %{
       assigns: %{
-        current_step_id: step_id,
+        current_step: current_step,
         application: application,
         submission: submission,
         current_user_tenant: current_user_tenant,
@@ -301,7 +305,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
       }
     } = socket
 
-    step = application.steps |> Enum.find(&(&1.id == step_id))
+    step = application.steps |> Enum.find(&(&1.id == current_step.id))
 
     update_step_submission(socket, json_data)
 
@@ -323,24 +327,29 @@ defmodule HousingAppWeb.Live.Applications.Submit do
         {:noreply,
          socket
          |> assign(
-           current_step_id: next_step.id,
+           current_step: next_step,
            json_schema: next_step.form.json_schema |> Jason.decode!()
          )
          |> load_step_submission()}
     end
   end
 
+  # When the form has no data, we need to submit an empty map, such as when displaying a message
+  def handle_event("submit-next", %{}, socket) do
+    handle_event("submit-next", %{"form" => %{"data" => %{}}}, socket)
+  end
+
   defp load_step_submission(socket) do
     %{
       assigns: %{
         submission: submission,
-        current_step_id: step_id,
+        current_step: current_step,
         current_user_tenant: current_user_tenant,
         current_tenant: tenant
       }
     } = socket
 
-    case HousingApp.Management.ApplicationStepSubmission.get_by_step_id(submission.id, step_id,
+    case HousingApp.Management.ApplicationStepSubmission.get_by_step_id(submission.id, current_step.id,
            actor: current_user_tenant,
            tenant: tenant
          ) do
@@ -373,14 +382,14 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     %{
       assigns: %{
         submission: submission,
-        current_step_id: step_id,
+        current_step: current_step,
         current_user_tenant: current_user_tenant,
         current_tenant: tenant
       }
     } = socket
 
     HousingApp.Management.ApplicationStepSubmission.submit(
-      %{application_submission_id: submission.id, step_id: step_id, data: json_data},
+      %{application_submission_id: submission.id, step_id: current_step.id, data: json_data},
       actor: current_user_tenant,
       tenant: tenant
     )

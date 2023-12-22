@@ -240,7 +240,7 @@ defmodule HousingAppWeb.CoreComponents do
         HousingApp.Utils.JsonSchema.to_html_form_inputs(
           %{
             "properties" => %{
-              "data" => %{"type" => "object", "title" => "Custom Fields", "properties" => @json_schema["properties"]}
+              "data" => Map.merge(%{"type" => "object", "title" => "Custom Fields", "properties" => %{}}, @json_schema)
             }
           },
           @prefix
@@ -426,7 +426,7 @@ defmodule HousingAppWeb.CoreComponents do
   attr :type, :string,
     default: "text",
     values: ~w(checkbox color date datetime-local email file hidden month number password
-               range radio search select tel text textarea time url week)
+               range radio search select tel text textarea time url week message)
 
   attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
@@ -513,6 +513,19 @@ defmodule HousingAppWeb.CoreComponents do
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
       <.error :for={msg <- @errors}><%= msg %></.error>
+    </div>
+    """
+  end
+
+  def input(%{type: "message"} = assigns) do
+    ~H"""
+    <div class="mb-5">
+      <p :if={!is_nil(@label) and @label != ""} class="text-lg text-gray-500 dark:text-gray-400">
+        <%= @label %>
+      </p>
+      <p class="text-gray-500 dark:text-gray-400">
+        <%= @value %>
+      </p>
     </div>
     """
   end
