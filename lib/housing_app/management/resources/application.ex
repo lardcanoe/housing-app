@@ -191,7 +191,7 @@ defmodule HousingApp.Management.Application do
 
   aggregates do
     count :count_of_submissions, :submissions do
-      filter expr(is_nil(archived_at))
+      filter expr(status == :completed and is_nil(archived_at))
     end
   end
 

@@ -8,5 +8,8 @@ defmodule HousingApp.Assignments.Registry do
     entry HousingApp.Assignments.Room
     entry HousingApp.Assignments.Bed
     entry HousingApp.Assignments.Booking
+    entry HousingApp.Assignments.RoommateGroup
+    entry HousingApp.Assignments.Roommate
+    entry HousingApp.Assignments.RoommateInvite
   end
 end
