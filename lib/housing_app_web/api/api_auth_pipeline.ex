@@ -1,4 +1,5 @@
 defmodule HousingAppWeb.Api.AuthPipeline do
+  @moduledoc false
   use Guardian.Plug.Pipeline,
     otp_app: :housing_app,
     error_handler: HousingAppWeb.Api.AuthErrorHandler,

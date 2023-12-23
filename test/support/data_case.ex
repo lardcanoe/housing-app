@@ -18,12 +18,12 @@ defmodule HousingApp.DataCase do
 
   using do
     quote do
-      alias HousingApp.Repo
-
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
       import HousingApp.DataCase
+
+      alias HousingApp.Repo
     end
   end
 

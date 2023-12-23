@@ -1,4 +1,5 @@
 defmodule HousingAppWeb.Live.Profiles.Edit do
+  @moduledoc false
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :edit} = assigns) do
@@ -16,9 +17,9 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
          {:ok, profile_form} <- HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
       {:ok,
        assign(socket,
-         json_schema: profile_form.json_schema |> Jason.decode!(),
+         json_schema: Jason.decode!(profile_form.json_schema),
          profile: profile,
-         form: profile.data |> to_form(as: "profile"),
+         form: to_form(profile.data, as: "profile"),
          sidebar: :profiles,
          page_title: "Edit Profile"
        )}
@@ -54,11 +55,7 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
 
     case ExJsonSchema.Validator.validate(ref_schema, data) do
       :ok ->
-        profile
-        |> HousingApp.Management.Profile.submit(%{data: data},
-          actor: current_user_tenant,
-          tenant: tenant
-        )
+        HousingApp.Management.Profile.submit(profile, %{data: data}, actor: current_user_tenant, tenant: tenant)
 
         {:noreply,
          socket
@@ -66,7 +63,7 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
          |> push_navigate(to: ~p"/profiles")}
 
       {:error, _errors} ->
-        {:noreply, socket |> put_flash(:error, "Errors present in form submission.")}
+        {:noreply, put_flash(socket, :error, "Errors present in form submission.")}
     end
   end
 end

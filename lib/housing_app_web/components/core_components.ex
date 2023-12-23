@@ -16,8 +16,9 @@ defmodule HousingAppWeb.CoreComponents do
   """
   use Phoenix.Component
 
-  alias Phoenix.LiveView.JS
   import HousingAppWeb.Gettext
+
+  alias Phoenix.LiveView.JS
 
   @doc """
   Renders a modal.
@@ -948,8 +949,7 @@ defmodule HousingAppWeb.CoreComponents do
       end
 
     assigns =
-      assigns
-      |> assign(src: src)
+      assign(assigns, src: src)
 
     ~H"""
     <img

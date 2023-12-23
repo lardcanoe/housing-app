@@ -25,8 +25,8 @@ defmodule HousingAppWeb.Live.Forms.View do
         {:ok,
          assign(socket,
            form_id: id,
-           json_schema: form.json_schema |> Jason.decode!(),
-           form: %{} |> to_form(as: "submit-form"),
+           json_schema: Jason.decode!(form.json_schema),
+           form: to_form(%{}, as: "submit-form"),
            sidebar: :forms,
            page_title: "View Form"
          )}
@@ -57,7 +57,7 @@ defmodule HousingAppWeb.Live.Forms.View do
 
             {:noreply,
              socket
-             |> assign(form: data |> to_form())
+             |> assign(form: to_form(data))
              |> put_flash(:error, "Error submitting")}
 
           {:ok, _submission} ->
@@ -72,7 +72,7 @@ defmodule HousingAppWeb.Live.Forms.View do
 
         {:noreply,
          socket
-         |> assign(form: data |> to_form())
+         |> assign(form: to_form(data))
          |> put_flash(:error, "Errors present in form submission.")}
     end
   end

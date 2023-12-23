@@ -66,7 +66,7 @@ defmodule HousingAppWeb.Components.Drawer.Profile do
   end
 
   def mount(socket) do
-    {:ok, socket |> assign(profile: nil, bookings: [])}
+    {:ok, assign(socket, profile: nil, bookings: [])}
   end
 
   def update(
@@ -75,11 +75,11 @@ defmodule HousingAppWeb.Components.Drawer.Profile do
       ) do
     with {:ok, profile} <-
            HousingApp.Management.Profile.get_by_id(profile_id, actor: current_user_tenant, tenant: tenant),
-         {:ok, profile_form} <- HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant),
-         bookings <-
-           HousingApp.Assignments.Booking.list_by_profile!(profile.id, actor: current_user_tenant, tenant: tenant) do
-      {:ok,
-       assign(socket, json_schema: profile_form.json_schema |> Jason.decode!(), profile: profile, bookings: bookings)}
+         {:ok, profile_form} <- HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
+      bookings =
+        HousingApp.Assignments.Booking.list_by_profile!(profile.id, actor: current_user_tenant, tenant: tenant)
+
+      {:ok, assign(socket, json_schema: Jason.decode!(profile_form.json_schema), profile: profile, bookings: bookings)}
     else
       {:error, _} ->
         {:ok, assign(socket, profile: nil, bookings: [])}

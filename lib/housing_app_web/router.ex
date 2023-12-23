@@ -2,8 +2,8 @@ defmodule HousingAppWeb.Router do
   use HousingAppWeb, :router
   use AshAuthentication.Phoenix.Router
 
-  import HousingAppWeb.Gettext
   import AshAdmin.Router
+  import HousingAppWeb.Gettext
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -129,6 +129,10 @@ defmodule HousingAppWeb.Router do
 
       scope "/reporting", Live.Reporting do
         # TODO: pipe_through [:require_authenticated_non_end_user]
+        live "/", Index, :index
+      end
+
+      scope "/roommates", Live.Roommates do
         live "/", Index, :index
       end
 

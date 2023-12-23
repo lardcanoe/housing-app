@@ -24,9 +24,9 @@ defmodule HousingAppWeb do
       use Phoenix.Router, helpers: true
 
       # Import common connection and controller functions to use in pipelines
-      import Plug.Conn
       import Phoenix.Controller
       import Phoenix.LiveView.Router
+      import Plug.Conn
     end
   end
 
@@ -42,8 +42,9 @@ defmodule HousingAppWeb do
         formats: [:html, :json],
         layouts: [html: HousingAppWeb.Layouts]
 
-      import Plug.Conn
       import HousingAppWeb.Gettext
+      import Plug.Conn
+
       alias HousingAppWeb.Router.Helpers, as: Routes
 
       unquote(verified_routes())
@@ -58,11 +59,11 @@ defmodule HousingAppWeb do
         root: "lib/housing_app_web/templates",
         namespace: HousingAppWeb
 
+      use Phoenix.Component
+
       # Import convenience functions from controllers
       import Phoenix.Controller,
         only: [get_csrf_token: 0, view_module: 1, view_template: 1]
-
-      use Phoenix.Component
 
       import Phoenix.View
 
@@ -73,13 +74,13 @@ defmodule HousingAppWeb do
 
   def live_view(opts \\ []) do
     quote do
-      @opts Keyword.merge(
-              [
-                layout: {HousingAppWeb.Layouts, :empty}
-              ],
-              unquote(opts)
-            )
-      use Phoenix.LiveView, @opts
+      use Phoenix.LiveView,
+          Keyword.merge(
+            [
+              layout: {HousingAppWeb.Layouts, :empty}
+            ],
+            unquote(opts)
+          )
 
       on_mount HousingAppWeb.LiveFlash
 
@@ -110,15 +111,15 @@ defmodule HousingAppWeb do
 
   defp html_helpers do
     quote do
+      import HousingAppWeb.Components.DataGrid
+      import HousingAppWeb.CoreComponents
+      import HousingAppWeb.Gettext
+      import HousingAppWeb.PlatformTypes
       import Phoenix.HTML
       import Phoenix.HTML.Form
-      import HousingAppWeb.CoreComponents
-      import HousingAppWeb.PlatformTypes
-      import HousingAppWeb.Components.DataGrid
-      import HousingAppWeb.Gettext
 
-      alias Phoenix.LiveView.JS
       alias HousingAppWeb.Router.Helpers, as: Routes
+      alias Phoenix.LiveView.JS
 
       unquote(verified_routes())
     end

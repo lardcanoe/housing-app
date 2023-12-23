@@ -66,23 +66,23 @@ defmodule HousingAppWeb.Components.Drawer.Building do
   end
 
   def mount(socket) do
-    {:ok, socket |> assign(json_schema: nil, building: nil)}
+    {:ok, assign(socket, json_schema: nil, building: nil)}
   end
 
   def update(
         %{building_id: building_id},
         %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
-    with {:ok, building} <-
-           HousingApp.Assignments.Building.get_by_id(building_id, actor: current_user_tenant, tenant: tenant) do
-      json_schema =
-        case HousingApp.Management.get_building_form(actor: current_user_tenant, tenant: tenant) do
-          {:ok, form} -> form.json_schema |> Jason.decode!()
-          {:error, _} -> nil
-        end
+    case HousingApp.Assignments.Building.get_by_id(building_id, actor: current_user_tenant, tenant: tenant) do
+      {:ok, building} ->
+        json_schema =
+          case HousingApp.Management.get_building_form(actor: current_user_tenant, tenant: tenant) do
+            {:ok, form} -> Jason.decode!(form.json_schema)
+            {:error, _} -> nil
+          end
 
-      {:ok, assign(socket, json_schema: json_schema, building: building)}
-    else
+        {:ok, assign(socket, json_schema: json_schema, building: building)}
+
       {:error, _} ->
         {:ok, assign(socket, building: nil, bookings: [])}
     end

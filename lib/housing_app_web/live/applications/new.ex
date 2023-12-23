@@ -1,4 +1,5 @@
 defmodule HousingAppWeb.Live.Applications.New do
+  @moduledoc false
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :new} = assigns) do

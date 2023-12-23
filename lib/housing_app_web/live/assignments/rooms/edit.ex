@@ -66,16 +66,18 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
           |> to_form(as: "room")
 
         buildings =
-          HousingApp.Assignments.Building.list!(actor: current_user_tenant, tenant: tenant)
+          [actor: current_user_tenant, tenant: tenant]
+          |> HousingApp.Assignments.Building.list!()
           |> Enum.map(&{&1.name, &1.id})
 
         products =
-          HousingApp.Accounting.Product.list!(actor: current_user_tenant, tenant: tenant)
+          [actor: current_user_tenant, tenant: tenant]
+          |> HousingApp.Accounting.Product.list!()
           |> Enum.map(&{&1.name, &1.id})
 
         json_schema =
           case HousingApp.Management.get_room_form(actor: current_user_tenant, tenant: tenant) do
-            {:ok, room_form} -> room_form.json_schema |> Jason.decode!()
+            {:ok, room_form} -> Jason.decode!(room_form.json_schema)
             {:error, _} -> nil
           end
 

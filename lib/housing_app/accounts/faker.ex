@@ -10,7 +10,8 @@ defmodule HousingApp.Accounts.Faker do
   def generate(%{"students" => students}, [tenant: tenant, actor: actor] = _opts) do
     user_count = String.to_integer(students)
 
-    Faker.Util.sample_uniq(user_count, &Faker.Internet.email/0)
+    user_count
+    |> Faker.Util.sample_uniq(&Faker.Internet.email/0)
     |> Enum.map(fn email ->
       {:ok, user} =
         HousingApp.Accounts.User

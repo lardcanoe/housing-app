@@ -132,35 +132,32 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Form do
 
   def get_booking_form_schema(current_user_tenant, tenant) do
     case HousingApp.Management.get_booking_form(actor: current_user_tenant, tenant: tenant) do
-      {:ok, form} -> form.json_schema |> Jason.decode!()
+      {:ok, form} -> Jason.decode!(form.json_schema)
       {:error, _} -> nil
     end
   end
 
   def load_async_assigns(%{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
-    socket
-    |> assign_async([:beds, :profiles, :products], fn ->
+    assign_async(socket, [:beds, :profiles, :products], fn ->
       profiles =
-        HousingApp.Management.Profile.list!(actor: current_user_tenant, tenant: tenant)
+        [actor: current_user_tenant, tenant: tenant]
+        |> HousingApp.Management.Profile.list!()
         |> Enum.sort_by(& &1.user_tenant.user.name)
         |> Enum.map(&{&1.user_tenant.user.name, &1.id})
 
       beds =
-        HousingApp.Assignments.Bed.list!(actor: current_user_tenant, tenant: tenant)
+        [actor: current_user_tenant, tenant: tenant]
+        |> HousingApp.Assignments.Bed.list!()
         |> Enum.map(&{"#{&1.room.building.name} / #{&1.room.name} / #{&1.name}", &1.id})
         |> Enum.sort_by(fn {name, _} -> name end)
 
       products =
-        HousingApp.Accounting.Product.list!(actor: current_user_tenant, tenant: tenant)
+        [actor: current_user_tenant, tenant: tenant]
+        |> HousingApp.Accounting.Product.list!()
         |> Enum.map(&{"#{&1.name}, $#{&1.rate}", &1.id})
         |> Enum.sort_by(fn {name, _} -> name end)
 
-      {:ok,
-       %{
-         profiles: profiles,
-         beds: beds,
-         products: products
-       }}
+      {:ok, %{profiles: profiles, beds: beds, products: products}}
     end)
   end
 

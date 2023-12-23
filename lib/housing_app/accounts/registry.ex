@@ -1,4 +1,5 @@
 defmodule HousingApp.Accounts.Registry do
+  @moduledoc false
   use Ash.Registry
 
   entries do

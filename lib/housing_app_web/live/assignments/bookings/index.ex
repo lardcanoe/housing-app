@@ -42,7 +42,7 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
   end
 
   def handle_event("edit-row", %{"id" => id}, socket) do
-    {:noreply, socket |> push_navigate(to: ~p"/assignments/bookings/#{id}/edit")}
+    {:noreply, push_navigate(socket, to: ~p"/assignments/bookings/#{id}/edit")}
   end
 
   def handle_event(
@@ -51,7 +51,8 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
         %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
     bookings =
-      HousingApp.Assignments.Booking.list!(actor: current_user_tenant, tenant: tenant)
+      [actor: current_user_tenant, tenant: tenant]
+      |> HousingApp.Assignments.Booking.list!()
       |> Enum.sort_by(& &1.profile.user_tenant.user.name)
       |> Enum.map(fn b ->
         %{

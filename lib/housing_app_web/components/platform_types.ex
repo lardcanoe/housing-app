@@ -22,7 +22,8 @@ defmodule HousingAppWeb.PlatformTypes do
 
   def time_period_options(actor, tenant) do
     user_defined =
-      time_periods(actor, tenant)
+      actor
+      |> time_periods(tenant)
       |> Enum.map(&{&1.name, &1.id})
 
     [@empty_option] ++ user_defined
@@ -37,7 +38,8 @@ defmodule HousingAppWeb.PlatformTypes do
   end
 
   def all_form_options(actor, tenant) do
-    all_forms(actor, tenant)
+    actor
+    |> all_forms(tenant)
     |> Enum.map(&{&1.name, &1.id})
   end
 
@@ -50,7 +52,8 @@ defmodule HousingAppWeb.PlatformTypes do
   end
 
   def approved_form_options(actor, tenant) do
-    approved_forms(actor, tenant)
+    actor
+    |> approved_forms(tenant)
     |> Enum.map(&{&1.name, &1.id})
   end
 
@@ -59,7 +62,8 @@ defmodule HousingAppWeb.PlatformTypes do
   end
 
   def new_management_ash_form(resource, actor, tenant) do
-    AshPhoenix.Form.for_create(resource, :new,
+    resource
+    |> AshPhoenix.Form.for_create(:new,
       api: HousingApp.Management,
       forms: [auto?: true],
       actor: actor,

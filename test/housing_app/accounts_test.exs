@@ -4,15 +4,15 @@ defmodule HousingApp.AccountsTest do
   use HousingApp.DataCase
 
   describe "tenants" do
-    alias HousingApp.Accounts.Tenant
-
     import HousingApp.AccountsFixtures
+
+    alias HousingApp.Accounts.Tenant
 
     @invalid_attrs %{"name" => nil}
 
     test "list_tenants/0 returns all tenants" do
       tenant = tenant_fixture()
-      assert HousingApp.Accounts.Tenant.list_unscoped!() |> Enum.map(& &1.id) == [tenant.id]
+      assert Enum.map(HousingApp.Accounts.Tenant.list_unscoped!(), & &1.id) == [tenant.id]
     end
 
     test "get_tenant!/1 returns the tenant with given id" do
@@ -29,7 +29,7 @@ defmodule HousingApp.AccountsTest do
       update_attrs = %{"name" => "some updated name"}
 
       assert {:ok, %Tenant{} = updated_tenant} =
-               Ash.Changeset.for_update(tenant, :update, update_attrs) |> HousingApp.Accounts.update()
+               tenant |> Ash.Changeset.for_update(:update, update_attrs) |> HousingApp.Accounts.update()
 
       assert updated_tenant.name == "some updated name"
     end
@@ -38,7 +38,7 @@ defmodule HousingApp.AccountsTest do
       tenant = tenant_fixture()
 
       assert {:error, %Ash.Error.Invalid{}} =
-               Ash.Changeset.for_update(tenant, :update, @invalid_attrs) |> HousingApp.Accounts.update()
+               tenant |> Ash.Changeset.for_update(:update, @invalid_attrs) |> HousingApp.Accounts.update()
 
       assert tenant.name == HousingApp.Accounts.Tenant.get_by_id!(tenant.id).name
     end
@@ -104,7 +104,8 @@ defmodule HousingApp.AccountsTest do
       assert user_tenant.user_type == :user
 
       {:error, %Ash.Error.Forbidden{}} =
-        Ash.Changeset.for_update(user_tenant, :update, %{"user_type" => :admin}, actor: user_tenant)
+        user_tenant
+        |> Ash.Changeset.for_update(:update, %{"user_type" => :admin}, actor: user_tenant)
         |> HousingApp.Accounts.update()
 
       assert HousingApp.Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).user_type == :user
@@ -120,7 +121,8 @@ defmodule HousingApp.AccountsTest do
       assert user_tenant.user_type == :staff
 
       {:error, %Ash.Error.Forbidden{}} =
-        Ash.Changeset.for_update(user_tenant, :update, %{"user_type" => :admin}, actor: user_tenant)
+        user_tenant
+        |> Ash.Changeset.for_update(:update, %{"user_type" => :admin}, actor: user_tenant)
         |> HousingApp.Accounts.update()
 
       assert HousingApp.Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).user_type == :staff
@@ -136,7 +138,8 @@ defmodule HousingApp.AccountsTest do
       assert user_tenant.user_type == :admin
 
       {:ok, _} =
-        Ash.Changeset.for_update(user_tenant, :update, %{"user_type" => :staff}, actor: user_tenant)
+        user_tenant
+        |> Ash.Changeset.for_update(:update, %{"user_type" => :staff}, actor: user_tenant)
         |> HousingApp.Accounts.update()
 
       assert HousingApp.Accounts.UserTenant.get_by_id!(user_tenant.id, actor: user).user_type == :staff

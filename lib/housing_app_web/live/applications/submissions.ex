@@ -31,8 +31,7 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
 
       {:ok, application} ->
         {:ok,
-         socket
-         |> assign(
+         assign(socket,
            application: application,
            count: 0,
            loading: true,
@@ -52,7 +51,7 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
         %{assigns: %{application: application, current_user_tenant: current_user_tenant, current_tenant: tenant}} =
           socket
       ) do
-    schema = application.form.json_schema |> Jason.decode!()
+    schema = Jason.decode!(application.form.json_schema)
 
     columns =
       [
@@ -71,8 +70,8 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
          ) do
       {:ok, submissions} ->
         data =
-          submissions
-          |> Enum.map(
+          Enum.map(
+            submissions,
             &Enum.into(&1.data, %{
               "id" => &1.id,
               "metadata" => %{

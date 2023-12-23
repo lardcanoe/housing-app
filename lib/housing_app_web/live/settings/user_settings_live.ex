@@ -1,4 +1,5 @@
 defmodule HousingAppWeb.Live.Settings.UserSettings do
+  @moduledoc false
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   # https://flowbite.com/blocks/application/crud-update-forms/#update-user-form
@@ -83,10 +84,11 @@ defmodule HousingAppWeb.Live.Settings.UserSettings do
            ),
          {:ok, profile_form} <- HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
       {:ok,
-       assign(socket,
-         json_schema: profile_form.json_schema |> Jason.decode!(),
+       socket
+       |> assign(
+         json_schema: Jason.decode!(profile_form.json_schema),
          profile: profile,
-         profile_form: profile.data |> to_form(as: "profile"),
+         profile_form: to_form(profile.data, as: "profile"),
          user_form: user_form(current_user),
          page_title: "Profile Settings"
        )
@@ -102,7 +104,8 @@ defmodule HousingAppWeb.Live.Settings.UserSettings do
 
   def mount(_params, _session, %{assigns: %{current_user: current_user}} = socket) do
     {:ok,
-     assign(socket, user_form: user_form(current_user), profile_form: nil, page_title: "Profile Settings")
+     socket
+     |> assign(user_form: user_form(current_user), profile_form: nil, page_title: "Profile Settings")
      |> push_event("init-dark-mode", %{})}
   end
 
@@ -131,9 +134,7 @@ defmodule HousingAppWeb.Live.Settings.UserSettings do
   def handle_event("submit-user", %{"form" => params}, socket) do
     case AshPhoenix.Form.submit(socket.assigns.user_form, params: params) do
       {:ok, _user} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Successfully updated your profile.")}
+        {:noreply, put_flash(socket, :info, "Successfully updated your profile.")}
 
       {:error, user_form} ->
         {:noreply, assign(socket, user_form: user_form)}
@@ -152,21 +153,22 @@ defmodule HousingAppWeb.Live.Settings.UserSettings do
           }
         } = socket
       ) do
-    with data <- HousingApp.Utils.JsonSchema.cast_params(json_schema, data),
-         ref_schema <- ExJsonSchema.Schema.resolve(json_schema),
-         :ok <- ExJsonSchema.Validator.validate(ref_schema, data),
+    data = HousingApp.Utils.JsonSchema.cast_params(json_schema, data)
+    ref_schema = ExJsonSchema.Schema.resolve(json_schema)
+
+    with :ok <- ExJsonSchema.Validator.validate(ref_schema, data),
          {:ok, profile} <-
            HousingApp.Management.Profile.submit(profile, %{data: data}, actor: current_user_tenant, tenant: tenant) do
       {:noreply,
        socket
        |> assign(
          profile: profile,
-         profile_form: data |> to_form(as: "profile")
+         profile_form: to_form(data, as: "profile")
        )
        |> put_flash(:info, "Updated profile")}
     else
       {:error, _errors} ->
-        {:noreply, socket |> put_flash(:error, "Errors present in form submission.")}
+        {:noreply, put_flash(socket, :error, "Errors present in form submission.")}
     end
   end
 end

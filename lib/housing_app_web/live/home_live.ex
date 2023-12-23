@@ -1,4 +1,5 @@
 defmodule HousingAppWeb.Live.HomeLive do
+  @moduledoc false
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :index, current_user_tenant: %{user_type: :user}} = assigns) do
@@ -67,13 +68,7 @@ defmodule HousingAppWeb.Live.HomeLive do
       |> to_form()
 
     faker_form =
-      %{
-        "products" => 0,
-        "buildings" => 0,
-        "rooms" => 0,
-        "students" => 0
-      }
-      |> to_form()
+      to_form(%{"products" => 0, "buildings" => 0, "rooms" => 0, "students" => 0})
 
     {:ok, assign(socket, create_form: form, faker_form: faker_form, page_title: "Dashboard")}
   end
@@ -127,7 +122,7 @@ defmodule HousingAppWeb.Live.HomeLive do
       )
     end)
 
-    {:noreply, socket |> put_flash(:info, "Generating fake data...")}
+    {:noreply, put_flash(socket, :info, "Generating fake data...")}
   end
 
   def handle_info({ref, ret}, socket) do
@@ -135,10 +130,10 @@ defmodule HousingAppWeb.Live.HomeLive do
 
     case ret do
       {:ok, _} ->
-        {:noreply, socket |> put_flash(:info, "Generated fake data!")}
+        {:noreply, put_flash(socket, :info, "Generated fake data!")}
 
       {:error, error} ->
-        {:noreply, socket |> put_flash(:error, "Error generating fake data: #{inspect(error)}")}
+        {:noreply, put_flash(socket, :error, "Error generating fake data: #{inspect(error)}")}
     end
   end
 end

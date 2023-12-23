@@ -14,7 +14,8 @@ defmodule HousingApp.Assignments.Faker do
 
       products = HousingApp.Accounting.Product.list!(tenant: tenant, actor: actor)
 
-      Faker.Util.sample_uniq(buildings, &Faker.Person.En.last_name/0)
+      buildings
+      |> Faker.Util.sample_uniq(&Faker.Person.En.last_name/0)
       |> Enum.map(fn name ->
         {:ok, building} =
           HousingApp.Assignments.Building
@@ -38,10 +39,8 @@ defmodule HousingApp.Assignments.Faker do
   end
 
   defp generate_rooms(building_id, floors, rooms_per_floor, products, tenant: tenant, actor: actor) do
-    1..floors
-    |> Enum.map(fn floor ->
-      1..rooms_per_floor
-      |> Enum.map(fn room ->
+    Enum.map(1..floors, fn floor ->
+      Enum.map(1..rooms_per_floor, fn room ->
         {:ok, room} =
           HousingApp.Assignments.Room
           |> Ash.Changeset.for_create(
@@ -51,7 +50,7 @@ defmodule HousingApp.Assignments.Faker do
               floor: floor,
               building_id: building_id,
               max_capacity: :rand.uniform(3),
-              product_id: Enum.take_random(products, 1) |> List.first() |> Map.get(:id),
+              product_id: products |> Enum.take_random(1) |> List.first() |> Map.get(:id),
               tenant_id: actor.tenant_id
             },
             actor: actor,
@@ -65,18 +64,12 @@ defmodule HousingApp.Assignments.Faker do
   end
 
   defp generate_beds(room, tenant: tenant, actor: actor) do
-    1..room.max_capacity
-    |> Enum.map(fn bed ->
+    Enum.map(1..room.max_capacity, fn bed ->
       {:ok, _bed} =
         HousingApp.Assignments.Bed
         |> Ash.Changeset.for_create(
           :create,
-          %{
-            name: "Bed #{bed}",
-            room_id: room.id,
-            product_id: room.product_id,
-            tenant_id: actor.tenant_id
-          },
+          %{name: "Bed #{bed}", room_id: room.id, product_id: room.product_id, tenant_id: actor.tenant_id},
           actor: actor,
           tenant: tenant
         )

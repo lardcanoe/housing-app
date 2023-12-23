@@ -52,7 +52,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
   end
 
   def handle_event("edit-row", %{"id" => id}, socket) do
-    {:noreply, socket |> push_navigate(to: ~p"/profiles/#{id}/edit")}
+    {:noreply, push_navigate(socket, to: ~p"/profiles/#{id}/edit")}
   end
 
   def handle_event(
@@ -62,7 +62,8 @@ defmodule HousingAppWeb.Live.Profiles.Index do
           socket
       ) do
     profiles =
-      HousingApp.Management.Profile.list!(actor: current_user_tenant, tenant: tenant)
+      [actor: current_user_tenant, tenant: tenant]
+      |> HousingApp.Management.Profile.list!()
       |> Enum.sort_by(& &1.user_tenant.user.name)
       |> Enum.map(fn p ->
         Map.merge(
@@ -76,7 +77,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
         )
       end)
 
-    schema = profile_form.json_schema |> Jason.decode!()
+    schema = Jason.decode!(profile_form.json_schema)
 
     columns =
       [

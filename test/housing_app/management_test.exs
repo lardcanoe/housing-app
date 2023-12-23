@@ -31,7 +31,8 @@ defmodule HousingApp.ManagementTest do
         )
 
       # Only get Profile for Tenant 2
-      assert HousingApp.Management.Profile.list!(actor: user_tenant2, tenant: "tenant_" <> to_string(tenant2.id))
+      assert [actor: user_tenant2, tenant: "tenant_" <> to_string(tenant2.id)]
+             |> HousingApp.Management.Profile.list!()
              |> Enum.map(& &1.id) == [profile2.id]
     end
 

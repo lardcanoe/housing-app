@@ -6,8 +6,7 @@ defmodule HousingApp.Utils.JsonSchema do
   def schema_to_aggrid_columns(scheman, prefix \\ "")
 
   def schema_to_aggrid_columns(%{"properties" => properties}, prefix) when not is_nil(properties) do
-    properties
-    |> Enum.map(fn {key, value} ->
+    Enum.map(properties, fn {key, value} ->
       header_name = HousingApp.Utils.String.titlize(key)
 
       case value do
@@ -89,7 +88,7 @@ defmodule HousingApp.Utils.JsonSchema do
       if name_prefix == "" do
         ""
       else
-        (name_prefix |> String.replace(["[", "]"], "")) <> "-"
+        String.replace(name_prefix, ["[", "]"], "") <> "-"
       end
 
     id = String.replace("#{id_prefix}#{key}", ".", "-") <> "-field"
@@ -107,7 +106,7 @@ defmodule HousingApp.Utils.JsonSchema do
           name: name,
           id: id,
           label: title,
-          options: enum |> Enum.map(fn v -> {v, v} end)
+          options: Enum.map(enum, fn v -> {v, v} end)
         }
 
       %{"type" => "string", "format" => "message"} ->
@@ -146,8 +145,7 @@ defmodule HousingApp.Utils.JsonSchema do
   end
 
   def extract_properties(%{"properties" => properties}) when is_map(properties) do
-    properties
-    |> Enum.reduce(%{}, fn {key, value}, acc ->
+    Enum.reduce(properties, %{}, fn {key, value}, acc ->
       case value do
         %{"template" => template} when is_binary(template) and template != "" ->
           acc
@@ -167,14 +165,10 @@ defmodule HousingApp.Utils.JsonSchema do
     types = extract_properties(schema)
 
     changeset =
-      {%{}, types}
-      |> Ecto.Changeset.cast(params, Map.keys(types))
+      Ecto.Changeset.cast({%{}, types}, params, Map.keys(types))
 
     converted =
-      changeset.changes
-      |> Enum.reduce(%{}, fn {key, value}, acc ->
-        Map.put(acc, Atom.to_string(key), value)
-      end)
+      Enum.reduce(changeset.changes, %{}, fn {key, value}, acc -> Map.put(acc, Atom.to_string(key), value) end)
 
     nested =
       properties
@@ -195,9 +189,9 @@ defmodule HousingApp.Utils.JsonSchema do
 
   def cast_params(%{}, _params), do: %{}
 
-  def validate_against_schema() do
+  def validate_against_schema do
     schema =
-      """
+      Jason.decode!("""
       {
         "title": "Profile",
         "type": "object",
@@ -313,12 +307,10 @@ defmodule HousingApp.Utils.JsonSchema do
           }
         }
       }
-      """
-      |> Jason.decode!()
+      """)
 
     types =
-      schema["properties"]
-      |> Enum.reduce(%{}, fn {key, value}, acc ->
+      Enum.reduce(schema["properties"], %{}, fn {key, value}, acc ->
         case Map.get(value, "type") do
           type when type == "string" or type == "integer" or type == "boolean" ->
             Map.put(acc, String.to_atom(key), String.to_atom(type))
@@ -337,7 +329,7 @@ defmodule HousingApp.Utils.JsonSchema do
 
     # types = %{name: :string, email: :string, age: :integer}
     params = %{name: "Callum", email: "callum@example.com", age: "27"}
-    param_strings = params |> Enum.reduce(%{}, fn {key, value}, acc -> Map.put(acc, to_string(key), value) end)
+    param_strings = Enum.reduce(params, %{}, fn {key, value}, acc -> Map.put(acc, to_string(key), value) end)
 
     ExJsonSchema.Validator.validate(schema, param_strings)
 

@@ -67,7 +67,8 @@ defmodule HousingApp.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:plug_content_security_policy, "~> 0.2.1"},
       {:remote_ip, "~> 1.1"},
-      {:credo, "~> 1.7.1", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7.1", only: [:dev, :test], runtime: false},
+      {:styler, "~> 0.11.1", only: [:dev, :test], runtime: false}
     ]
   end
 

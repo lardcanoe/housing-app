@@ -69,7 +69,7 @@ defmodule HousingAppWeb.Components.Drawer.Booking do
   end
 
   def mount(socket) do
-    {:ok, socket |> assign(json_schema: nil, booking: nil)}
+    {:ok, assign(socket, json_schema: nil, booking: nil)}
   end
 
   def update(
@@ -80,7 +80,7 @@ defmodule HousingAppWeb.Components.Drawer.Booking do
       {:ok, booking} ->
         json_schema =
           case HousingApp.Management.get_booking_form(actor: current_user_tenant, tenant: tenant) do
-            {:ok, form} -> form.json_schema |> Jason.decode!()
+            {:ok, form} -> Jason.decode!(form.json_schema)
             {:error, _} -> nil
           end
 

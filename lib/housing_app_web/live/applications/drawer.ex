@@ -68,7 +68,7 @@ defmodule HousingAppWeb.Components.Drawer.Application do
   end
 
   def mount(socket) do
-    {:ok, socket |> assign(application: nil)}
+    {:ok, assign(socket, application: nil)}
   end
 
   def update(

@@ -1,12 +1,9 @@
 defmodule HousingApp.Management.Form do
   @moduledoc false
 
-  require Ash.Query
+  use Ash.Resource, data_layer: AshPostgres.DataLayer, extensions: [AshAdmin.Api], authorizers: [Ash.Policy.Authorizer]
 
-  use Ash.Resource,
-    data_layer: AshPostgres.DataLayer,
-    extensions: [AshAdmin.Api],
-    authorizers: [Ash.Policy.Authorizer]
+  require Ash.Query
 
   attributes do
     uuid_primary_key :id

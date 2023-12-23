@@ -69,7 +69,8 @@ defmodule HousingApp.Management.TenantSetting do
     action :get_settings, :map do
       run fn input, context ->
         map =
-          __MODULE__.list_settings!(actor: context.actor)
+          [actor: context.actor]
+          |> __MODULE__.list_settings!()
           |> Enum.map(fn entry ->
             {{entry.namespace, entry.setting}, entry.value}
           end)

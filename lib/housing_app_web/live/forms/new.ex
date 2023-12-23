@@ -1,4 +1,5 @@
 defmodule HousingAppWeb.Live.Forms.New do
+  @moduledoc false
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :new} = assigns) do
@@ -23,8 +24,7 @@ defmodule HousingAppWeb.Live.Forms.New do
         api: HousingApp.Management,
         forms: [auto?: true],
         prepare_params: fn p, _ ->
-          p
-          |> Map.put("tenant_id", current_user_tenant.tenant_id)
+          Map.put(p, "tenant_id", current_user_tenant.tenant_id)
         end,
         actor: current_user_tenant,
         tenant: tenant

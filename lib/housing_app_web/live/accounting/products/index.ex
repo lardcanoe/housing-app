@@ -73,9 +73,7 @@ defmodule HousingAppWeb.Live.Accounting.Products.Index do
     end
   end
 
-  defp fetch_products(%{
-         assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}
-       }) do
+  defp fetch_products(%{assigns: %{current_user_tenant: current_user_tenant, current_tenant: current_tenant}}) do
     case HousingApp.Accounting.Product.list(actor: current_user_tenant, tenant: current_tenant) do
       {:ok, products} -> {:ok, products}
       _ -> {:error, []}

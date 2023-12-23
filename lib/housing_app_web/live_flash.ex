@@ -1,4 +1,5 @@
 defmodule HousingAppWeb.LiveFlash do
+  @moduledoc false
   import Phoenix.LiveView
 
   # Figured this out from https://elixirforum.com/t/liveview-flash-assigns-not-available-in-child-livecomponent/29558/9

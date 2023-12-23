@@ -1,4 +1,5 @@
 defmodule HousingAppWeb.Live.Applications.Index do
+  @moduledoc false
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :index, current_user_tenant: %{user_type: :user}} = assigns) do
@@ -79,11 +80,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
     """
   end
 
-  def mount(
-        _params,
-        _session,
-        %{assigns: %{current_user_tenant: %{user_type: :user}, current_tenant: tenant}} = socket
-      ) do
+  def mount(_params, _session, %{assigns: %{current_user_tenant: %{user_type: :user}, current_tenant: tenant}} = socket) do
     if connected?(socket) do
       HousingAppWeb.Endpoint.subscribe("application:#{tenant}:created")
       HousingAppWeb.Endpoint.subscribe("application:#{tenant}:updated")
@@ -96,16 +93,10 @@ defmodule HousingAppWeb.Live.Applications.Index do
   end
 
   def mount(params, _session, socket) do
-    {:ok,
-     socket
-     |> assign(params: params, loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
+    {:ok, assign(socket, params: params, loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
   end
 
-  def handle_params(
-        _params,
-        _url,
-        %{assigns: %{current_user_tenant: %{user_type: :user}}} = socket
-      ) do
+  def handle_params(_params, _url, %{assigns: %{current_user_tenant: %{user_type: :user}}} = socket) do
     {:noreply,
      socket
      |> assign(sidebar: :applications, page_title: "Applications")
@@ -114,23 +105,17 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
   def handle_params(params, _url, socket) do
     {:noreply,
-     socket
-     |> assign(params: params, loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
+     assign(socket, params: params, loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
   end
 
   defp load_async_assigns(
-         %{
-           assigns: %{
-             current_user_tenant: %{user_type: :user} = current_user_tenant,
-             current_tenant: tenant
-           }
-         } = socket
+         %{assigns: %{current_user_tenant: %{user_type: :user} = current_user_tenant, current_tenant: tenant}} = socket
        ) do
-    socket
-    |> assign_async([:applications, :submissions], fn ->
+    assign_async(socket, [:applications, :submissions], fn ->
       applications =
         if connected?(socket) do
-          HousingApp.Management.Application.list_approved!(actor: current_user_tenant, tenant: tenant)
+          [actor: current_user_tenant, tenant: tenant]
+          |> HousingApp.Management.Application.list_approved!()
           |> Enum.sort_by(& &1.name)
         else
           []
@@ -138,7 +123,8 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
       submissions =
         if connected?(socket) do
-          HousingApp.Management.ApplicationSubmission.list_by_user_tenant!(current_user_tenant.id,
+          current_user_tenant.id
+          |> HousingApp.Management.ApplicationSubmission.list_by_user_tenant!(
             actor: current_user_tenant,
             tenant: tenant
           )
@@ -147,20 +133,16 @@ defmodule HousingAppWeb.Live.Applications.Index do
           Map.new()
         end
 
-      {:ok,
-       %{
-         applications: applications,
-         submissions: submissions
-       }}
+      {:ok, %{applications: applications, submissions: submissions}}
     end)
   end
 
   def handle_info(%{event: "application-created", payload: %{payload: %{data: %{status: :approved}}}}, socket) do
-    {:noreply, socket |> load_async_assigns()}
+    {:noreply, load_async_assigns(socket)}
   end
 
   def handle_info(%{event: "application-updated", payload: %{payload: %{data: %{status: :approved}}}}, socket) do
-    {:noreply, socket |> load_async_assigns()}
+    {:noreply, load_async_assigns(socket)}
   end
 
   def handle_info(_, socket) do
@@ -173,11 +155,11 @@ defmodule HousingAppWeb.Live.Applications.Index do
   end
 
   def handle_event("edit-row", %{"id" => id}, socket) do
-    {:noreply, socket |> push_navigate(to: ~p"/applications/#{id}/edit")}
+    {:noreply, push_navigate(socket, to: ~p"/applications/#{id}/edit")}
   end
 
   def handle_event("redirect", %{"url" => url}, socket) do
-    {:noreply, socket |> push_navigate(to: url)}
+    {:noreply, push_navigate(socket, to: url)}
   end
 
   def handle_event("load-data", %{}, socket) do

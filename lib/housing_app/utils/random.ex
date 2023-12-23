@@ -1,5 +1,6 @@
 defmodule HousingApp.Utils.Random do
   # https://puid.github.io/Elixir/
+  @moduledoc false
 
   # iex> Random.AlphaNumPuid.generate()
   # "TooiUAMHDsCojbhv0XwYxCW1q"

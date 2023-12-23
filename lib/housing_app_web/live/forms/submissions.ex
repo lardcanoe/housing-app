@@ -30,7 +30,7 @@ defmodule HousingAppWeb.Live.Forms.Submissions do
          |> push_navigate(to: ~p"/forms")}
 
       {:ok, form} ->
-        {:ok, socket |> assign(form: form, count: 0, loading: true, sidebar: :forms, page_title: "Form Submissions")}
+        {:ok, assign(socket, form: form, count: 0, loading: true, sidebar: :forms, page_title: "Form Submissions")}
     end
   end
 
@@ -43,7 +43,7 @@ defmodule HousingAppWeb.Live.Forms.Submissions do
         %{},
         %{assigns: %{form: form, current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
-    schema = form.json_schema |> Jason.decode!()
+    schema = Jason.decode!(form.json_schema)
 
     columns =
       [
@@ -59,8 +59,8 @@ defmodule HousingAppWeb.Live.Forms.Submissions do
     case HousingApp.Management.FormSubmission.list_by_form(form.id, actor: current_user_tenant, tenant: tenant) do
       {:ok, submissions} ->
         data =
-          submissions
-          |> Enum.map(
+          Enum.map(
+            submissions,
             &Enum.into(&1.data, %{
               "id" => &1.id,
               "metadata" => %{"created_at" => &1.created_at, "user" => &1.user_tenant.user.name}

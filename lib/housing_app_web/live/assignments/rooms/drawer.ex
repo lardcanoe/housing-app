@@ -72,25 +72,26 @@ defmodule HousingAppWeb.Components.Drawer.Room do
   end
 
   def mount(socket) do
-    {:ok, socket |> assign(json_schema: nil, room: nil, bookings: [])}
+    {:ok, assign(socket, json_schema: nil, room: nil, bookings: [])}
   end
 
   def update(
         %{room_id: room_id},
         %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       ) do
-    with {:ok, room} <-
-           HousingApp.Assignments.Room.get_by_id(room_id, actor: current_user_tenant, tenant: tenant),
-         bookings <-
-           HousingApp.Assignments.Booking.list_by_room!(room.id, actor: current_user_tenant, tenant: tenant) do
-      json_schema =
-        case HousingApp.Management.get_room_form(actor: current_user_tenant, tenant: tenant) do
-          {:ok, form} -> form.json_schema |> Jason.decode!()
-          {:error, _} -> nil
-        end
+    case HousingApp.Assignments.Room.get_by_id(room_id, actor: current_user_tenant, tenant: tenant) do
+      {:ok, room} ->
+        bookings =
+          HousingApp.Assignments.Booking.list_by_room!(room.id, actor: current_user_tenant, tenant: tenant)
 
-      {:ok, assign(socket, json_schema: json_schema, room: room, bookings: bookings)}
-    else
+        json_schema =
+          case HousingApp.Management.get_room_form(actor: current_user_tenant, tenant: tenant) do
+            {:ok, form} -> Jason.decode!(form.json_schema)
+            {:error, _} -> nil
+          end
+
+        {:ok, assign(socket, json_schema: json_schema, room: room, bookings: bookings)}
+
       {:error, _} ->
         {:ok, assign(socket, room: nil, bookings: [])}
     end

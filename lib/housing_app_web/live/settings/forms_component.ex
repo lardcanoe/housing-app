@@ -45,7 +45,7 @@ defmodule HousingAppWeb.Components.TenantForms do
   end
 
   def mount(socket) do
-    {:ok, socket |> assign(ash_form: nil, forms: [])}
+    {:ok, assign(socket, ash_form: nil, forms: [])}
   end
 
   def update(%{current_user_tenant: current_user_tenant, current_tenant: tenant}, socket) do
@@ -56,7 +56,7 @@ defmodule HousingAppWeb.Components.TenantForms do
       )
 
     ash_form =
-      %{
+      to_form(%{
         "profile_form_id" => settings[{:system, :profile_form_id}] || nil,
         "form_types" => settings[{:system, :form_types}] || "",
         "application_types" => settings[{:system, :application_types}] || "",
@@ -64,12 +64,10 @@ defmodule HousingAppWeb.Components.TenantForms do
         "room_form_id" => settings[{:system, :room_form_id}] || nil,
         "bed_form_id" => settings[{:system, :bed_form_id}] || nil,
         "booking_form_id" => settings[{:system, :booking_form_id}] || nil
-      }
-      |> to_form()
+      })
 
     {:ok,
-     socket
-     |> assign(
+     assign(socket,
        ash_form: ash_form,
        forms: approved_forms_with_empty(current_user_tenant, tenant),
        current_user_tenant: current_user_tenant,
@@ -107,6 +105,6 @@ defmodule HousingAppWeb.Components.TenantForms do
       end)
       |> to_form()
 
-    {:noreply, socket |> assign(ash_form: ash_form)}
+    {:noreply, assign(socket, ash_form: ash_form)}
   end
 end

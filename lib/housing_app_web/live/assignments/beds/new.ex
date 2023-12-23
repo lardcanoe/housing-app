@@ -28,7 +28,8 @@ defmodule HousingAppWeb.Live.Assignments.Beds.New do
       |> to_form()
 
     rooms =
-      HousingApp.Assignments.Room.list!(actor: current_user_tenant, tenant: tenant)
+      [actor: current_user_tenant, tenant: tenant]
+      |> HousingApp.Assignments.Room.list!()
       |> Enum.map(&{"#{&1.building.name} #{&1.name}", &1.id})
 
     {:ok, assign(socket, ash_form: ash_form, rooms: rooms, sidebar: :assignments, page_title: "New Bed")}

@@ -60,7 +60,7 @@ defmodule HousingAppWeb.Components.TimePeriodsForm do
   end
 
   def mount(socket) do
-    {:ok, socket |> assign(tp_form: nil, time_periods: [])}
+    {:ok, assign(socket, tp_form: nil, time_periods: [])}
   end
 
   def update(%{current_user_tenant: current_user_tenant, current_tenant: tenant}, socket) do
@@ -83,8 +83,7 @@ defmodule HousingAppWeb.Components.TimePeriodsForm do
     case AshPhoenix.Form.submit(tp_form, params: data) do
       {:ok, _tp} ->
         {:noreply,
-         socket
-         |> assign(
+         assign(socket,
            tp_form: new_management_ash_form(HousingApp.Management.TimePeriod, current_user_tenant, tenant),
            time_periods: time_periods(current_user_tenant, tenant)
          )}

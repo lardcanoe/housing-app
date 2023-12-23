@@ -1,13 +1,13 @@
 defmodule HousingApp.Management.Application do
   @moduledoc false
 
-  require Ash.Query
-
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
     extensions: [AshAdmin.Api],
     authorizers: [Ash.Policy.Authorizer],
     notifiers: [Ash.Notifier.PubSub]
+
+  require Ash.Query
 
   attributes do
     uuid_primary_key :id

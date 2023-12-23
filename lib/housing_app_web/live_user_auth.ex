@@ -3,8 +3,9 @@ defmodule HousingAppWeb.LiveUserAuth do
   Helpers for authenticating users in liveviews
   """
 
-  import Phoenix.Component
   use HousingAppWeb, :verified_routes
+
+  import Phoenix.Component
 
   def on_mount(:live_user_optional, _params, %{"user" => user}, socket) do
     if user do
@@ -26,7 +27,7 @@ defmodule HousingAppWeb.LiveUserAuth do
         {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
 
       {:ok, user_tenant} ->
-        {:cont, socket |> mount_user_success(current_user, user_tenant)}
+        {:cont, mount_user_success(socket, current_user, user_tenant)}
     end
   end
 
@@ -37,7 +38,7 @@ defmodule HousingAppWeb.LiveUserAuth do
         {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
 
       {:ok, user_tenant} ->
-        {:cont, socket |> mount_user_success(current_user, user_tenant)}
+        {:cont, mount_user_success(socket, current_user, user_tenant)}
     end
   end
 

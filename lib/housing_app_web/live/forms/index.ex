@@ -1,4 +1,5 @@
 defmodule HousingAppWeb.Live.Forms.Index do
+  @moduledoc false
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
   def render(%{live_action: :index} = assigns) do
@@ -27,15 +28,11 @@ defmodule HousingAppWeb.Live.Forms.Index do
   end
 
   def mount(params, _session, socket) do
-    {:ok,
-     socket
-     |> assign(params: params, loading: true, count: 0, sidebar: :forms, page_title: "Forms")}
+    {:ok, assign(socket, params: params, loading: true, count: 0, sidebar: :forms, page_title: "Forms")}
   end
 
   def handle_params(params, _url, socket) do
-    {:noreply,
-     socket
-     |> assign(params: params, loading: true, count: 0, sidebar: :forms, page_title: "Forms")}
+    {:noreply, assign(socket, params: params, loading: true, count: 0, sidebar: :forms, page_title: "Forms")}
   end
 
   def handle_event("view-row", %{"id" => id}, socket) do
@@ -44,11 +41,11 @@ defmodule HousingAppWeb.Live.Forms.Index do
   end
 
   def handle_event("edit-row", %{"id" => id}, socket) do
-    {:noreply, socket |> push_navigate(to: ~p"/forms/#{id}/edit")}
+    {:noreply, push_navigate(socket, to: ~p"/forms/#{id}/edit")}
   end
 
   def handle_event("redirect", %{"url" => url}, socket) do
-    {:noreply, socket |> push_navigate(to: url)}
+    {:noreply, push_navigate(socket, to: url)}
   end
 
   def handle_event("load-data", %{}, socket) do
@@ -84,8 +81,7 @@ defmodule HousingAppWeb.Live.Forms.Index do
      }, assign(socket, loading: false, count: length(forms))}
   end
 
-  defp fetch_forms(%{assigns: %{params: %{"type" => app_type}}} = socket)
-       when is_binary(app_type) and app_type != "" do
+  defp fetch_forms(%{assigns: %{params: %{"type" => app_type}}} = socket) when is_binary(app_type) and app_type != "" do
     %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
     HousingApp.Management.Form.list_by_type!(app_type, actor: current_user_tenant, tenant: tenant)
   end

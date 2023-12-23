@@ -1,4 +1,5 @@
 defmodule HousingAppWeb.Api.Guardian do
+  @moduledoc false
   use Guardian, otp_app: :housing_app
 
   def subject_for_token(%{api_key: api_key}, _claims) when is_binary(api_key) and api_key != "" do

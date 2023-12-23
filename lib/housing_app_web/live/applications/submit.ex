@@ -125,18 +125,19 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
       {:ok, app} ->
         if app.steps != [] do
-          step = app.steps |> Enum.find(&(&1.step == 1))
+          step = Enum.find(app.steps, &(&1.step == 1))
 
           last_step_id = app.steps |> Enum.sort(&(&1.step > &2.step)) |> hd() |> then(& &1.id)
 
           {:ok,
-           assign(socket,
+           socket
+           |> assign(
              application: app,
-             json_schema: step.form.json_schema |> Jason.decode!(),
+             json_schema: Jason.decode!(step.form.json_schema),
              multi_step: true,
              current_step: step,
              last_step_id: last_step_id,
-             form: %{"data" => %{}} |> to_form(as: "form"),
+             form: to_form(%{"data" => %{}}, as: "form"),
              sidebar: :applications,
              page_title: "Submit Application"
            )
@@ -146,11 +147,12 @@ defmodule HousingAppWeb.Live.Applications.Submit do
            |> load_async_assigns()}
         else
           {:ok,
-           assign(socket,
+           socket
+           |> assign(
              application: app,
-             json_schema: app.form.json_schema |> Jason.decode!(),
+             json_schema: Jason.decode!(app.form.json_schema),
              multi_step: false,
-             form: %{"profile_id" => "", "data" => %{}} |> to_form(as: "form"),
+             form: to_form(%{"profile_id" => "", "data" => %{}}, as: "form"),
              sidebar: :applications,
              page_title: "Submit Application"
            )
@@ -162,7 +164,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
   def load_form(%{assigns: %{application: %{submission_type: :many}}} = socket) do
     # FUTURE: Should really find most recent, and if :started, then continue it
-    socket |> assign(submission: nil, data_form: %{"profile_id" => "", "data" => %{}} |> to_form(as: "data"))
+    assign(socket, submission: nil, data_form: to_form(%{"profile_id" => "", "data" => %{}}, as: "data"))
   end
 
   def load_form(
@@ -174,12 +176,12 @@ defmodule HousingAppWeb.Live.Applications.Submit do
            tenant: tenant
          ) do
       {:ok, submission} ->
-        assign(socket, submission: submission, data_form: %{"data" => submission.data} |> to_form(as: "data"))
+        assign(socket, submission: submission, data_form: to_form(%{"data" => submission.data}, as: "data"))
 
       {:error, _} ->
         socket
         |> stub_new_submission(application, current_user_tenant, tenant)
-        |> assign(data_form: %{"profile_id" => "", "data" => %{}} |> to_form(as: "data"))
+        |> assign(data_form: to_form(%{"profile_id" => "", "data" => %{}}, as: "data"))
     end
   end
 
@@ -191,7 +193,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
         tenant: tenant
       )
 
-    socket |> assign(submission: submission)
+    assign(socket, submission: submission)
   end
 
   def load_async_assigns(%{assigns: %{current_user_tenant: %{user_type: :user}}} = socket) do
@@ -199,17 +201,14 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   end
 
   def load_async_assigns(%{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
-    socket
-    |> assign_async([:profiles], fn ->
+    assign_async(socket, [:profiles], fn ->
       profiles =
-        HousingApp.Management.Profile.list!(actor: current_user_tenant, tenant: tenant)
+        [actor: current_user_tenant, tenant: tenant]
+        |> HousingApp.Management.Profile.list!()
         |> Enum.sort_by(& &1.user_tenant.user.name)
         |> Enum.map(&{&1.user_tenant.user.name, &1.id})
 
-      {:ok,
-       %{
-         profiles: profiles
-       }}
+      {:ok, %{profiles: profiles}}
     end)
   end
 
@@ -220,13 +219,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   def handle_event(
         "submit",
         %{"form" => %{"data" => json_data}} = form,
-        %{
-          assigns: %{
-            submission: submission,
-            current_user_tenant: current_user_tenant,
-            current_tenant: tenant
-          }
-        } = socket
+        %{assigns: %{submission: submission, current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
       )
       when not is_nil(submission) do
     json_data = HousingApp.Utils.JsonSchema.cast_params(socket.assigns.json_schema, json_data)
@@ -246,7 +239,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
             {:noreply,
              socket
-             |> assign(form: form |> to_form())
+             |> assign(form: to_form(form))
              |> put_flash(:error, "Error resubmitting")}
 
           {:ok, _submission} ->
@@ -261,7 +254,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
         {:noreply,
          socket
-         |> assign(form: form |> to_form())
+         |> assign(form: to_form(form))
          |> put_flash(:error, "Errors present in form submission.")}
     end
   end
@@ -269,13 +262,8 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   def handle_event(
         "submit",
         %{"form" => %{"data" => json_data}} = form,
-        %{
-          assigns: %{
-            application: application,
-            current_user_tenant: current_user_tenant,
-            current_tenant: tenant
-          }
-        } = socket
+        %{assigns: %{application: application, current_user_tenant: current_user_tenant, current_tenant: tenant}} =
+          socket
       ) do
     json_data = HousingApp.Utils.JsonSchema.cast_params(socket.assigns.json_schema, json_data)
 
@@ -295,7 +283,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
             {:noreply,
              socket
-             |> assign(form: form |> to_form())
+             |> assign(form: to_form(form))
              |> put_flash(:error, "Error submitting")}
 
           {:ok, _submission} ->
@@ -310,7 +298,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
         {:noreply,
          socket
-         |> assign(form: form |> to_form())
+         |> assign(form: to_form(form))
          |> put_flash(:error, "Errors present in form submission.")}
     end
   end
@@ -319,13 +307,13 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     %{assigns: %{application: application, completed_steps: completed_steps}} = socket
 
     if MapSet.member?(completed_steps, id) do
-      step = application.steps |> Enum.find(&(&1.id == id))
+      step = Enum.find(application.steps, &(&1.id == id))
 
       {:noreply,
        socket
        |> assign(
          current_step: step,
-         json_schema: step.form.json_schema |> Jason.decode!()
+         json_schema: Jason.decode!(step.form.json_schema)
        )
        |> load_step_submission()}
     else
@@ -349,7 +337,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
     completed_steps = MapSet.put(completed_steps, current_step.id)
 
-    case application.steps |> Enum.find(&(&1.step == current_step.step + 1)) do
+    case Enum.find(application.steps, &(&1.step == current_step.step + 1)) do
       nil ->
         HousingApp.Management.ApplicationSubmission.resubmit(
           submission,
@@ -369,7 +357,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
          |> assign(
            current_step: next_step,
            completed_steps: completed_steps,
-           json_schema: next_step.form.json_schema |> Jason.decode!()
+           json_schema: Jason.decode!(next_step.form.json_schema)
          )
          |> load_step_submission()}
     end
@@ -395,15 +383,13 @@ defmodule HousingAppWeb.Live.Applications.Submit do
            tenant: tenant
          ) do
       {:ok, step_submission} ->
-        socket
-        |> assign(
+        assign(socket,
           step_submission: step_submission,
-          data_form: %{"data" => step_submission.data} |> to_form(as: "data")
+          data_form: to_form(%{"data" => step_submission.data}, as: "data")
         )
 
       {:error, _} ->
-        socket
-        |> assign(step_submission: nil, data_form: %{"data" => %{}} |> to_form(as: "data"))
+        assign(socket, step_submission: nil, data_form: to_form(%{"data" => %{}}, as: "data"))
     end
   end
 
@@ -417,13 +403,14 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     } = socket
 
     completed_steps =
-      HousingApp.Management.ApplicationStepSubmission.list_by_application_submission!(submission.id,
+      submission.id
+      |> HousingApp.Management.ApplicationStepSubmission.list_by_application_submission!(
         actor: current_user_tenant,
         tenant: tenant
       )
       |> MapSet.new(& &1.step_id)
 
-    socket |> assign(completed_steps: completed_steps)
+    assign(socket, completed_steps: completed_steps)
   end
 
   defp update_step_submission(
@@ -465,7 +452,8 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
       _ ->
         # TODO: Validation
-        HousingApp.Management.Profile.get_by_id!(form["form"]["profile_id"],
+        form["form"]["profile_id"]
+        |> HousingApp.Management.Profile.get_by_id!(
           actor: current_user_tenant,
           tenant: tenant
         )

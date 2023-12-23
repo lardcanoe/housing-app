@@ -52,7 +52,7 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Edit do
 
         json_schema =
           case HousingApp.Management.get_building_form(actor: current_user_tenant, tenant: tenant) do
-            {:ok, form} -> form.json_schema |> Jason.decode!()
+            {:ok, form} -> Jason.decode!(form.json_schema)
             {:error, _} -> nil
           end
 

@@ -1,4 +1,5 @@
 defmodule HousingApp.Validations.IsJsonSchema do
+  @moduledoc false
   def init(opts) do
     if is_atom(opts[:attribute]) do
       {:ok, opts}
@@ -13,7 +14,7 @@ defmodule HousingApp.Validations.IsJsonSchema do
     if is_nil(value) do
       :ok
     else
-      ExJsonSchema.Schema.resolve(value |> Jason.decode!())
+      ExJsonSchema.Schema.resolve(Jason.decode!(value))
       :ok
     end
   rescue

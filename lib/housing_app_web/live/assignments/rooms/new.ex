@@ -44,11 +44,13 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.New do
       |> to_form()
 
     buildings =
-      HousingApp.Assignments.Building.list!(actor: current_user_tenant, tenant: tenant)
+      [actor: current_user_tenant, tenant: tenant]
+      |> HousingApp.Assignments.Building.list!()
       |> Enum.map(&{&1.name, &1.id})
 
     products =
-      HousingApp.Accounting.Product.list!(actor: current_user_tenant, tenant: tenant)
+      [actor: current_user_tenant, tenant: tenant]
+      |> HousingApp.Accounting.Product.list!()
       |> Enum.map(&{&1.name, &1.id})
 
     {:ok,

@@ -59,7 +59,7 @@ defmodule HousingAppWeb.Components.Drawer.Form do
   end
 
   def mount(socket) do
-    {:ok, socket |> assign(form: nil)}
+    {:ok, assign(socket, form: nil)}
   end
 
   def update(
