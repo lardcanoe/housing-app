@@ -11,7 +11,7 @@ defmodule HousingApp.Assignments.RoommateInvite do
     uuid_primary_key :id
 
     attribute :status, :atom do
-      constraints one_of: [:pending, :accepted, :rejected]
+      constraints one_of: [:pending, :accepted, :declined]
       default :pending
       allow_nil? false
     end
@@ -83,11 +83,37 @@ defmodule HousingApp.Assignments.RoommateInvite do
       change set_attribute(:tenant_id, actor(:tenant_id))
       change set_attribute(:invited_by_id, actor(:id))
     end
+
+    update :accept do
+      change set_attribute(:status, :accepted)
+    end
+
+    update :decline do
+      change set_attribute(:status, :declined)
+    end
+
+    read :list_mine do
+      filter expr(user_tenant_id == ^actor(:id) and status == :pending and is_nil(archived_at))
+    end
+
+    read :get_by_id do
+      argument :id, :uuid do
+        allow_nil? false
+      end
+
+      get? true
+
+      filter expr(id == ^arg(:id) and user_tenant_id == ^actor(:id) and is_nil(archived_at))
+    end
   end
 
   code_interface do
     define_for HousingApp.Assignments
     define :invite
+    define :accept
+    define :decline
+    define :list_mine
+    define :get_by_id, args: [:id]
   end
 
   identities do

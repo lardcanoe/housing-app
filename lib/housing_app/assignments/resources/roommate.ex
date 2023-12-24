@@ -71,7 +71,7 @@ defmodule HousingApp.Assignments.Roommate do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:roommate_group_id]
+      accept [:roommate_group_id, :roommate_invite_id]
 
       change set_attribute(:tenant_id, actor(:tenant_id))
       change set_attribute(:user_tenant_id, actor(:id))
