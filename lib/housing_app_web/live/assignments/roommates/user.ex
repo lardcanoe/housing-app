@@ -10,11 +10,26 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.User do
         :for={roommate <- @roommates}
         class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
       >
-        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+        <h1 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
           <%= roommate.roommate_group.name %>
-        </h5>
-        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-          <%= roommate.user_tenant.user.name %>
+        </h1>
+        <h2
+          :if={roommate.roommate_group.members != []}
+          class="mb-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white"
+        >
+          Accepted
+        </h2>
+        <p :for={member <- roommate.roommate_group.members} class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+          <%= member.user_tenant.user.name %> <%= member.user_tenant.user.email %>
+        </p>
+        <h2
+          :if={roommate.roommate_group.invites != []}
+          class="mb-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white"
+        >
+          Pending
+        </h2>
+        <p :for={invite <- roommate.roommate_group.invites} class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+          <%= invite.user_tenant.user.name %> <%= invite.user_tenant.user.email %>
         </p>
         <.link
           phx-click={show_modal("invite-modal-#{roommate.roommate_group_id}")}
@@ -48,7 +63,10 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.User do
           </div>
         </.custom_modal>
       </div>
-      <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+      <div
+        :if={length(@roommates) < 5}
+        class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+      >
         <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
           New Group
         </h5>
@@ -95,7 +113,11 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.User do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     {:ok, roommates} =
-      HousingApp.Assignments.Roommate.list_mine(actor: current_user_tenant, tenant: tenant)
+      HousingApp.Assignments.Roommate.list_mine(
+        actor: current_user_tenant,
+        tenant: tenant,
+        load: [roommate_group: [members: [user_tenant: [:user]], invites: [user_tenant: [:user]]]]
+      )
 
     assign(socket, roommates: roommates)
   end

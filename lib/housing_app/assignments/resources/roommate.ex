@@ -83,7 +83,6 @@ defmodule HousingApp.Assignments.Roommate do
     end
 
     read :list_mine do
-      prepare build(load: [:roommate_group, user_tenant: [:user]])
       filter expr(user_tenant_id == ^actor(:id) and is_nil(archived_at))
     end
   end
