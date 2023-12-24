@@ -43,7 +43,7 @@ defmodule HousingApp.Assignments.Roommate do
 
     belongs_to :roommate_invite, HousingApp.Assignments.RoommateInvite do
       attribute_writable? true
-      allow_nil? false
+      allow_nil? true
     end
   end
 
@@ -69,10 +69,31 @@ defmodule HousingApp.Assignments.Roommate do
 
   actions do
     defaults [:create, :read, :update, :destroy]
+
+    create :new do
+      accept [:roommate_group_id]
+
+      change set_attribute(:tenant_id, actor(:tenant_id))
+      change set_attribute(:user_tenant_id, actor(:id))
+    end
+
+    read :list do
+      prepare build(load: [:roommate_group, user_tenant: [:user]])
+      filter expr(is_nil(archived_at))
+    end
+
+    read :list_mine do
+      prepare build(load: [:roommate_group, user_tenant: [:user]])
+      filter expr(user_tenant_id == ^actor(:id) and is_nil(archived_at))
+    end
   end
 
   code_interface do
     define_for HousingApp.Assignments
+
+    define :new
+    define :list
+    define :list_mine
   end
 
   identities do

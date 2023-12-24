@@ -70,10 +70,30 @@ defmodule HousingApp.Assignments.RoommateGroup do
 
   actions do
     defaults [:create, :read, :update, :destroy]
+
+    create :new do
+      accept [:name]
+      change set_attribute(:tenant_id, actor(:tenant_id))
+      change set_attribute(:created_by_id, actor(:id))
+    end
+
+    # TODO: Only an owner or member should be able to read
+    read :get_by_id do
+      argument :id, :uuid do
+        allow_nil? false
+      end
+
+      get? true
+
+      filter expr(id == ^arg(:id) and is_nil(archived_at))
+    end
   end
 
   code_interface do
     define_for HousingApp.Assignments
+
+    define :new
+    define :get_by_id, args: [:id]
   end
 
   aggregates do

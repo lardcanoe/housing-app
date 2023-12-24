@@ -125,6 +125,10 @@ defmodule HousingAppWeb.Router do
           live "/:id", Index, :view
           live "/:id/edit", Form, :edit
         end
+
+        scope "/roommates", Roommates do
+          live "/", Index, :index
+        end
       end
 
       scope "/reporting", Live.Reporting do
@@ -132,8 +136,9 @@ defmodule HousingAppWeb.Router do
         live "/", Index, :index
       end
 
-      scope "/roommates", Live.Roommates do
-        live "/", Index, :index
+      scope "/roommates", Live.Assignments.Roommates do
+        live "/", User, :index
+        live "/new", New, :new
       end
 
       scope "/settings", Live.Settings do

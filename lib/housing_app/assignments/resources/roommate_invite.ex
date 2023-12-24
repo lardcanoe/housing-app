@@ -76,10 +76,18 @@ defmodule HousingApp.Assignments.RoommateInvite do
 
   actions do
     defaults [:create, :read, :update, :destroy]
+
+    create :invite do
+      accept [:roommate_group_id, :user_tenant_id]
+      change set_attribute(:status, :pending)
+      change set_attribute(:tenant_id, actor(:tenant_id))
+      change set_attribute(:invited_by_id, actor(:id))
+    end
   end
 
   code_interface do
     define_for HousingApp.Assignments
+    define :invite
   end
 
   identities do

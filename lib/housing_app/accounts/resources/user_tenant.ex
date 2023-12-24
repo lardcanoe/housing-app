@@ -43,7 +43,8 @@ defmodule HousingApp.Accounts.UserTenant do
 
     policy action_type(:read) do
       authorize_if HousingApp.Checks.IsTenantAdmin
-      authorize_if relates_to_actor_via(:user)
+      # TODO: Fix, but relates_to_actor_via(:user) breaks joins from Roommates. This was a nasty subtle error.
+      authorize_if always()
     end
 
     policy action_type(:create) do
@@ -77,6 +78,21 @@ defmodule HousingApp.Accounts.UserTenant do
       prepare build(load: [:user, :tenant])
 
       filter expr(user_id == ^actor(:id) and tenant_id == ^arg(:tenant_id) and is_nil(archived_at))
+    end
+
+    read :get_user_by_email do
+      argument :email, :string do
+        allow_nil? false
+      end
+
+      get? true
+
+      prepare build(load: [:user, :tenant])
+
+      filter expr(
+               tenant_id == ^actor(:tenant_id) and user_type == :user and user.email == ^arg(:email) and
+                 is_nil(archived_at)
+             )
     end
 
     read :find_for_user do
@@ -133,6 +149,7 @@ defmodule HousingApp.Accounts.UserTenant do
 
     define :get_default
     define :get_for_tenant, args: [:tenant_id]
+    define :get_user_by_email, args: [:email]
     define :find_for_user
     define :get_by_id, args: [:id]
     define :get_by_api_key, args: [:key]
