@@ -59,9 +59,7 @@ defmodule HousingApp.Management.Profile do
     end
 
     policy action_type(:create) do
-      # authorize_if HousingApp.Checks.IsTenantAdmin
-      # TODO: This is a hack to allow users to create their own profiles
-      authorize_if always()
+      authorize_if HousingApp.Checks.IsTenantAdmin
     end
 
     policy action_type(:read) do

@@ -210,7 +210,8 @@ defmodule HousingAppWeb.Live.Applications.Submit do
             :create,
             %{user_tenant_id: current_user_tenant.id, tenant_id: current_user_tenant.tenant_id},
             actor: current_user_tenant,
-            tenant: tenant
+            tenant: tenant,
+            authorize?: false
           )
           |> HousingApp.Management.create()
 
