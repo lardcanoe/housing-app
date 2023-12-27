@@ -21,7 +21,7 @@ defmodule HousingAppWeb.Live.Applications.Edit do
   end
 
   def mount(%{"id" => id}, _session, socket) do
-    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     case HousingApp.Management.Application.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
@@ -61,14 +61,77 @@ defmodule HousingAppWeb.Live.Applications.Edit do
   end
 
   def handle_event("submit", %{"form" => params}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+    {:ok, profile_form} = HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant)
+
+    params =
+      Map.put(
+        params,
+        "steps",
+        Jason.decode!("""
+        [
+          {
+            "id": "fb70646d-4c46-4a07-bd32-5804da5a3663",
+            "step": 1,
+            "title": "Welcome",
+            "form_id": "86dced97-9cd8-4a8d-bbc3-f4e0a4676a8a",
+            "required": false
+          },
+          {
+            "id": "cf01fa16-9005-4a28-9bcb-c179c0317c29",
+            "step": 2,
+            "title": "Profile",
+            "form_id": "#{profile_form.id}",
+            "required": true
+          },
+          {
+            "id": "3c093686-192e-4a25-a2d1-9790ee38dff0",
+            "step": 3,
+            "title": "Confirm ADA",
+            "form_id": "838a331e-93dd-4fb6-8099-0f88e660fbe4",
+            "required": false
+          },
+          {
+            "id": "dc3ba31e-3fdd-4fc8-bdae-1086191c2c57",
+            "step": 4,
+            "title": "Terms and Conditions",
+            "form_id": "402bed7a-5ad5-4bcd-bbe1-8bdab4c7a61a",
+            "required": false
+          },
+          {
+            "id": "2db43efa-9010-497a-aff4-77d52f15d857",
+            "step": 5,
+            "title": "Living Learning Community",
+            "form_id": "cbd88d90-9cef-4689-ae1f-027984d4c91d",
+            "required": false
+          },
+          {
+            "id": "7fa1a393-e250-4135-82c6-0428f96dffb3",
+            "step": 6,
+            "title": "About Myself",
+            "form_id": "77643ea7-e17c-46ba-87c2-7895b8885716",
+            "required": false
+          },
+          {
+            "id": "0a113cda-efcf-41fe-a731-9402eb4b92d3",
+            "step": 7,
+            "title": "Finish and submit",
+            "form_id": "5105c01b-2cb4-4504-a4ae-fb99561d6432",
+            "required": false
+          }
+        ]
+        """)
+      )
+
     # params =
     #   Map.put(params, "steps", [
     #     %{"title" => "Welcome", "step" => 1, "form_id" => "86dced97-9cd8-4a8d-bbc3-f4e0a4676a8a"},
-    #     %{"title" => "Confirm ADA", "step" => 2, "form_id" => "838a331e-93dd-4fb6-8099-0f88e660fbe4"},
-    #     %{"title" => "Terms and Conditions", "step" => 3, "form_id" => "402bed7a-5ad5-4bcd-bbe1-8bdab4c7a61a"},
-    #     %{"title" => "Living Learning Community", "step" => 4, "form_id" => "cbd88d90-9cef-4689-ae1f-027984d4c91d"},
-    #     %{"title" => "About Myself", "step" => 5, "form_id" => "77643ea7-e17c-46ba-87c2-7895b8885716"},
-    #     %{"title" => "Finish and submit", "step" => 6, "form_id" => "5105c01b-2cb4-4504-a4ae-fb99561d6432"}
+    #     %{"title" => "Profile", "step" => 2, "form_id" => profile_form.id},
+    #     %{"title" => "Confirm ADA", "step" => 3, "form_id" => "838a331e-93dd-4fb6-8099-0f88e660fbe4"},
+    #     %{"title" => "Terms and Conditions", "step" => 4, "form_id" => "402bed7a-5ad5-4bcd-bbe1-8bdab4c7a61a"},
+    #     %{"title" => "Living Learning Community", "step" => 5, "form_id" => "cbd88d90-9cef-4689-ae1f-027984d4c91d"},
+    #     %{"title" => "About Myself", "step" => 6, "form_id" => "77643ea7-e17c-46ba-87c2-7895b8885716"},
+    #     %{"title" => "Finish and submit", "step" => 7, "form_id" => "5105c01b-2cb4-4504-a4ae-fb99561d6432"}
     #   ])
 
     with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
