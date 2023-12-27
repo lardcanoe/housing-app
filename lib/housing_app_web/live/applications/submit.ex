@@ -197,7 +197,25 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   end
 
   def load_async_assigns(%{assigns: %{current_user_tenant: %{user_type: :user}}} = socket) do
-    socket
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    case HousingApp.Management.Profile.get_mine(actor: current_user_tenant, tenant: tenant) do
+      {:ok, profile} ->
+        assign(socket, profile: profile)
+
+      {:error, %Ash.Error.Query.NotFound{}} ->
+        {:ok, profile} =
+          HousingApp.Management.Profile
+          |> Ash.Changeset.for_create(
+            :create,
+            %{user_tenant_id: current_user_tenant.id, tenant_id: current_user_tenant.tenant_id},
+            actor: current_user_tenant,
+            tenant: tenant
+          )
+          |> HousingApp.Management.create()
+
+        assign(socket, profile: profile)
+    end
   end
 
   def load_async_assigns(%{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
@@ -208,7 +226,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
         |> Enum.sort_by(& &1.user_tenant.user.name)
         |> Enum.map(&{&1.user_tenant.user.name, &1.id})
 
-      {:ok, %{profiles: profiles}}
+      {:ok, %{profile: nil, profiles: profiles}}
     end)
   end
 
@@ -304,7 +322,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   end
 
   def handle_event("navigate", %{"field" => "step", "id" => id}, socket) do
-    %{assigns: %{application: application, completed_steps: completed_steps}} = socket
+    %{application: application, completed_steps: completed_steps} = socket.assigns
 
     if MapSet.member?(completed_steps, id) do
       step = Enum.find(application.steps, &(&1.id == id))
@@ -323,17 +341,16 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
   def handle_event("submit-next", %{"form" => %{"data" => json_data}}, socket) do
     %{
-      assigns: %{
-        current_step: current_step,
-        application: application,
-        submission: submission,
-        completed_steps: completed_steps,
-        current_user_tenant: current_user_tenant,
-        current_tenant: tenant
-      }
-    } = socket
+      current_step: current_step,
+      application: application,
+      submission: submission,
+      completed_steps: completed_steps,
+      current_user_tenant: current_user_tenant,
+      current_tenant: tenant
+    } = socket.assigns
 
     update_step_submission(socket, json_data)
+    update_mapped_step_submission(socket, json_data)
 
     completed_steps = MapSet.put(completed_steps, current_step.id)
 
@@ -443,6 +460,24 @@ defmodule HousingAppWeb.Live.Applications.Submit do
       actor: current_user_tenant,
       tenant: tenant
     )
+  end
+
+  defp update_mapped_step_submission(socket, json_data) do
+    %{
+      assigns: %{
+        current_step: current_step,
+        profile: profile,
+        current_user_tenant: current_user_tenant,
+        current_tenant: tenant
+      }
+    } = socket
+
+    {:ok, profile_form} = HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant)
+
+    if current_step.form_id == profile_form.id do
+      {:ok, _} =
+        HousingApp.Management.Profile.submit(profile, %{data: json_data}, actor: current_user_tenant, tenant: tenant)
+    end
   end
 
   defp get_actor(current_user_tenant, tenant, form) do

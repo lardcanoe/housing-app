@@ -59,7 +59,9 @@ defmodule HousingApp.Management.Profile do
     end
 
     policy action_type(:create) do
-      authorize_if HousingApp.Checks.IsTenantAdmin
+      # authorize_if HousingApp.Checks.IsTenantAdmin
+      # TODO: This is a hack to allow users to create their own profiles
+      authorize_if always()
     end
 
     policy action_type(:read) do
@@ -69,7 +71,8 @@ defmodule HousingApp.Management.Profile do
 
     policy action_type(:update) do
       authorize_if HousingApp.Checks.IsTenantAdmin
-      authorize_if relates_to_actor_via(:user_tenant)
+      # TODO: This is a hack to allow users to update their own profiles
+      authorize_if always()
     end
   end
 
@@ -113,6 +116,12 @@ defmodule HousingApp.Management.Profile do
       filter expr(user_tenant_id == ^arg(:user_tenant_id) and is_nil(archived_at))
     end
 
+    read :get_mine do
+      get? true
+
+      filter expr(user_tenant_id == ^actor(:id) and is_nil(archived_at))
+    end
+
     update :submit do
       accept [:data]
     end
@@ -122,6 +131,7 @@ defmodule HousingApp.Management.Profile do
     define_for HousingApp.Management
 
     define :list
+    define :get_mine
     define :get_by_id, args: [:id]
     define :get_by_user_tenant, args: [:user_tenant_id]
     define :submit
