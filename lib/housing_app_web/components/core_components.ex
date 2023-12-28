@@ -333,6 +333,7 @@ defmodule HousingAppWeb.CoreComponents do
   attr :prefix, :string, default: ""
   attr :autowidth, :boolean, default: true, doc: "the autowidth flag"
   attr :class, :string, default: nil
+  attr :button_text, :string, default: "Submit"
   attr(:rest, :global, include: ~w(phx-target))
 
   def json_form(%{embed: true} = assigns) do
@@ -375,7 +376,7 @@ defmodule HousingAppWeb.CoreComponents do
       <%= render_schema(%{definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema, @prefix), form: @form}) %>
 
       <:actions>
-        <.button>Submit</.button>
+        <.button><%= @button_text %></.button>
       </:actions>
     </.simple_form>
     """
