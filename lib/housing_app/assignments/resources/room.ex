@@ -65,6 +65,11 @@ defmodule HousingApp.Assignments.Room do
       attribute_writable? true
       allow_nil? false
     end
+
+    has_many :beds, HousingApp.Assignments.Bed do
+      source_attribute :id
+      destination_attribute :room_id
+    end
   end
 
   policies do

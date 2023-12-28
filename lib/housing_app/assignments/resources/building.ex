@@ -19,12 +19,12 @@ defmodule HousingApp.Assignments.Building do
       allow_nil? false
     end
 
-    attribute :floors, :integer do
+    attribute :floor_count, :integer do
       default 1
       allow_nil? false
     end
 
-    attribute :rooms, :integer do
+    attribute :room_count, :integer do
       default 0
       allow_nil? false
     end
@@ -53,6 +53,11 @@ defmodule HousingApp.Assignments.Building do
       attribute_writable? true
       allow_nil? false
     end
+
+    has_many :rooms, HousingApp.Assignments.Room do
+      source_attribute :id
+      destination_attribute :building_id
+    end
   end
 
   policies do
@@ -75,7 +80,7 @@ defmodule HousingApp.Assignments.Building do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:name, :location, :floors, :rooms]
+      accept [:name, :location, :floor_count, :room_count]
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
 

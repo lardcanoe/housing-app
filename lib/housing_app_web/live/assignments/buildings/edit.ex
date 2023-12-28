@@ -9,8 +9,8 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Edit do
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update building</h2>
       <.input field={@ash_form[:name]} label="Name" />
       <.input field={@ash_form[:location]} label="Location" />
-      <.input type="number" field={@ash_form[:floors]} label="Floors" />
-      <.input type="number" field={@ash_form[:rooms]} label="Rooms" />
+      <.input type="number" field={@ash_form[:floor_count]} label="Floors" />
+      <.input type="number" field={@ash_form[:room_count]} label="Rooms" />
 
       <.json_form
         :if={@json_schema}

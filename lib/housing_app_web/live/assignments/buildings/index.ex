@@ -64,8 +64,8 @@ defmodule HousingAppWeb.Live.Assignments.Buildings.Index do
           "id" => p.id,
           "name" => p.name,
           "location" => p.location,
-          "floors" => p.floors,
-          "rooms" => p.rooms,
+          "floors" => p.floor_count,
+          "rooms" => p.room_count,
           "data" => p.data,
           "actions" => [["Edit"], ["View"]]
         }

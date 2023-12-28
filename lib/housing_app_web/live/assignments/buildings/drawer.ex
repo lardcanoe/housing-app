@@ -55,9 +55,9 @@ defmodule HousingAppWeb.Components.Drawer.Building do
           <%= @building.id %>
         </dd>
         <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Floors</dt>
-        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400"><%= @building.floors %></dd>
+        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400"><%= @building.floor_count %></dd>
         <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Rooms</dt>
-        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400"><%= @building.rooms %></dd>
+        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400"><%= @building.room_count %></dd>
       </dl>
 
       <.json_view :if={@json_schema} data={@building.data} json_schema={@json_schema} />
