@@ -19,11 +19,9 @@ defmodule HousingAppWeb.Live.Forms.Edit do
     """
   end
 
-  def mount(
-        %{"id" => id},
-        _session,
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def mount(%{"id" => id}, _session, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     case HousingApp.Management.Form.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,

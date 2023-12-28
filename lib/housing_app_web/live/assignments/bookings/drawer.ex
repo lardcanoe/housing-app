@@ -72,10 +72,9 @@ defmodule HousingAppWeb.Components.Drawer.Booking do
     {:ok, assign(socket, json_schema: nil, booking: nil)}
   end
 
-  def update(
-        %{booking_id: booking_id},
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def update(%{booking_id: booking_id}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     case HousingApp.Assignments.Booking.get_by_id(booking_id, actor: current_user_tenant, tenant: tenant) do
       {:ok, booking} ->
         json_schema =

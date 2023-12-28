@@ -75,10 +75,9 @@ defmodule HousingAppWeb.Components.Drawer.Bed do
     {:ok, assign(socket, json_schema: nil, bed: nil, bookings: [])}
   end
 
-  def update(
-        %{bed_id: bed_id},
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def update(%{bed_id: bed_id}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     case HousingApp.Assignments.Bed.get_by_id(bed_id, actor: current_user_tenant, tenant: tenant) do
       {:ok, bed} ->
         bookings = HousingApp.Assignments.Booking.list_by_bed!(bed.id, actor: current_user_tenant, tenant: tenant)

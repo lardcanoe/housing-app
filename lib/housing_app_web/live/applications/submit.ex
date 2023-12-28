@@ -110,11 +110,9 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     """
   end
 
-  def mount(
-        %{"id" => id},
-        _session,
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def mount(%{"id" => id}, _session, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     case HousingApp.Management.Application.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
@@ -167,10 +165,9 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     assign(socket, submission: nil, data_form: to_form(%{"profile_id" => "", "data" => %{}}, as: "data"))
   end
 
-  def load_form(
-        %{assigns: %{application: application, current_user_tenant: current_user_tenant, current_tenant: tenant}} =
-          socket
-      ) do
+  def load_form(%{assigns: %{application: application}} = socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     case HousingApp.Management.ApplicationSubmission.get_submission(application.id, current_user_tenant.id,
            actor: current_user_tenant,
            tenant: tenant
@@ -219,7 +216,9 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     end
   end
 
-  def load_async_assigns(%{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+  def load_async_assigns(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     assign_async(socket, [:profiles], fn ->
       profiles =
         [actor: current_user_tenant, tenant: tenant]
@@ -235,12 +234,10 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     {:noreply, socket}
   end
 
-  def handle_event(
-        "submit",
-        %{"form" => %{"data" => json_data}} = form,
-        %{assigns: %{submission: submission, current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      )
+  def handle_event("submit", %{"form" => %{"data" => json_data}} = form, %{assigns: %{submission: submission}} = socket)
       when not is_nil(submission) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     json_data = HousingApp.Utils.JsonSchema.cast_params(socket.assigns.json_schema, json_data)
 
     ref_schema = ExJsonSchema.Schema.resolve(socket.assigns.json_schema)
@@ -281,9 +278,10 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   def handle_event(
         "submit",
         %{"form" => %{"data" => json_data}} = form,
-        %{assigns: %{application: application, current_user_tenant: current_user_tenant, current_tenant: tenant}} =
-          socket
+        %{assigns: %{application: application}} = socket
       ) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     json_data = HousingApp.Utils.JsonSchema.cast_params(socket.assigns.json_schema, json_data)
 
     ref_schema = ExJsonSchema.Schema.resolve(socket.assigns.json_schema)
@@ -436,7 +434,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
          json_data
        )
        when not is_nil(step_submission) and current_step.id == step_submission.id do
-    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     HousingApp.Management.ApplicationStepSubmission.resubmit(
       step_submission,

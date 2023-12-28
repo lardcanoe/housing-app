@@ -8,11 +8,9 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
     """
   end
 
-  def mount(
-        %{"id" => id},
-        _session,
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def mount(%{"id" => id}, _session, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     with {:ok, profile} <- HousingApp.Management.Profile.get_by_id(id, actor: current_user_tenant, tenant: tenant),
          {:ok, profile_form} <- HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
       {:ok,

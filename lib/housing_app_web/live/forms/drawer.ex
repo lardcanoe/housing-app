@@ -62,10 +62,9 @@ defmodule HousingAppWeb.Components.Drawer.Form do
     {:ok, assign(socket, form: nil)}
   end
 
-  def update(
-        %{form_id: form_id},
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def update(%{form_id: form_id}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     case HousingApp.Management.Form.get_by_id(form_id, actor: current_user_tenant, tenant: tenant) do
       {:ok, form} ->
         {:ok, assign(socket, form: form)}

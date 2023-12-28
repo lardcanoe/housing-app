@@ -14,7 +14,9 @@ defmodule HousingAppWeb.Live.Profiles.New do
     """
   end
 
-  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+  def mount(_params, _session, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     ash_form =
       HousingApp.Management.Profile
       |> AshPhoenix.Form.for_create(:new,

@@ -45,11 +45,9 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
     {:noreply, push_navigate(socket, to: ~p"/assignments/bookings/#{id}/edit")}
   end
 
-  def handle_event(
-        "load-data",
-        %{},
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def handle_event("load-data", %{}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     bookings =
       [actor: current_user_tenant, tenant: tenant]
       |> HousingApp.Assignments.Booking.list!()

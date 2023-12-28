@@ -69,10 +69,9 @@ defmodule HousingAppWeb.Components.Drawer.Profile do
     {:ok, assign(socket, profile: nil, bookings: [])}
   end
 
-  def update(
-        %{profile_id: profile_id},
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def update(%{profile_id: profile_id}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     with {:ok, profile} <-
            HousingApp.Management.Profile.get_by_id(profile_id, actor: current_user_tenant, tenant: tenant),
          {:ok, profile_form} <- HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do

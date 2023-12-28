@@ -28,7 +28,9 @@ defmodule HousingAppWeb.Live.Profiles.Index do
     """
   end
 
-  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+  def mount(_params, _session, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     case HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
       {:ok, profile_form} ->
         {:ok,
@@ -55,12 +57,9 @@ defmodule HousingAppWeb.Live.Profiles.Index do
     {:noreply, push_navigate(socket, to: ~p"/profiles/#{id}/edit")}
   end
 
-  def handle_event(
-        "load-data",
-        %{},
-        %{assigns: %{profile_form: profile_form, current_user_tenant: current_user_tenant, current_tenant: tenant}} =
-          socket
-      ) do
+  def handle_event("load-data", %{}, %{assigns: %{profile_form: profile_form}} = socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     profiles =
       [actor: current_user_tenant, tenant: tenant]
       |> HousingApp.Management.Profile.list!()

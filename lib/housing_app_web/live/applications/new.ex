@@ -20,7 +20,7 @@ defmodule HousingAppWeb.Live.Applications.New do
   end
 
   def mount(_params, _session, socket) do
-    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     {:ok,
      assign(socket,

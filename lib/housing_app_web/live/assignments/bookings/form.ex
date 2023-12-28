@@ -71,11 +71,9 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Form do
     """
   end
 
-  def mount(
-        %{"id" => id},
-        _session,
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def mount(%{"id" => id}, _session, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     case HousingApp.Assignments.Booking.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
@@ -107,7 +105,9 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Form do
     end
   end
 
-  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+  def mount(_params, _session, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     ash_form =
       HousingApp.Assignments.Booking
       |> AshPhoenix.Form.for_create(:new,
@@ -137,7 +137,9 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Form do
     end
   end
 
-  def load_async_assigns(%{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+  def load_async_assigns(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     assign_async(socket, [:beds, :profiles, :products], fn ->
       profiles =
         [actor: current_user_tenant, tenant: tenant]
@@ -165,12 +167,10 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Form do
     {:noreply, assign(socket, params: params)}
   end
 
-  def handle_event(
-        "validate",
-        %{"_target" => ["form", "bed_id"], "form" => %{"bed_id" => bed_id} = params},
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      )
+  def handle_event("validate", %{"_target" => ["form", "bed_id"], "form" => %{"bed_id" => bed_id} = params}, socket)
       when is_binary(bed_id) and bed_id != "" do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     params =
       case HousingApp.Assignments.Bed.get_by_id(bed_id, actor: current_user_tenant, tenant: tenant) do
         {:ok, bed} -> Map.put(params, "product_id", bed.room.product_id)

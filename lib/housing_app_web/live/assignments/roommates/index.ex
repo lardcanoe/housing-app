@@ -51,11 +51,9 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.Index do
     {:noreply, push_navigate(socket, to: ~p"/assignments/roommates/#{id}/edit")}
   end
 
-  def handle_event(
-        "load-data",
-        %{},
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def handle_event("load-data", %{}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     roommates =
       [actor: current_user_tenant, tenant: tenant]
       |> HousingApp.Assignments.Roommate.list!()

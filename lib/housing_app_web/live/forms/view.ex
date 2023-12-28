@@ -8,11 +8,9 @@ defmodule HousingAppWeb.Live.Forms.View do
     """
   end
 
-  def mount(
-        %{"id" => id},
-        _session,
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def mount(%{"id" => id}, _session, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     case HousingApp.Management.Form.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
@@ -37,11 +35,9 @@ defmodule HousingAppWeb.Live.Forms.View do
     {:noreply, socket}
   end
 
-  def handle_event(
-        "submit",
-        data,
-        %{assigns: %{form_id: form_id, current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def handle_event("submit", data, %{assigns: %{form_id: form_id}} = socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     data = HousingApp.Utils.JsonSchema.cast_params(socket.assigns.json_schema, data)
 
     ref_schema = ExJsonSchema.Schema.resolve(socket.assigns.json_schema)

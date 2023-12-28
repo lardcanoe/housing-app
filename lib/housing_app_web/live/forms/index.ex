@@ -82,12 +82,12 @@ defmodule HousingAppWeb.Live.Forms.Index do
   end
 
   defp fetch_forms(%{assigns: %{params: %{"type" => app_type}}} = socket) when is_binary(app_type) and app_type != "" do
-    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
     HousingApp.Management.Form.list_by_type!(app_type, actor: current_user_tenant, tenant: tenant)
   end
 
   defp fetch_forms(socket) do
-    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
     HousingApp.Management.Form.list!(actor: current_user_tenant, tenant: tenant)
   end
 

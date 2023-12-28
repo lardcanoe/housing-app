@@ -200,12 +200,12 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
   defp fetch_applications(%{assigns: %{params: %{"type" => app_type}}} = socket)
        when is_binary(app_type) and app_type != "" do
-    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
     HousingApp.Management.Application.list_by_type!(app_type, actor: current_user_tenant, tenant: tenant)
   end
 
   defp fetch_applications(socket) do
-    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
     HousingApp.Management.Application.list!(actor: current_user_tenant, tenant: tenant)
   end
 

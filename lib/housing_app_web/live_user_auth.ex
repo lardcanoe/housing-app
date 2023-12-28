@@ -31,8 +31,9 @@ defmodule HousingAppWeb.LiveUserAuth do
     end
   end
 
-  def on_mount(:live_user_required, _params, %{"user" => user}, %{assigns: %{current_user: current_user}} = socket)
-      when is_binary(user) do
+  def on_mount(:live_user_required, _params, %{"user" => user}, socket) when is_binary(user) do
+    %{current_user: current_user} = socket.assigns
+
     case HousingApp.Accounts.UserTenant.get_default(actor: current_user) do
       {:error, _} ->
         {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}

@@ -15,7 +15,9 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.New do
     """
   end
 
-  def mount(_params, _session, %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket) do
+  def mount(_params, _session, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     ash_form =
       HousingApp.Assignments.RoommateGroup
       |> AshPhoenix.Form.for_create(:new,
@@ -39,7 +41,7 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.New do
   end
 
   def handle_event("submit", %{"form" => params}, socket) do
-    %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
          {:ok, roommate_group} <- AshPhoenix.Form.submit(ash_form),

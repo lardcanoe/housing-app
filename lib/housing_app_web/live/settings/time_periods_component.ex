@@ -78,7 +78,7 @@ defmodule HousingAppWeb.Components.TimePeriodsForm do
   end
 
   def handle_event("submit", %{"form" => data}, socket) do
-    %{assigns: %{tp_form: tp_form, current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
+    %{tp_form: tp_form, current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     case AshPhoenix.Form.submit(tp_form, params: data) do
       {:ok, _tp} ->

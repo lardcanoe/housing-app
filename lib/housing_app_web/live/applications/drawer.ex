@@ -71,10 +71,9 @@ defmodule HousingAppWeb.Components.Drawer.Application do
     {:ok, assign(socket, application: nil)}
   end
 
-  def update(
-        %{application_id: application_id},
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def update(%{application_id: application_id}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     case HousingApp.Management.Application.get_by_id(application_id, actor: current_user_tenant, tenant: tenant) do
       {:ok, application} ->
         {:ok, assign(socket, application: application)}

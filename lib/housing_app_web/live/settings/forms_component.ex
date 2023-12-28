@@ -80,11 +80,9 @@ defmodule HousingAppWeb.Components.TenantForms do
     {:noreply, socket}
   end
 
-  def handle_event(
-        "submit",
-        data,
-        %{assigns: %{current_user_tenant: current_user_tenant, current_tenant: tenant}} = socket
-      ) do
+  def handle_event("submit", data, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     ash_form =
       data
       |> Enum.reduce(%{}, fn {key, value}, acc ->
