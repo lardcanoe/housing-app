@@ -64,7 +64,17 @@ defmodule HousingAppWeb.Live.Applications.Submit do
         </li>
       </ol>
 
-      <.simple_form autowidth={false} for={@form} phx-change="validate" phx-submit="submit-next">
+      <.live_component
+        :if={@component}
+        module={@component}
+        id="step-component"
+        data={@step_data}
+        current_user_tenant={@current_user_tenant}
+        current_tenant={@current_tenant}
+      >
+      </.live_component>
+
+      <.simple_form :if={@json_schema} autowidth={false} for={@form} phx-change="validate" phx-submit="submit-next">
         <.json_form form={@data_form} json_schema={@json_schema} embed={true} prefix="form" />
         <:actions>
           <.button :if={@current_step.id == @last_step_id}>Submit</.button>
@@ -131,7 +141,6 @@ defmodule HousingAppWeb.Live.Applications.Submit do
            socket
            |> assign(
              application: app,
-             json_schema: Jason.decode!(step.form.json_schema),
              multi_step: true,
              current_step: step,
              last_step_id: last_step_id,
@@ -140,6 +149,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
              page_title: "Submit Application"
            )
            |> load_form()
+           |> load_current_step()
            |> load_step_submission()
            |> load_completed_step_submissions()
            |> load_async_assigns()}
@@ -162,7 +172,11 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
   def load_form(%{assigns: %{application: %{submission_type: :many}}} = socket) do
     # FUTURE: Should really find most recent, and if :started, then continue it
-    assign(socket, submission: nil, data_form: to_form(%{"profile_id" => "", "data" => %{}}, as: "data"))
+    assign(socket,
+      submission: nil,
+      step_data: %{},
+      data_form: to_form(%{"profile_id" => "", "data" => %{}}, as: "data")
+    )
   end
 
   def load_form(%{assigns: %{application: application}} = socket) do
@@ -328,10 +342,8 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
       {:noreply,
        socket
-       |> assign(
-         current_step: step,
-         json_schema: Jason.decode!(step.form.json_schema)
-       )
+       |> assign(current_step: step)
+       |> load_current_step()
        |> load_step_submission()}
     else
       {:noreply, socket}
@@ -372,9 +384,9 @@ defmodule HousingAppWeb.Live.Applications.Submit do
          socket
          |> assign(
            current_step: next_step,
-           completed_steps: completed_steps,
-           json_schema: Jason.decode!(next_step.form.json_schema)
+           completed_steps: completed_steps
          )
+         |> load_current_step()
          |> load_step_submission()}
     end
   end
@@ -384,15 +396,35 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     handle_event("submit-next", %{"form" => %{"data" => %{}}}, socket)
   end
 
+  def handle_info({:component_submit, data}, socket) do
+    handle_event("submit-next", %{"form" => %{"data" => data}}, socket)
+  end
+
+  defp load_current_step(socket) do
+    %{current_step: current_step} = socket.assigns
+
+    cond do
+      current_step.form ->
+        assign(socket,
+          json_schema: Jason.decode!(current_step.form.json_schema),
+          component: nil
+        )
+
+      current_step.component ->
+        assign(socket,
+          component: HousingAppWeb.Components.Assignments.SelectBed,
+          json_schema: nil
+        )
+    end
+  end
+
   defp load_step_submission(socket) do
     %{
-      assigns: %{
-        submission: submission,
-        current_step: current_step,
-        current_user_tenant: current_user_tenant,
-        current_tenant: tenant
-      }
-    } = socket
+      submission: submission,
+      current_step: current_step,
+      current_user_tenant: current_user_tenant,
+      current_tenant: tenant
+    } = socket.assigns
 
     case HousingApp.Management.ApplicationStepSubmission.get_by_step_id(submission.id, current_step.id,
            actor: current_user_tenant,
@@ -401,11 +433,12 @@ defmodule HousingAppWeb.Live.Applications.Submit do
       {:ok, step_submission} ->
         assign(socket,
           step_submission: step_submission,
+          step_data: step_submission.data,
           data_form: to_form(%{"data" => step_submission.data}, as: "data")
         )
 
       {:error, _} ->
-        assign(socket, step_submission: nil, data_form: to_form(%{"data" => %{}}, as: "data"))
+        assign(socket, step_submission: nil, step_data: %{}, data_form: to_form(%{"data" => %{}}, as: "data"))
     end
   end
 
@@ -433,7 +466,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
          %{assigns: %{current_step: current_step, step_submission: step_submission}} = socket,
          json_data
        )
-       when not is_nil(step_submission) and current_step.id == step_submission.id do
+       when not is_nil(step_submission) and current_step.id == step_submission.step_id do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     HousingApp.Management.ApplicationStepSubmission.resubmit(

@@ -60,6 +60,10 @@ defmodule HousingApp.Assignments.Building do
       authorize_if HousingApp.Checks.IsPlatformAdmin
       authorize_if HousingApp.Checks.IsTenantAdmin
     end
+
+    policy action_type(:read) do
+      authorize_if always()
+    end
   end
 
   postgres do

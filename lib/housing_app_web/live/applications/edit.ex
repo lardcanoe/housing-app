@@ -113,8 +113,15 @@ defmodule HousingAppWeb.Live.Applications.Edit do
             "required": false
           },
           {
-            "id": "0a113cda-efcf-41fe-a731-9402eb4b92d3",
+            "id": "4c0d8a99-afb7-46ee-b118-3b60cc0b2ff2",
             "step": 7,
+            "title": "Select Bed",
+            "component": "assignments_select_bed",
+            "required": true
+          },
+          {
+            "id": "0a113cda-efcf-41fe-a731-9402eb4b92d3",
+            "step": 8,
             "title": "Finish and submit",
             "form_id": "5105c01b-2cb4-4504-a4ae-fb99561d6432",
             "required": false

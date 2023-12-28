@@ -16,6 +16,11 @@ defmodule HousingApp.Management.ApplicationStep do
       allow_nil? false
     end
 
+    attribute :component, :atom do
+      constraints one_of: [:assignments_select_bed]
+      allow_nil? true
+    end
+
     attribute :required, :boolean do
       default false
       allow_nil? false
@@ -25,7 +30,7 @@ defmodule HousingApp.Management.ApplicationStep do
   relationships do
     belongs_to :form, HousingApp.Management.Form do
       attribute_writable? true
-      allow_nil? false
+      allow_nil? true
     end
   end
 
