@@ -17,7 +17,7 @@ defmodule HousingApp.Management.ApplicationStep do
     end
 
     attribute :component, :atom do
-      constraints one_of: [:assignments_select_bed]
+      constraints one_of: [:assignments_select_bed, :management_update_profile]
       allow_nil? true
     end
 

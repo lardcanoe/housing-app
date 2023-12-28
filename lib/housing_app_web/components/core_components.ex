@@ -333,6 +333,7 @@ defmodule HousingAppWeb.CoreComponents do
   attr :prefix, :string, default: ""
   attr :autowidth, :boolean, default: true, doc: "the autowidth flag"
   attr :class, :string, default: nil
+  attr(:rest, :global, include: ~w(phx-target))
 
   def json_form(%{embed: true} = assigns) do
     ~H"""
@@ -360,6 +361,7 @@ defmodule HousingAppWeb.CoreComponents do
       phx-change="validate"
       phx-submit="submit"
       autocomplete="off"
+      {@rest}
     >
       <%= render_slot(@inner_block, @form) %>
 

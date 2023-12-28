@@ -208,26 +208,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   end
 
   def load_async_assigns(%{assigns: %{current_user_tenant: %{user_type: :user}}} = socket) do
-    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
-
-    case HousingApp.Management.Profile.get_mine(actor: current_user_tenant, tenant: tenant) do
-      {:ok, profile} ->
-        assign(socket, profile: profile)
-
-      {:error, %Ash.Error.Query.NotFound{}} ->
-        {:ok, profile} =
-          HousingApp.Management.Profile
-          |> Ash.Changeset.for_create(
-            :create,
-            %{user_tenant_id: current_user_tenant.id, tenant_id: current_user_tenant.tenant_id},
-            actor: current_user_tenant,
-            tenant: tenant,
-            authorize?: false
-          )
-          |> HousingApp.Management.create()
-
-        assign(socket, profile: profile)
-    end
+    socket
   end
 
   def load_async_assigns(socket) do
@@ -361,7 +342,6 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     } = socket.assigns
 
     update_step_submission(socket, json_data)
-    update_mapped_step_submission(socket, json_data)
 
     completed_steps = MapSet.put(completed_steps, current_step.id)
 
@@ -412,11 +392,14 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
       current_step.component ->
         assign(socket,
-          component: HousingAppWeb.Components.Assignments.SelectBed,
+          component: component_to_module(current_step.component),
           json_schema: nil
         )
     end
   end
+
+  defp component_to_module(:assignments_select_bed), do: HousingAppWeb.Components.Assignments.SelectBed
+  defp component_to_module(:management_update_profile), do: HousingAppWeb.Components.Management.UpdateProfile
 
   defp load_step_submission(socket) do
     %{
@@ -492,24 +475,6 @@ defmodule HousingAppWeb.Live.Applications.Submit do
       actor: current_user_tenant,
       tenant: tenant
     )
-  end
-
-  defp update_mapped_step_submission(socket, json_data) do
-    %{
-      assigns: %{
-        current_step: current_step,
-        profile: profile,
-        current_user_tenant: current_user_tenant,
-        current_tenant: tenant
-      }
-    } = socket
-
-    {:ok, profile_form} = HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant)
-
-    if current_step.form_id == profile_form.id do
-      {:ok, _} =
-        HousingApp.Management.Profile.submit(profile, %{data: json_data}, actor: current_user_tenant, tenant: tenant)
-    end
   end
 
   defp get_actor(current_user_tenant, tenant, form) do

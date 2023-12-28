@@ -61,9 +61,6 @@ defmodule HousingAppWeb.Live.Applications.Edit do
   end
 
   def handle_event("submit", %{"form" => params}, socket) do
-    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
-    {:ok, profile_form} = HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant)
-
     params =
       Map.put(
         params,
@@ -81,7 +78,7 @@ defmodule HousingAppWeb.Live.Applications.Edit do
             "id": "cf01fa16-9005-4a28-9bcb-c179c0317c29",
             "step": 2,
             "title": "Profile",
-            "form_id": "#{profile_form.id}",
+            "component": "management_update_profile",
             "required": true
           },
           {
