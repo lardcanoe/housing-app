@@ -78,7 +78,7 @@ defmodule HousingAppWeb.Components.Drawer.Booking do
     case HousingApp.Assignments.Booking.get_by_id(booking_id, actor: current_user_tenant, tenant: tenant) do
       {:ok, booking} ->
         json_schema =
-          case HousingApp.Management.get_booking_form(actor: current_user_tenant, tenant: tenant) do
+          case HousingApp.Management.Service.get_booking_form(actor: current_user_tenant, tenant: tenant) do
             {:ok, form} -> Jason.decode!(form.json_schema)
             {:error, _} -> nil
           end

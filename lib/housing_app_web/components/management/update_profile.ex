@@ -77,7 +77,7 @@ defmodule HousingAppWeb.Components.Management.UpdateProfile do
   defp load_form(socket) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
-    case HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
+    case HousingApp.Management.Service.get_profile_form(actor: current_user_tenant, tenant: tenant) do
       {:ok, profile_form} ->
         assign(socket, json_schema: Jason.decode!(profile_form.json_schema))
 

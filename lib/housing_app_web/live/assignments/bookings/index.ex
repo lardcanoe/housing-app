@@ -3,6 +3,8 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
+  import HousingAppWeb.Components.DataGrid
+
   def render(%{live_action: :index} = assigns) do
     ~H"""
     <.data_grid
@@ -75,7 +77,7 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
       end)
 
     form_columns =
-      case HousingApp.Management.get_booking_form(actor: current_user_tenant, tenant: tenant) do
+      case HousingApp.Management.Service.get_booking_form(actor: current_user_tenant, tenant: tenant) do
         {:ok, form} ->
           form.json_schema
           |> Jason.decode!()

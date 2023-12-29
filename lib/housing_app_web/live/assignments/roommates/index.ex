@@ -3,6 +3,8 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.Index do
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
+  import HousingAppWeb.Components.DataGrid
+
   def render(%{live_action: :index} = assigns) do
     ~H"""
     <.data_grid

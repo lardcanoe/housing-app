@@ -2,6 +2,8 @@ defmodule HousingAppWeb.Live.Applications.Index do
   @moduledoc false
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
+  import HousingAppWeb.Components.DataGrid
+
   def render(%{live_action: :index, current_user_tenant: %{user_type: :user}} = assigns) do
     ~H"""
     <p :if={@applications.loading || @submissions.loading}>Loading...</p>

@@ -111,7 +111,6 @@ defmodule HousingAppWeb do
 
   defp html_helpers do
     quote do
-      import HousingAppWeb.Components.DataGrid
       import HousingAppWeb.CoreComponents
       import HousingAppWeb.Gettext
       import HousingAppWeb.PlatformTypes

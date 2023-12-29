@@ -3,6 +3,8 @@ defmodule HousingAppWeb.Live.Profiles.Index do
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
+  import HousingAppWeb.Components.DataGrid
+
   def render(%{live_action: :index} = assigns) do
     ~H"""
     <.data_grid
@@ -31,7 +33,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
   def mount(_params, _session, socket) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
-    case HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
+    case HousingApp.Management.Service.get_profile_form(actor: current_user_tenant, tenant: tenant) do
       {:ok, profile_form} ->
         {:ok,
          assign(socket, profile_form: profile_form, loading: true, count: 0, sidebar: :profiles, page_title: "Profiles")}

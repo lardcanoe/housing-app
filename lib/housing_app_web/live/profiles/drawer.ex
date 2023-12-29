@@ -74,7 +74,8 @@ defmodule HousingAppWeb.Components.Drawer.Profile do
 
     with {:ok, profile} <-
            HousingApp.Management.Profile.get_by_id(profile_id, actor: current_user_tenant, tenant: tenant),
-         {:ok, profile_form} <- HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
+         {:ok, profile_form} <-
+           HousingApp.Management.Service.get_profile_form(actor: current_user_tenant, tenant: tenant) do
       bookings =
         HousingApp.Assignments.Booking.list_by_profile!(profile.id, actor: current_user_tenant, tenant: tenant)
 

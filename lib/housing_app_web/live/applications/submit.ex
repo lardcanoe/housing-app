@@ -214,15 +214,21 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   def load_async_assigns(socket) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
-    assign_async(socket, [:profiles], fn ->
-      profiles =
-        [actor: current_user_tenant, tenant: tenant]
-        |> HousingApp.Management.Profile.list!()
-        |> Enum.sort_by(& &1.user_tenant.user.name)
-        |> Enum.map(&{&1.user_tenant.user.name, &1.id})
+    if connected?(socket) do
+      assign_async(socket, [:profiles], fn ->
+        profiles =
+          [actor: current_user_tenant, tenant: tenant]
+          |> HousingApp.Management.Profile.list!()
+          |> Enum.sort_by(& &1.user_tenant.user.name)
+          |> Enum.map(&{&1.user_tenant.user.name, &1.id})
 
-      {:ok, %{profile: nil, profiles: profiles}}
-    end)
+        {:ok, %{profile: nil, profiles: profiles}}
+      end)
+    else
+      assign_async(socket, [:profiles], fn ->
+        {:ok, %{profile: nil, profiles: []}}
+      end)
+    end
   end
 
   def handle_event("validate", _params, socket) do

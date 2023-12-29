@@ -131,7 +131,7 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Form do
   end
 
   def get_booking_form_schema(current_user_tenant, tenant) do
-    case HousingApp.Management.get_booking_form(actor: current_user_tenant, tenant: tenant) do
+    case HousingApp.Management.Service.get_booking_form(actor: current_user_tenant, tenant: tenant) do
       {:ok, form} -> Jason.decode!(form.json_schema)
       {:error, _} -> nil
     end

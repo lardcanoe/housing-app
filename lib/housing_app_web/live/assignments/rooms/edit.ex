@@ -74,7 +74,7 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
           |> Enum.map(&{&1.name, &1.id})
 
         json_schema =
-          case HousingApp.Management.get_room_form(actor: current_user_tenant, tenant: tenant) do
+          case HousingApp.Management.Service.get_room_form(actor: current_user_tenant, tenant: tenant) do
             {:ok, room_form} -> Jason.decode!(room_form.json_schema)
             {:error, _} -> nil
           end

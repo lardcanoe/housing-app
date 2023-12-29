@@ -2,6 +2,8 @@ defmodule HousingAppWeb.Live.Forms.Index do
   @moduledoc false
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
+  import HousingAppWeb.Components.DataGrid
+
   def render(%{live_action: :index} = assigns) do
     ~H"""
     <.data_grid

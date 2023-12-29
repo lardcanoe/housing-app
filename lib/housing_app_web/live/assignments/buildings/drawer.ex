@@ -75,7 +75,7 @@ defmodule HousingAppWeb.Components.Drawer.Building do
     case HousingApp.Assignments.Building.get_by_id(building_id, actor: current_user_tenant, tenant: tenant) do
       {:ok, building} ->
         json_schema =
-          case HousingApp.Management.get_building_form(actor: current_user_tenant, tenant: tenant) do
+          case HousingApp.Management.Service.get_building_form(actor: current_user_tenant, tenant: tenant) do
             {:ok, form} -> Jason.decode!(form.json_schema)
             {:error, _} -> nil
           end

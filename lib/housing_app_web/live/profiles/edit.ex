@@ -12,7 +12,8 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     with {:ok, profile} <- HousingApp.Management.Profile.get_by_id(id, actor: current_user_tenant, tenant: tenant),
-         {:ok, profile_form} <- HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
+         {:ok, profile_form} <-
+           HousingApp.Management.Service.get_profile_form(actor: current_user_tenant, tenant: tenant) do
       {:ok,
        assign(socket,
          json_schema: Jason.decode!(profile_form.json_schema),

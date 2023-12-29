@@ -52,7 +52,7 @@ defmodule HousingAppWeb.Live.Assignments.Beds.Edit do
           |> Enum.map(&{"#{&1.building.name} #{&1.name}", &1.id})
 
         json_schema =
-          case HousingApp.Management.get_bed_form(actor: current_user_tenant, tenant: tenant) do
+          case HousingApp.Management.Service.get_bed_form(actor: current_user_tenant, tenant: tenant) do
             {:ok, form} -> Jason.decode!(form.json_schema)
             {:error, _} -> nil
           end

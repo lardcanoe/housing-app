@@ -3,6 +3,8 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
+  import HousingAppWeb.Components.DataGrid
+
   def render(%{live_action: :submissions} = assigns) do
     ~H"""
     <.data_grid

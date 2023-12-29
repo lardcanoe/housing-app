@@ -82,7 +82,8 @@ defmodule HousingAppWeb.Live.Settings.UserSettings do
              actor: current_user_tenant,
              tenant: tenant
            ),
-         {:ok, profile_form} <- HousingApp.Management.get_profile_form(actor: current_user_tenant, tenant: tenant) do
+         {:ok, profile_form} <-
+           HousingApp.Management.Service.get_profile_form(actor: current_user_tenant, tenant: tenant) do
       {:ok,
        socket
        |> assign(
