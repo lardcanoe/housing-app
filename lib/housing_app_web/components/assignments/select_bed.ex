@@ -8,6 +8,7 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
   attr :current_user_tenant, :any, required: true
   attr :current_tenant, :string, required: true
   attr :data, :any, required: true
+  attr :submission, :any, required: true
 
   def render(assigns) do
     ~H"""
@@ -72,8 +73,15 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
   end
 
   def handle_event("submit", %{"form" => data}, socket) do
-    send(self(), {:component_submit, data})
-    {:noreply, socket}
+    case create_booking(data, socket) do
+      {:ok, _booking} ->
+        send(self(), {:component_submit, data})
+        {:noreply, socket}
+
+      {:error, errors} ->
+        dbg(errors)
+        {:noreply, put_flash(socket, :error, "Error creating booking.")}
+    end
   end
 
   defp load_roommate_groups(socket) do
@@ -135,5 +143,16 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
 
       {:ok, %{rooms: rooms}}
     end)
+  end
+
+  defp create_booking(%{"bed_id" => bed_id}, socket) when is_binary(bed_id) and bed_id != "" do
+    %{submission: submission, current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    HousingApp.Assignments.Service.upsert_bed_booking(
+      submission,
+      bed_id,
+      actor: current_user_tenant,
+      tenant: tenant
+    )
   end
 end

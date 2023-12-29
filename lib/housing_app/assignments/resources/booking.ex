@@ -70,6 +70,18 @@ defmodule HousingApp.Assignments.Booking do
       authorize_if HousingApp.Checks.IsPlatformAdmin
       authorize_if HousingApp.Checks.IsTenantAdmin
     end
+
+    policy action(:get_for_application_submission) do
+      authorize_if relates_to_actor_via([:profile, :user_tenant])
+    end
+
+    policy action(:new) do
+      authorize_if always()
+    end
+
+    policy action(:swap_bed) do
+      authorize_if relates_to_actor_via([:profile, :user_tenant])
+    end
   end
 
   postgres do
@@ -91,6 +103,10 @@ defmodule HousingApp.Assignments.Booking do
     create :new do
       accept [:bed_id, :profile_id, :product_id, :application_submission_id, :start_at, :end_at, :data]
       change set_attribute(:tenant_id, actor(:tenant_id))
+    end
+
+    update :swap_bed do
+      accept [:bed_id, :product_id]
     end
 
     read :list do
@@ -146,17 +162,29 @@ defmodule HousingApp.Assignments.Booking do
 
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
+
+    read :get_for_application_submission do
+      argument :application_submission_id, :uuid do
+        allow_nil? false
+      end
+
+      get? true
+
+      filter expr(application_submission_id == ^arg(:application_submission_id) and is_nil(archived_at))
+    end
   end
 
   code_interface do
     define_for HousingApp.Assignments
 
     define :new
+    define :swap_bed
     define :list
     define :list_by_room, args: [:room_id]
     define :list_by_bed, args: [:bed_id]
     define :list_by_profile, args: [:profile_id]
     define :get_by_id, args: [:id]
+    define :get_for_application_submission, args: [:application_submission_id]
   end
 
   identities do
