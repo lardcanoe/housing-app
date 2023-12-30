@@ -20,26 +20,48 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
           options={@roommate_group_options}
           label="Roommate Group"
           required
+          {if(@booking, do: [{"disabled",""}])}
         />
 
-        <.async_result :let={beds} :if={@selection == :bed and not is_nil(@form[:roommate_group_id])} assign={@beds}>
-          <:loading>
-            <.input type="select" field={@form[:bed_id]} options={[]} label="Bed" prompt="Loading beds..." disabled />
-          </:loading>
-          <:failed :let={reason}><%= reason %></:failed>
-          <.input type="select" field={@form[:bed_id]} options={beds} label="Bed" prompt="Select a bed..." required />
-        </.async_result>
-
-        <.async_result :let={rooms} :if={@selection == :room and not is_nil(@form[:roommate_group_id])} assign={@rooms}>
+        <.async_result :let={rooms} :if={@selection == :room} assign={@rooms}>
           <:loading>
             <.input type="select" field={@form[:room_id]} options={[]} label="Room" prompt="Loading rooms..." disabled />
           </:loading>
           <:failed :let={reason}><%= reason %></:failed>
-          <.input type="select" field={@form[:room_id]} options={rooms} label="Room" prompt="Select a room..." required />
+          <.input
+            type="select"
+            field={@form[:room_id]}
+            options={rooms}
+            label="Room"
+            prompt="Select a room..."
+            required
+            {if(@booking, do: [{"disabled",""}])}
+          />
         </.async_result>
 
+        <.async_result :let={beds} :if={@selection == :bed} assign={@beds}>
+          <:loading>
+            <.input type="select" field={@form[:bed_id]} options={[]} label="Bed" prompt="Loading beds..." disabled />
+          </:loading>
+          <:failed :let={reason}><%= reason %></:failed>
+          <.input
+            type="select"
+            field={@form[:bed_id]}
+            options={beds}
+            label="Bed"
+            prompt="Select a bed..."
+            required
+            {if(@booking, do: [{"disabled",""}])}
+          />
+        </.async_result>
+
+        <h1 :if={@booking} class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+          Current bed selection: <%= @booking.bed.room.building.name %> <%= @booking.bed.room.name %>, Bed <%= @booking.bed.name %>
+        </h1>
+
         <:actions>
-          <.button>Next</.button>
+          <.button :if={@booking}>Accept bed selection</.button>
+          <.button :if={is_nil(@booking)}>Next</.button>
         </:actions>
       </.simple_form>
     </div>
@@ -54,8 +76,8 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
     {:ok,
      socket
      |> assign(params)
-     |> assign(roommate_group_id: params.data["roommate_group_id"])
-     |> assign(form: to_form(params.data, as: "form"))
+     |> load_booking()
+     |> load_form()
      |> load_roommate_groups()
      |> refresh_beds()}
   end
@@ -73,8 +95,14 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
   end
 
   def handle_event("submit", %{"form" => data}, socket) do
+    # TODO: create_booking should be an async task, and should run in a txn
     case create_booking(data, socket) do
       {:ok, _booking} ->
+        send(self(), {:component_submit, data})
+        {:noreply, socket}
+
+      results when is_list(results) ->
+        # TODO: Check that all are "ok: Booking" and not "error: ..."
         send(self(), {:component_submit, data})
         {:noreply, socket}
 
@@ -82,6 +110,48 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
         dbg(errors)
         {:noreply, put_flash(socket, :error, "Error creating booking.")}
     end
+  end
+
+  defp load_booking(socket) do
+    %{submission: submission, data: data, current_user_tenant: current_user_tenant, current_tenant: tenant} =
+      socket.assigns
+
+    case HousingApp.Assignments.Booking.get_for_application_submission(
+           submission.id,
+           actor: current_user_tenant,
+           tenant: tenant,
+           load: [bed: [room: [:building]]],
+           not_found_error?: false
+         ) do
+      {:ok, %HousingApp.Assignments.Booking{} = booking} ->
+        assign(socket,
+          booking: booking,
+          roommate_group_id: booking.roommate_group_id,
+          room_id: booking.bed.room_id,
+          bed_id: booking.bed_id
+        )
+
+      _ ->
+        assign(socket, booking: nil, roommate_group_id: data["roommate_group_id"])
+    end
+  end
+
+  defp load_form(%{assigns: %{booking: booking}} = socket) when not is_nil(booking) do
+    form_data =
+      Map.merge(
+        %{
+          "roommate_group_id" => booking.roommate_group_id,
+          "room_id" => booking.bed.room_id,
+          "bed_id" => booking.bed_id
+        },
+        socket.assigns.data
+      )
+
+    assign(socket, form: to_form(form_data, as: "form"))
+  end
+
+  defp load_form(socket) do
+    assign(socket, form: to_form(socket.assigns.data, as: "form"))
   end
 
   defp load_roommate_groups(socket) do
@@ -151,6 +221,19 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
     HousingApp.Assignments.Service.upsert_bed_booking(
       submission,
       bed_id,
+      actor: current_user_tenant,
+      tenant: tenant
+    )
+  end
+
+  defp create_booking(%{"roommate_group_id" => roommate_group_id, "room_id" => room_id}, socket)
+       when is_binary(room_id) and room_id != "" and is_binary(roommate_group_id) and roommate_group_id != "" do
+    %{submission: submission, current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    HousingApp.Assignments.Service.upsert_roommate_booking(
+      submission,
+      roommate_group_id,
+      room_id,
       actor: current_user_tenant,
       tenant: tenant
     )

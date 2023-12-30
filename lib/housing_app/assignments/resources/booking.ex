@@ -63,6 +63,15 @@ defmodule HousingApp.Assignments.Booking do
       api HousingApp.Management
       attribute_writable? true
     end
+
+    belongs_to :roommate_group, HousingApp.Assignments.RoommateGroup do
+      attribute_writable? true
+    end
+
+    belongs_to :created_by, HousingApp.Accounts.UserTenant do
+      api HousingApp.Accounts
+      attribute_writable? true
+    end
   end
 
   policies do
@@ -101,7 +110,18 @@ defmodule HousingApp.Assignments.Booking do
     defaults [:create, :read, :update, :destroy]
 
     create :new do
-      accept [:bed_id, :profile_id, :product_id, :application_submission_id, :start_at, :end_at, :data]
+      accept [
+        :bed_id,
+        :profile_id,
+        :product_id,
+        :application_submission_id,
+        :start_at,
+        :end_at,
+        :data,
+        :roommate_group_id,
+        :created_by_id
+      ]
+
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
 

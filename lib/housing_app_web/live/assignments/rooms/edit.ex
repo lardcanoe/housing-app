@@ -98,8 +98,10 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
 
   def handle_event("submit", %{"form" => params} = payload, socket) do
     # TODO: Validate "data" against JSON schema of form
+    params = Map.put(params, "data", payload["data"] || %{})
+
     with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(ash_form, override_params: %{"data" => payload["data"] || %{}}) do
+         {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
       {:noreply,
        socket
        |> put_flash(:info, "Successfully updated the room.")

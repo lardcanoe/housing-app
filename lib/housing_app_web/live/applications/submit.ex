@@ -3,6 +3,8 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
+  require Logger
+
   def render(%{live_action: :submit, multi_step: true, current_user_tenant: %{user_type: :user}} = assigns) do
     ~H"""
     <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white"><%= @application.name %></h1>
@@ -325,9 +327,12 @@ defmodule HousingAppWeb.Live.Applications.Submit do
   def handle_event("navigate", %{"field" => "step", "id" => id}, socket) do
     %{application: application, completed_steps: completed_steps} = socket.assigns
 
-    if MapSet.member?(completed_steps, id) do
-      step = Enum.find(application.steps, &(&1.id == id))
+    completed? = MapSet.member?(completed_steps, id)
+    step = Enum.find(application.steps, &(&1.id == id))
+    prev_step = Enum.find(application.steps, &(&1.step == step.step - 1))
+    prev_completed? = MapSet.member?(completed_steps, prev_step.id)
 
+    if completed? or prev_completed? do
       {:noreply,
        socket
        |> assign(current_step: step)
@@ -402,6 +407,10 @@ defmodule HousingAppWeb.Live.Applications.Submit do
           component: component_to_module(current_step.component),
           json_schema: nil
         )
+
+      true ->
+        Logger.error("Step has no form or component")
+        assign(socket, component: nil, json_schema: nil)
     end
   end
 
@@ -427,7 +436,11 @@ defmodule HousingAppWeb.Live.Applications.Submit do
           data_form: to_form(%{"data" => step_submission.data}, as: "data")
         )
 
-      {:error, _} ->
+      {:error, %Ash.Error.Query.NotFound{}} ->
+        assign(socket, step_submission: nil, step_data: %{}, data_form: to_form(%{"data" => %{}}, as: "data"))
+
+      {:error, error} ->
+        dbg(error)
         assign(socket, step_submission: nil, step_data: %{}, data_form: to_form(%{"data" => %{}}, as: "data"))
     end
   end
