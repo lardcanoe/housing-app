@@ -366,6 +366,14 @@ defmodule HousingAppWeb.Live.Applications.Submit do
           tenant: tenant
         )
 
+        HousingApp.Management.Service.new_notification(
+          "Application submitted",
+          "Thank you for your submission. We will review your application shortly.",
+          %{action: "submit", resource: "application_submission", resource_id: submission.id},
+          actor: current_user_tenant,
+          tenant: tenant
+        )
+
         {:noreply,
          socket
          |> put_flash(:info, "Thank you for your submission!")

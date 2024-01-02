@@ -12,5 +12,6 @@ defmodule HousingApp.Management.Registry do
     entry HousingApp.Management.ApplicationStepSubmission
     entry HousingApp.Management.Form
     entry HousingApp.Management.FormSubmission
+    entry HousingApp.Management.Notification
   end
 end

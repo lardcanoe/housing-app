@@ -1,6 +1,23 @@
 defmodule HousingApp.Management.Service do
   @moduledoc false
 
+  def new_notification(subject, message, correlation, actor: actor, tenant: tenant) do
+    HousingApp.Management.Notification
+    |> Ash.Changeset.for_create(
+      :create,
+      %{
+        subject: subject,
+        message: message,
+        correlation: correlation,
+        user_tenant_id: actor.id,
+        tenant_id: actor.tenant_id
+      },
+      actor: actor,
+      tenant: tenant
+    )
+    |> HousingApp.Management.create()
+  end
+
   def get_profile_form(actor: current_user_tenant, tenant: tenant) do
     get_form_for(:system, :profile_form_id, actor: current_user_tenant, tenant: tenant)
   end
