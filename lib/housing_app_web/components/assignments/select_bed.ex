@@ -94,6 +94,21 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
     {:noreply, socket}
   end
 
+  # User has accepted their roommate bed selection
+  def handle_event("submit", %{}, %{assigns: %{booking: booking}} = socket) when not is_nil(booking) do
+    send(
+      self(),
+      {:component_submit,
+       %{
+         "roommate_group_id" => booking.roommate_group_id,
+         "room_id" => booking.bed.room_id,
+         "bed_id" => booking.bed_id
+       }}
+    )
+
+    {:noreply, socket}
+  end
+
   def handle_event("submit", %{"form" => data}, socket) do
     # TODO: create_booking should be an async task, and should run in a txn
     case create_booking(data, socket) do
