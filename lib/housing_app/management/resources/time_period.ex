@@ -42,6 +42,11 @@ defmodule HousingApp.Management.TimePeriod do
       attribute_writable? true
       allow_nil? false
     end
+
+    has_many :applications, HousingApp.Management.Application do
+      source_attribute :id
+      destination_attribute :time_period_id
+    end
   end
 
   policies do

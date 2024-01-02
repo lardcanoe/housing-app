@@ -135,10 +135,16 @@ defmodule HousingApp.Management.Application do
       filter expr(status == :approved and is_nil(archived_at))
     end
 
+    # By type, and optional status
     read :list_by_type do
       argument :type, :string do
         constraints min_length: 1, trim?: true
         allow_nil? false
+      end
+
+      argument :status, :atom do
+        constraints one_of: [:draft, :approved, :archived]
+        allow_nil? true
       end
 
       prepare build(
@@ -147,7 +153,13 @@ defmodule HousingApp.Management.Application do
                 sort: [:name]
               )
 
-      filter expr(type == ^arg(:type) and is_nil(archived_at))
+      filter expr(
+               if is_nil(^arg(:status)) do
+                 type == ^arg(:type) and is_nil(archived_at)
+               else
+                 type == ^arg(:type) and status == ^arg(:status) and is_nil(archived_at)
+               end
+             )
     end
 
     read :get_by_id do
@@ -184,7 +196,7 @@ defmodule HousingApp.Management.Application do
 
     define :list
     define :list_approved
-    define :list_by_type, args: [:type]
+    define :list_by_type, args: [:type, {:optional, :status}]
     define :get_by_id, args: [:id]
     define :get_types
   end
