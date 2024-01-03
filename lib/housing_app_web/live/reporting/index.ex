@@ -50,10 +50,11 @@ defmodule HousingAppWeb.Live.Reporting.Index do
 
     <%= if @bookings.ok? && @bookings.result do %>
       <div :for={booking <- @bookings.result} class="p-6 bg-white rounded shadow dark:bg-gray-800">
-        <h3 class="mb-2 text-xl font-bold dark:text-white"><%= booking.name %></h3>
-        <p class="font-light text-gray-500 dark:text-gray-400">
-          <%= booking.count_of_submissions %>
+        <p class="mb-4 text-2xl text-center font-bold text-gray-100 dark:text-gray-400">
+          <%= booking.count %> bookings
         </p>
+        <h3 class="text-base font-bold dark:text-white"><%= booking.time_period.name %></h3>
+        <h3 class="text-base font-bold dark:text-white"><%= booking.application.name %></h3>
       </div>
     <% end %>
     """
@@ -96,7 +97,7 @@ defmodule HousingAppWeb.Live.Reporting.Index do
 
     assign_async(socket, [:bookings], fn ->
       bookings =
-        HousingApp.Assignments.Reporting.bookings(actor: current_user_tenant, tenant: tenant)
+        HousingApp.Assignments.Booking.stats_by_time_period!(actor: current_user_tenant, tenant: tenant)
 
       {:ok, %{bookings: bookings}}
     end)

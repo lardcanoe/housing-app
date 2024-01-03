@@ -106,6 +106,16 @@ defmodule HousingApp.Accounts.User do
   actions do
     defaults [:read, :update]
 
+    read :get_by_id do
+      argument :id, :uuid do
+        allow_nil? false
+      end
+
+      get? true
+
+      filter expr(id == ^arg(:id))
+    end
+
     # action :sign_out, :integer do
     #   argument :user, MyApp.User, allow_nil?: false
 
@@ -125,6 +135,8 @@ defmodule HousingApp.Accounts.User do
 
   code_interface do
     define_for HousingApp.Accounts
+
+    define :get_by_id, args: [:id]
   end
 
   identities do

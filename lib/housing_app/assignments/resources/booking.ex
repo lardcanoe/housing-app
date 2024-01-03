@@ -6,6 +6,8 @@ defmodule HousingApp.Assignments.Booking do
     extensions: [AshAdmin.Api],
     authorizers: [Ash.Policy.Authorizer]
 
+  import Ecto.Query, only: [from: 2]
+
   attributes do
     uuid_primary_key :id
 
@@ -192,6 +194,30 @@ defmodule HousingApp.Assignments.Booking do
 
       filter expr(application_submission_id == ^arg(:application_submission_id) and is_nil(archived_at))
     end
+
+    action :stats_by_time_period, {:array, :struct} do
+      run fn input, context ->
+        from(b in __MODULE__,
+          join: sub in assoc(b, :application_submission),
+          join: app in assoc(sub, :application),
+          join: tp in assoc(app, :time_period),
+          where:
+            b.tenant_id == ^context.actor.tenant_id and
+              is_nil(b.archived_at) and
+              is_nil(sub.archived_at) and
+              sub.status == ^:completed and
+              is_nil(app.archived_at) and
+              app.status == ^:approved,
+          group_by: [tp.id, tp.name, app.id, app.name],
+          select: [tp.id, tp.name, app.id, app.name, count()]
+        )
+        |> HousingApp.Repo.all(prefix: input.tenant)
+        |> Enum.map(fn [tp_id, tp_name, app_id, app_name, count] ->
+          %{time_period: %{id: tp_id, name: tp_name}, application: %{id: app_id, name: app_name}, count: count}
+        end)
+        |> then(&{:ok, &1})
+      end
+    end
   end
 
   code_interface do
@@ -205,6 +231,7 @@ defmodule HousingApp.Assignments.Booking do
     define :list_by_profile, args: [:profile_id]
     define :get_by_id, args: [:id]
     define :get_for_application_submission, args: [:application_submission_id]
+    define :stats_by_time_period
   end
 
   identities do
