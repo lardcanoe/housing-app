@@ -131,6 +131,10 @@ defmodule HousingAppWeb.Router do
         end
       end
 
+      scope "/notifications", Live.Notifications do
+        live "/", Index, :index
+      end
+
       scope "/reporting", Live.Reporting do
         # TODO: pipe_through [:require_authenticated_non_end_user]
         live "/", Index, :index

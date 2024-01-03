@@ -144,7 +144,7 @@ defmodule HousingAppWeb.Components.Navbar do
             </div>
             <div></div>
             <.link
-              patch={~p"/"}
+              patch={~p"/notifications"}
               class="block py-2 text-md font-medium text-center text-gray-900 bg-gray-50 hover:bg-gray-100 dark:bg-gray-600 dark:text-white dark:hover:underline"
             >
               <div class="inline-flex items-center">

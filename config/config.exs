@@ -94,6 +94,10 @@ config :spark, :formatter,
     ]
   ]
 
+config :ex_cldr,
+  default_locale: "en",
+  default_backend: HousingApp.Cldr
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

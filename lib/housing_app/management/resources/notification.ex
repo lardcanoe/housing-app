@@ -86,11 +86,13 @@ defmodule HousingApp.Management.Notification do
     defaults [:create, :read, :update, :destroy]
 
     read :list do
-      filter expr(is_nil(archived_at))
+      prepare build(sort: [created_at: :desc])
+      filter expr(user_tenant_id == ^actor(:id) and is_nil(archived_at))
     end
 
     read :list_unread do
-      filter expr(not read and is_nil(archived_at))
+      prepare build(sort: [created_at: :desc])
+      filter expr(user_tenant_id == ^actor(:id) and not read and is_nil(archived_at))
     end
 
     read :get_by_id do
