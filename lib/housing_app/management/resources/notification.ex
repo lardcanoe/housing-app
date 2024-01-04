@@ -71,6 +71,10 @@ defmodule HousingApp.Management.Notification do
       authorize_if HousingApp.Checks.IsTenantAdmin
       authorize_if relates_to_actor_via(:user_tenant)
     end
+
+    policy action(:count_unread) do
+      authorize_if always()
+    end
   end
 
   postgres do
@@ -105,6 +109,14 @@ defmodule HousingApp.Management.Notification do
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
 
+    action :count_unread, :integer do
+      run fn _, context ->
+        __MODULE__
+        |> Ash.Query.for_read(:list_unread, %{}, actor: context.actor, tenant: context.tenant)
+        |> HousingApp.Management.count()
+      end
+    end
+
     update :mark_as_read do
       accept []
       change set_attribute(:read, true)
@@ -117,6 +129,8 @@ defmodule HousingApp.Management.Notification do
     define :list
     define :list_unread
     define :get_by_id, args: [:id]
+    define :mark_as_read
+    define :count_unread
   end
 
   multitenancy do

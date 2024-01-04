@@ -29,13 +29,17 @@ import './darkmode'
 let Hooks = {}
 Hooks.AgGrid = AgGrid
 
+let localeCache = {
+    locale: Intl.NumberFormat().resolvedOptions().locale,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timezone_offset: -(new Date().getTimezoneOffset() / 60)
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
     params: {
         _csrf_token: csrfToken,
-        locale: Intl.NumberFormat().resolvedOptions().locale,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        timezone_offset: -(new Date().getTimezoneOffset() / 60)
+        ...localeCache
     },
     hooks: Hooks
 })

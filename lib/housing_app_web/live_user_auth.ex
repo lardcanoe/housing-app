@@ -58,14 +58,18 @@ defmodule HousingAppWeb.LiveUserAuth do
   # Replicate assigns in lib/housing_app_web/controllers/auth_controller.ex
   # But do NOT copy them, perform our own database queries
 
-  def mount_user_success(socket, current_user, user_tenant) do
-    Ash.set_tenant("tenant_#{user_tenant.tenant_id}")
+  def mount_user_success(socket, current_user, current_user_tenant) do
+    tenant = "tenant_#{current_user_tenant.tenant_id}"
+    Ash.set_tenant(tenant)
 
     available_user_tenants = HousingApp.Accounts.UserTenant.find_for_user!(actor: current_user)
 
+    unread_notifications = HousingApp.Management.Notification.count_unread!(actor: current_user_tenant, tenant: tenant)
+
     socket
-    |> assign(:current_user_tenant, user_tenant)
-    |> assign(:current_tenant, "tenant_#{user_tenant.tenant_id}")
+    |> assign(:current_user_tenant, current_user_tenant)
+    |> assign(:current_tenant, tenant)
     |> assign(:available_user_tenants, available_user_tenants)
+    |> assign(:unread_notifications, unread_notifications)
   end
 end
