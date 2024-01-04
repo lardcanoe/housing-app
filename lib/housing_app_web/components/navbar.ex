@@ -125,7 +125,7 @@ defmodule HousingAppWeb.Components.Navbar do
             <span class="sr-only">View notifications</span>
             <!-- Showing a number takes up too much space -->
             <div :if={@unread_notifications > 0} class="relative">
-              <div class="absolute -top-0 -end-0 inline-flex items-center justify-center w-3 h-3 text-xs font-bold text-white bg-green-500 border-2 border-white rounded-full dark:border-gray-900">
+              <div class="absolute -top-1 -end-1 inline-flex items-center justify-center w-3 h-3 text-xs font-bold text-white bg-green-500 border-2 border-white rounded-full dark:border-gray-900">
               </div>
             </div>
             <.icon name="hero-bell-solid" class="w-6 h-6" />

@@ -4,7 +4,8 @@ defmodule HousingApp.Management.Notification do
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
     extensions: [AshAdmin.Api],
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    notifiers: [Ash.Notifier.PubSub]
 
   attributes do
     uuid_primary_key :id
@@ -51,6 +52,14 @@ defmodule HousingApp.Management.Notification do
       attribute_writable? true
       allow_nil? false
     end
+  end
+
+  pub_sub do
+    module HousingAppWeb.Endpoint
+    prefix "notification"
+    broadcast_type :broadcast
+
+    publish :create, [[:user_tenant_id], "created"], event: "notification-created"
   end
 
   policies do

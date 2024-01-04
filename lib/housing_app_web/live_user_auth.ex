@@ -55,12 +55,22 @@ defmodule HousingAppWeb.LiveUserAuth do
     {:cont, assign(socket, :current_user, nil)}
   end
 
+  def handle_info(%{event: "notification-created"}, socket) do
+    {:noreply, assign(socket, :unread_notifications, socket.assigns.unread_notifications + 1)}
+  end
+
+  def handle_info(_, socket) do
+    {:noreply, socket}
+  end
+
   # Replicate assigns in lib/housing_app_web/controllers/auth_controller.ex
   # But do NOT copy them, perform our own database queries
 
   def mount_user_success(socket, current_user, current_user_tenant) do
     tenant = "tenant_#{current_user_tenant.tenant_id}"
     Ash.set_tenant(tenant)
+
+    HousingAppWeb.Endpoint.subscribe("notification:#{current_user_tenant.id}:created")
 
     available_user_tenants = HousingApp.Accounts.UserTenant.find_for_user!(actor: current_user)
 
