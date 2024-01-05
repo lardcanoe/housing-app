@@ -8,7 +8,13 @@
     unread_notifications={@unread_notifications}
   />
 
-  <.sidebar section={assigns[:sidebar]} current_user_tenant={@current_user_tenant} current_tenant={@current_tenant} />
+  <.live_component
+    module={HousingAppWeb.Components.Sidebar}
+    id="sidebar"
+    current_tenant={@current_tenant}
+    current_user_tenant={@current_user_tenant}
+    section={assigns[:sidebar]}
+  />
 
   <main class="p-4 md:ml-64 h-auto pt-20">
     <div class="mx-auto">

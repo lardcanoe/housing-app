@@ -1,16 +1,13 @@
 defmodule HousingAppWeb.Components.Sidebar do
   @moduledoc false
 
-  use Phoenix.Component
-  use HousingAppWeb, :verified_routes
-
-  import HousingAppWeb.CoreComponents, only: [icon: 1]
+  use HousingAppWeb, :live_component
 
   attr :current_user_tenant, :any, required: true
-  attr :current_tenant, :any, required: true
+  attr :current_tenant, :string, required: true
   attr :section, :any, default: nil
 
-  def sidebar(%{current_user_tenant: %{user_type: :user}} = assigns) do
+  def render(%{current_user_tenant: %{user_type: :user}} = assigns) do
     ~H"""
     <aside
       class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -97,29 +94,7 @@ defmodule HousingAppWeb.Components.Sidebar do
     """
   end
 
-  def sidebar(assigns) do
-    assigns =
-      assign_new(assigns, :form_types, fn ->
-        {:ok, form_types} =
-          HousingApp.Management.Form.get_types(
-            actor: assigns.current_user_tenant,
-            tenant: assigns.current_tenant
-          )
-
-        form_types
-      end)
-
-    assigns =
-      assign_new(assigns, :application_types, fn ->
-        {:ok, application_types} =
-          HousingApp.Management.Application.get_types(
-            actor: assigns.current_user_tenant,
-            tenant: assigns.current_tenant
-          )
-
-        application_types
-      end)
-
+  def render(assigns) do
     ~H"""
     <aside
       class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -198,14 +173,16 @@ defmodule HousingAppWeb.Components.Sidebar do
                   Manage
                 </.link>
               </li>
-              <li :for={t <- @form_types}>
-                <.link
-                  patch={~p"/forms?type=#{t}"}
-                  class="flex items-center p-2 pl-11 w-full text-sm font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  <%= t %>
-                </.link>
-              </li>
+              <%= if @form_types.ok? && @form_types.result do %>
+                <li :for={t <- @form_types.result}>
+                  <.link
+                    patch={~p"/forms?type=#{t}"}
+                    class="flex items-center p-2 pl-11 w-full text-sm font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  >
+                    <%= t %>
+                  </.link>
+                </li>
+              <% end %>
             </ul>
           </li>
           <!-- Applications -->
@@ -232,14 +209,16 @@ defmodule HousingAppWeb.Components.Sidebar do
                   Manage
                 </.link>
               </li>
-              <li :for={t <- @application_types}>
-                <.link
-                  patch={~p"/applications?type=#{t}"}
-                  class="flex items-center p-2 pl-11 w-full text-sm font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  <%= t %>
-                </.link>
-              </li>
+              <%= if @application_types.ok? && @application_types.result do %>
+                <li :for={t <- @application_types.result}>
+                  <.link
+                    patch={~p"/applications?type=#{t}"}
+                    class="flex items-center p-2 pl-11 w-full text-sm font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  >
+                    <%= t %>
+                  </.link>
+                </li>
+              <% end %>
             </ul>
           </li>
           <!-- Assignments -->
@@ -503,5 +482,37 @@ defmodule HousingAppWeb.Components.Sidebar do
       </path>
     </svg>
     """
+  end
+
+  def mount(socket) do
+    {:ok, socket}
+  end
+
+  def update(%{current_user_tenant: %{user_type: :user}} = params, socket) do
+    {:ok, assign(socket, params)}
+  end
+
+  def update(params, socket) do
+    {:ok, socket |> assign(params) |> load_application_types()}
+  end
+
+  defp load_application_types(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    assign_async(socket, [:form_types, :application_types], fn ->
+      {:ok, form_types} =
+        HousingApp.Management.Form.get_types(
+          actor: current_user_tenant,
+          tenant: tenant
+        )
+
+      {:ok, application_types} =
+        HousingApp.Management.Application.get_types(
+          actor: current_user_tenant,
+          tenant: tenant
+        )
+
+      {:ok, %{form_types: form_types, application_types: application_types}}
+    end)
   end
 end

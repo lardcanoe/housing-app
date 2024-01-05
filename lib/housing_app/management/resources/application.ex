@@ -179,7 +179,7 @@ defmodule HousingApp.Management.Application do
       run fn input, context ->
         types =
           __MODULE__
-          |> Ash.Query.for_read(:read, %{select: [:type]}, actor: context.actor)
+          |> Ash.Query.for_read(:read, %{select: [:type]}, actor: context.actor, tenant: input.tenant)
           |> Ash.Query.filter(is_nil(archived_at))
           |> HousingApp.Management.read!()
           |> Enum.map(& &1.type)
