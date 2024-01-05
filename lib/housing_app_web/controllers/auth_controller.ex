@@ -28,7 +28,7 @@ defmodule HousingAppWeb.AuthController do
   end
 
   def switch_tenant(conn, %{"tenant_id" => tenant_id}) do
-    case HousingApp.Accounts.UserTenant.get_for_tenant(tenant_id, actor: conn.assigns[:current_user]) do
+    case HousingApp.Accounts.UserTenant.get_mine_for_tenant(tenant_id, actor: conn.assigns[:current_user]) do
       {:error, _} ->
         redirect(conn, to: ~p"/")
 

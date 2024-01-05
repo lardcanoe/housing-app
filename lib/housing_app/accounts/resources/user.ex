@@ -21,6 +21,11 @@ defmodule HousingApp.Accounts.User do
           sender HousingApp.Accounts.User.Senders.SendPasswordResetEmail
         end
       end
+
+      magic_link do
+        identity_field :email
+        sender(HousingApp.Accounts.User.Senders.SendMagicLink)
+      end
     end
 
     tokens do
@@ -61,6 +66,10 @@ defmodule HousingApp.Accounts.User do
   end
 
   policies do
+    # TODO: Fix these!
+    #       Also, see policies in https://hexdocs.pm/ash_authentication/getting-started-with-authentication.html
+    #       https://hexdocs.pm/ash_authentication/policies-on-authentication-resources.html
+
     bypass always() do
       authorize_if always()
     end
@@ -116,6 +125,16 @@ defmodule HousingApp.Accounts.User do
       filter expr(id == ^arg(:id))
     end
 
+    read :get_by_email do
+      argument :email, :string do
+        allow_nil? false
+      end
+
+      get? true
+
+      filter expr(email == ^arg(:email))
+    end
+
     # action :sign_out, :integer do
     #   argument :user, MyApp.User, allow_nil?: false
 
@@ -137,6 +156,7 @@ defmodule HousingApp.Accounts.User do
     define_for HousingApp.Accounts
 
     define :get_by_id, args: [:id]
+    define :get_by_email, args: [:email]
   end
 
   identities do

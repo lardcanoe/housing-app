@@ -68,7 +68,7 @@ defmodule HousingApp.Accounts.UserTenant do
   actions do
     defaults [:create, :read, :update, :destroy]
 
-    read :get_for_tenant do
+    read :get_mine_for_tenant do
       argument :tenant_id, :uuid do
         allow_nil? false
       end
@@ -78,6 +78,16 @@ defmodule HousingApp.Accounts.UserTenant do
       prepare build(load: [:user, :tenant])
 
       filter expr(user_id == ^actor(:id) and tenant_id == ^arg(:tenant_id) and is_nil(archived_at))
+    end
+
+    read :get_for_user_of_my_tenant do
+      argument :user_id, :uuid do
+        allow_nil? false
+      end
+
+      get? true
+
+      filter expr(user_id == ^arg(:user_id) and tenant_id == ^actor(:tenant_id) and is_nil(archived_at))
     end
 
     read :get_user_by_email do
@@ -95,9 +105,15 @@ defmodule HousingApp.Accounts.UserTenant do
              )
     end
 
-    read :find_for_user do
+    read :find_for_my_user do
       prepare build(load: [:user, :tenant])
       filter expr(user_id == ^actor(:id) and is_nil(archived_at))
+    end
+
+    read :list_staff do
+      prepare build(load: [:user])
+
+      filter expr(tenant_id == ^actor(:tenant_id) and user_type in [:staff, :admin])
     end
 
     read :get_by_id do
@@ -148,9 +164,11 @@ defmodule HousingApp.Accounts.UserTenant do
     define_for HousingApp.Accounts
 
     define :get_default
-    define :get_for_tenant, args: [:tenant_id]
+    define :get_mine_for_tenant, args: [:tenant_id]
     define :get_user_by_email, args: [:email]
-    define :find_for_user
+    define :get_for_user_of_my_tenant, args: [:user_id]
+    define :find_for_my_user
+    define :list_staff
     define :get_by_id, args: [:id]
     define :get_by_api_key, args: [:key]
     define :generate_api_key

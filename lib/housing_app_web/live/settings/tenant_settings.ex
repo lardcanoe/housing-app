@@ -3,6 +3,8 @@ defmodule HousingAppWeb.Live.Settings.TenantSettings do
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
+  on_mount HousingAppWeb.LiveLocale
+
   # https://flowbite.com/blocks/application/crud-update-forms/#update-user-form
   def render(%{live_action: :index} = assigns) do
     ~H"""
@@ -26,16 +28,22 @@ defmodule HousingAppWeb.Live.Settings.TenantSettings do
             aria-controls="forms"
             aria-selected="true"
           >
-            <svg
-              class="w-4 h-4 me-2 text-white"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z" />
-            </svg>
-            Forms
+            <.icon name="hero-document-text-solid" class="w-4 h-4 me-2 text-white" /> Forms
+          </a>
+        </li>
+        <li role="presentation">
+          <a
+            href="#"
+            class="inline-flex items-center px-4 py-3 rounded-lg hover:text-gray-900 bg-gray-50 hover:bg-gray-100 w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
+            aria-current="page"
+            id="users-tab"
+            data-tabs-target="#users"
+            type="button"
+            role="tab"
+            aria-controls="users"
+            aria-selected="true"
+          >
+            <.icon name="hero-user-solid" class="w-4 h-4 me-2 text-white" /> Users
           </a>
         </li>
         <li role="presentation">
@@ -88,6 +96,22 @@ defmodule HousingAppWeb.Live.Settings.TenantSettings do
             id="tenant-time-periods-component"
             current_user_tenant={@current_user_tenant}
             current_tenant={@current_tenant}
+          >
+          </.live_component>
+        </div>
+        <div
+          class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800"
+          id="users"
+          role="tabpanel"
+          aria-labelledby="users-tab"
+        >
+          <.live_component
+            module={HousingAppWeb.Components.Settings.User}
+            id="tenant-users-component"
+            current_user_tenant={@current_user_tenant}
+            current_tenant={@current_tenant}
+            timezone={@timezone}
+            locale={@locale}
           >
           </.live_component>
         </div>

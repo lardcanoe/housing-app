@@ -27,6 +27,24 @@ defmodule HousingApp.Accounts.Emails do
     """)
   end
 
+  def deliver_magic_link(user, url) do
+    if !url do
+      raise "Cannot deliver reset instructions without a url"
+    end
+
+    deliver(user.email, "Login Link", """
+    <html>
+      <p>
+        Hi #{user.email},
+      </p>
+
+      <p>
+        <a href="#{url}">Click here</a> to login.
+      </p>
+    <html>
+    """)
+  end
+
   # For simplicity, this module simply logs messages to the terminal.
   # You should replace it by a proper email or notification tool, such as:
   #

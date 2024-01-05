@@ -221,6 +221,7 @@ defmodule HousingAppWeb.Components.Navbar do
                 <div class="text-sm text-gray-900 dark:text-white">Assignments</div>
               </.link>
               <.link
+                :if={@user_type == :admin}
                 patch={~p"/settings/account"}
                 class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group"
               >
@@ -354,7 +355,7 @@ defmodule HousingAppWeb.Components.Navbar do
                   My profile
                 </.link>
               </li>
-              <li :if={@user_type != :user}>
+              <li :if={@user_type == :admin}>
                 <.link
                   patch={~p"/settings/account"}
                   class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
@@ -408,7 +409,7 @@ defmodule HousingAppWeb.Components.Navbar do
   def update(params, socket) do
     %{current_user: current_user} = params
 
-    available_user_tenants = HousingApp.Accounts.UserTenant.find_for_user!(actor: current_user)
+    available_user_tenants = HousingApp.Accounts.UserTenant.find_for_my_user!(actor: current_user)
 
     {:ok, socket |> assign(params) |> assign(available_user_tenants: available_user_tenants)}
   end

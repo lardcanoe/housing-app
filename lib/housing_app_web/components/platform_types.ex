@@ -14,6 +14,11 @@ defmodule HousingAppWeb.PlatformTypes do
     {"Many", :many}
   ]
 
+  @user_types [
+    {"Admin", :admin},
+    {"Staff", :staff}
+  ]
+
   @empty_option {"-- Select a default --", nil}
 
   def time_periods(actor, tenant) do
@@ -32,6 +37,8 @@ defmodule HousingAppWeb.PlatformTypes do
   def status_options, do: @status_options
 
   def submission_type_options, do: @submission_types
+
+  def user_type_options, do: @user_types
 
   def all_forms(actor, tenant) do
     HousingApp.Management.Form.list!(actor: actor, tenant: tenant)
