@@ -55,11 +55,12 @@ defmodule HousingApp.Management.Notification do
   end
 
   pub_sub do
-    module HousingAppWeb.Endpoint
+    module Phoenix.PubSub
+    name HousingApp.PubSub
     prefix "notification"
     broadcast_type :broadcast
 
-    publish :create, [[:user_tenant_id], "created"], event: "notification-created"
+    publish :create, [:user_tenant_id, "created"], event: "notification-created"
   end
 
   policies do

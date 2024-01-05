@@ -6,6 +6,7 @@ defmodule HousingAppWeb.LiveUserAuth do
   use HousingAppWeb, :verified_routes
 
   import Phoenix.Component
+  import Phoenix.LiveView
 
   def on_mount(:live_user_optional, _params, %{"user" => user}, socket) do
     if user do
@@ -27,7 +28,7 @@ defmodule HousingAppWeb.LiveUserAuth do
         {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
 
       {:ok, user_tenant} ->
-        {:cont, mount_user_success(socket, current_user, user_tenant)}
+        {:cont, mount_user_success(socket, user_tenant)}
     end
   end
 
@@ -39,7 +40,7 @@ defmodule HousingAppWeb.LiveUserAuth do
         {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
 
       {:ok, user_tenant} ->
-        {:cont, mount_user_success(socket, current_user, user_tenant)}
+        {:cont, mount_user_success(socket, user_tenant)}
     end
   end
 
@@ -55,31 +56,37 @@ defmodule HousingAppWeb.LiveUserAuth do
     {:cont, assign(socket, :current_user, nil)}
   end
 
-  def handle_info(%{event: "notification-created"}, socket) do
-    {:noreply, assign(socket, :unread_notifications, socket.assigns.unread_notifications + 1)}
-  end
-
-  def handle_info(_, socket) do
-    {:noreply, socket}
-  end
-
   # Replicate assigns in lib/housing_app_web/controllers/auth_controller.ex
   # But do NOT copy them, perform our own database queries
 
-  def mount_user_success(socket, current_user, current_user_tenant) do
+  def mount_user_success(socket, current_user_tenant) do
     tenant = "tenant_#{current_user_tenant.tenant_id}"
     Ash.set_tenant(tenant)
 
-    HousingAppWeb.Endpoint.subscribe("notification:#{current_user_tenant.id}:created")
-
-    available_user_tenants = HousingApp.Accounts.UserTenant.find_for_user!(actor: current_user)
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(HousingApp.PubSub, "notification:#{current_user_tenant.id}:created")
+      Phoenix.PubSub.subscribe(HousingApp.PubSub, "notification:#{current_user_tenant.id}:cleared")
+    end
 
     unread_notifications = HousingApp.Management.Notification.count_unread!(actor: current_user_tenant, tenant: tenant)
 
     socket
     |> assign(:current_user_tenant, current_user_tenant)
     |> assign(:current_tenant, tenant)
-    |> assign(:available_user_tenants, available_user_tenants)
     |> assign(:unread_notifications, unread_notifications)
+    |> attach_hook(:notifications_pubsub, :handle_info, &handle_info/2)
+  end
+
+  defp handle_info(%Phoenix.Socket.Broadcast{event: "notification-created"}, socket) do
+    {:halt, assign(socket, :unread_notifications, socket.assigns.unread_notifications + 1)}
+  end
+
+  defp handle_info(%Phoenix.Socket.Broadcast{event: "notifications-cleared"}, socket) do
+    {:halt, assign(socket, :unread_notifications, 0)}
+  end
+
+  # Stub out so that not all pages need handle_info defined for our notifications pubsub
+  defp handle_info(_, socket) do
+    {:cont, socket}
   end
 end

@@ -1,21 +1,14 @@
 defmodule HousingAppWeb.Components.Navbar do
   @moduledoc false
 
-  use Phoenix.Component
-  use HousingAppWeb, :verified_routes
+  use HousingAppWeb, :live_component
 
-  import HousingAppWeb.CoreComponents,
-    only: [
-      gravatar: 1,
-      icon: 1
-    ]
-
+  attr :current_tenant, :string, required: true
   attr :current_user, :any, required: true
   attr :current_user_tenant, :any, required: true
-  attr :available_user_tenants, :any, required: true
   attr :unread_notifications, :integer, default: 0
 
-  def navbar(%{current_user_tenant: %{user_type: user_type}, current_user: %{role: role}} = assigns) do
+  def render(%{current_user_tenant: %{user_type: user_type}, current_user: %{role: role}} = assigns) do
     assigns = assign(assigns, role: role, user_type: user_type)
 
     ~H"""
@@ -406,5 +399,17 @@ defmodule HousingAppWeb.Components.Navbar do
       </div>
     </nav>
     """
+  end
+
+  def mount(socket) do
+    {:ok, assign(socket, unread_notifications: 0, available_user_tenants: [])}
+  end
+
+  def update(params, socket) do
+    %{current_user: current_user} = params
+
+    available_user_tenants = HousingApp.Accounts.UserTenant.find_for_user!(actor: current_user)
+
+    {:ok, socket |> assign(params) |> assign(available_user_tenants: available_user_tenants)}
   end
 end

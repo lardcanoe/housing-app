@@ -82,7 +82,8 @@ defmodule HousingApp.Management.Application do
   end
 
   pub_sub do
-    module HousingAppWeb.Endpoint
+    module Phoenix.PubSub
+    name HousingApp.PubSub
     prefix "application"
     broadcast_type :broadcast
 

@@ -84,8 +84,8 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
   def mount(_params, _session, %{assigns: %{current_user_tenant: %{user_type: :user}, current_tenant: tenant}} = socket) do
     if connected?(socket) do
-      HousingAppWeb.Endpoint.subscribe("application:#{tenant}:created")
-      HousingAppWeb.Endpoint.subscribe("application:#{tenant}:updated")
+      Phoenix.PubSub.subscribe(HousingApp.PubSub, "application:#{tenant}:created")
+      Phoenix.PubSub.subscribe(HousingApp.PubSub, "application:#{tenant}:updated")
     end
 
     {:ok,
@@ -139,11 +139,17 @@ defmodule HousingAppWeb.Live.Applications.Index do
     end)
   end
 
-  def handle_info(%{event: "application-created", payload: %{payload: %{data: %{status: :approved}}}}, socket) do
+  def handle_info(
+        %Phoenix.Socket.Broadcast{event: "application-created", payload: %{payload: %{data: %{status: :approved}}}},
+        socket
+      ) do
     {:noreply, load_async_assigns(socket)}
   end
 
-  def handle_info(%{event: "application-updated", payload: %{payload: %{data: %{status: :approved}}}}, socket) do
+  def handle_info(
+        %Phoenix.Socket.Broadcast{event: "application-updated", payload: %{payload: %{data: %{status: :approved}}}},
+        socket
+      ) do
     {:noreply, load_async_assigns(socket)}
   end
 

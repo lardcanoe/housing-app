@@ -1,8 +1,10 @@
 <div class="antialiased bg-gray-50 dark:bg-gray-900">
-  <.navbar
+  <.live_component
+    module={HousingAppWeb.Components.Navbar}
+    id="navbar"
+    current_tenant={@current_tenant}
     current_user={@current_user}
     current_user_tenant={@current_user_tenant}
-    available_user_tenants={@available_user_tenants}
     unread_notifications={@unread_notifications}
   />
 

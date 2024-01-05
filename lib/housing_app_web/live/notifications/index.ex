@@ -44,11 +44,15 @@ defmodule HousingAppWeb.Live.Notifications.Index do
 
   defp load_notifications(socket) do
     if connected?(socket) do
-      socket
-      |> assign(unread_notifications: 0)
-      |> assign_async([:notifications], fn ->
-        {:ok, %{notifications: fetch_notifications(socket)}}
-      end)
+      %{current_user_tenant: current_user_tenant} = socket.assigns
+
+      HousingAppWeb.Endpoint.broadcast(
+        "notification:#{current_user_tenant.id}:cleared",
+        "notifications-cleared",
+        %{}
+      )
+
+      assign_async(socket, [:notifications], fn -> {:ok, %{notifications: fetch_notifications(socket)}} end)
     else
       assign_async(socket, [:notifications], fn ->
         {:ok, %{notifications: []}}
