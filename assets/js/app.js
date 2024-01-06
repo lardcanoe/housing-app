@@ -23,11 +23,13 @@ import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import "flowbite/dist/flowbite.phoenix.min.js"
 import AgGrid from "./hooks/ag-grid"
+import QueryBuilder from "./hooks/query-builder"
 import './darkmode'
 
 // FUTURE: Load hooks dynamically, https://aswinmohan.me/pagewise-js-liveview
 let Hooks = {}
 Hooks.AgGrid = AgGrid
+Hooks.QueryBuilder = QueryBuilder
 
 let localeCache = {
     locale: Intl.NumberFormat().resolvedOptions().locale,

@@ -69,6 +69,29 @@ defmodule HousingAppWeb.Live.Settings.TenantSettings do
             Time Periods
           </a>
         </li>
+        <li role="presentation">
+          <a
+            href="#"
+            class="inline-flex items-center px-4 py-3 rounded-lg hover:text-gray-900 bg-gray-50 hover:bg-gray-100 w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
+            id="queries-tab"
+            data-tabs-target="#queries"
+            type="button"
+            role="tab"
+            aria-controls="queries"
+            aria-selected="false"
+          >
+            <svg
+              class="w-4 h-4 me-2 text-gray-500 dark:text-gray-400"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 18 18"
+            >
+              <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
+            </svg>
+            Common Queries
+          </a>
+        </li>
       </ul>
       <div id="default-tab-content" class="w-full">
         <div
@@ -112,6 +135,20 @@ defmodule HousingAppWeb.Live.Settings.TenantSettings do
             current_tenant={@current_tenant}
             timezone={@timezone}
             locale={@locale}
+          >
+          </.live_component>
+        </div>
+        <div
+          class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800"
+          id="queries"
+          role="tabpanel"
+          aria-labelledby="queries-tab"
+        >
+          <.live_component
+            module={HousingAppWeb.Components.Settings.Queries}
+            id="tenant-queries-component"
+            current_user_tenant={@current_user_tenant}
+            current_tenant={@current_tenant}
           >
           </.live_component>
         </div>

@@ -1,6 +1,7 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+@import '../node_modules/react-querybuilder/dist/query-builder.css';
 
 .dashboard-area-height {
     height: calc(100vh - (160px));

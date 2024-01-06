@@ -1,15 +1,12 @@
-defmodule HousingAppWeb.Components.Settings.User do
+defmodule HousingAppWeb.Components.Settings.Queries do
   @moduledoc false
 
   use HousingAppWeb, :live_component
 
-  import HousingApp.Cldr, only: [format_time: 2]
   import HousingAppWeb.CoreComponents
 
   attr :current_user_tenant, :any, required: true
   attr :current_tenant, :string, required: true
-  attr :locale, :string, required: true
-  attr :timezone, :string, required: true
 
   def render(%{user_form: nil} = assigns) do
     ~H"""
@@ -20,49 +17,17 @@ defmodule HousingAppWeb.Components.Settings.User do
   def render(assigns) do
     ~H"""
     <div>
-      <.table
-        :if={@user_tenants != []}
-        id="user_tenants"
-        rows={@user_tenants}
-        pagination={false}
-        row_id={fn row -> "user-row-#{row.id}" end}
-      >
-        <:col :let={ut} label="avatar">
-          <.gravatar
-            email={ut.user.email |> Ash.CiString.to_comparable_string()}
-            alternate={ut.user.avatar}
-            alt={ut.user.name}
-          />
-        </:col>
-        <:col :let={ut} label="name">
-          <%= ut.user.name %>
-        </:col>
-        <:col :let={ut} label="email">
-          <%= ut.user.email %>
-        </:col>
-        <:col :let={ut} label="type">
-          <%= ut.user_type %>
-        </:col>
-        <:col :let={ut} label="has api key?">
-          <.icon :if={!is_nil(ut.api_key) && ut.api_key != ""} name="hero-check-solid" />
-        </:col>
-        <:col :let={ut} label="created at">
-          <%= format_time(ut.created_at, locale: @locale, timezone: @timezone) %>
-        </:col>
-      </.table>
-
       <.simple_form
         autowidth={false}
-        class="max-w-lg mt-4"
+        class="mt-4"
         for={@user_form}
         phx-change="validate"
         phx-submit="submit"
         phx-target={@myself}
       >
-        <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New User</h2>
+        <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Query</h2>
         <.input field={@user_form[:name]} label="Name" />
-        <.input type="email" field={@user_form[:email]} label="Email" />
-        <.input type="select" options={@user_types} field={@user_form[:user_type]} label="User Type" />
+        <div id="query-builder" name="form[query]" class="mb-4" phx-hook="QueryBuilder" data-phoenix-target={@myself} />
 
         <:actions>
           <.button>Add</.button>
@@ -84,8 +49,12 @@ defmodule HousingAppWeb.Components.Settings.User do
      |> assign(params)
      |> assign(
        user_tenants: user_tenants(current_user_tenant),
-       user_form: to_form(%{"user_type" => :staff}, as: "form")
+       user_form: to_form(%{}, as: "form")
      )}
+  end
+
+  def handle_event("query-changed", _data, socket) do
+    {:noreply, socket}
   end
 
   def handle_event("validate", _data, socket) do

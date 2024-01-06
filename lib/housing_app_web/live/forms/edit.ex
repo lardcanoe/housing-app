@@ -17,9 +17,11 @@ defmodule HousingAppWeb.Live.Forms.Edit do
           <.button :if={false} type="delete">Delete</.button>
         </:actions>
       </.simple_form>
-      <div class="p-4">
-        <h3 class="mb-2 font-bold text-gray-900 dark:text-white">Example form:</h3>
-        <.json_form form={@schema_form} json_schema={@json_schema} embed={true} add_custom_root={false} />
+      <div>
+        <h3 class="mb-4 font-bold text-gray-900 dark:text-white">Example form:</h3>
+        <div class="p-4">
+          <.json_form form={@schema_form} json_schema={@json_schema} embed={true} add_custom_root={false} />
+        </div>
       </div>
     </div>
     """
