@@ -2,8 +2,6 @@ import { mount } from '../react/query-builder';
 
 export default {
     mounted() {
-        this.target = this.el.dataset.phoenixTarget;
-
         const initialQuery = this.el.dataset.query
             ? JSON.parse(this.el.dataset.query)
             : { combinator: 'and', rules: [] };
@@ -19,7 +17,7 @@ export default {
         })
     },
     queryChange(q) {
-        this.pushEventTo(this.target, 'query-changed', { q });
+        this.pushEventTo(this.el, 'query-changed', { q });
     },
     destryed() {
         if (this.unmountComponent) {

@@ -35,7 +35,6 @@ defmodule HousingAppWeb.Components.Settings.Queries do
           phx-update="ignore"
           data-query={@query}
           data-fields={@fields}
-          data-phoenix-target={@myself}
         />
 
         <:actions>
