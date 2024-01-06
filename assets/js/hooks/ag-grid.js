@@ -33,7 +33,8 @@ export default {
                 wrapText: true,
                 autoHeight: true,
                 filter: true,
-                floatingFilter: true
+                floatingFilter: true,
+                minWidth: 160,
             },
             columnTypes: {
                 numberColumn: { width: 130, filter: 'agNumberColumnFilter' },

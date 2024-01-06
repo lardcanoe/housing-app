@@ -294,7 +294,8 @@ defmodule HousingAppWeb.CoreComponents do
   attr :autowidth, :boolean, default: true, doc: "the autowidth flag"
 
   attr :rest, :global,
-    include: ~w(autocomplete name rel action enctype method novalidate target multipart),
+    include:
+      ~w(autocomplete name rel action enctype method novalidate target multipart phx-target phx-submit phx-change),
     doc: "the arbitrary HTML attributes to apply to the form tag"
 
   slot :inner_block, required: true
@@ -330,11 +331,21 @@ defmodule HousingAppWeb.CoreComponents do
   attr :form, :any, required: true, doc: "the datastructure for the form"
   attr :json_schema, :map, required: true, doc: "the json schema"
   attr :embed, :boolean, default: false
+  attr :add_custom_root, :boolean, default: true
   attr :prefix, :string, default: ""
   attr :autowidth, :boolean, default: true, doc: "the autowidth flag"
   attr :class, :string, default: nil
   attr :button_text, :string, default: "Submit"
-  attr(:rest, :global, include: ~w(phx-target))
+  attr(:rest, :global, include: ~w(phx-target phx-submit phx-change))
+
+  def json_form(%{embed: true, add_custom_root: false} = assigns) do
+    ~H"""
+    <%= render_schema(%{
+      definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema, @prefix),
+      form: @form
+    }) %>
+    """
+  end
 
   def json_form(%{embed: true} = assigns) do
     ~H"""
@@ -359,8 +370,8 @@ defmodule HousingAppWeb.CoreComponents do
       for={@form}
       autowidth={@autowidth}
       class={@class}
-      phx-change="validate"
-      phx-submit="submit"
+      phx-change={Map.get(@rest, :"phx-change", "validate")}
+      phx-submit={Map.get(@rest, :"phx-submit", "submit")}
       autocomplete="off"
       {@rest}
     >

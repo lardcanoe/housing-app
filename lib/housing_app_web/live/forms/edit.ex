@@ -5,17 +5,23 @@ defmodule HousingAppWeb.Live.Forms.Edit do
 
   def render(%{live_action: :edit} = assigns) do
     ~H"""
-    <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
-      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update form</h2>
-      <.input field={@ash_form[:name]} label="Name" />
-      <.input type="textarea" rows="20" field={@ash_form[:json_schema]} label="Schema" />
-      <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
-      <.input field={@ash_form[:type]} label="Type" />
-      <:actions>
-        <.button>Save</.button>
-        <.button :if={false} type="delete">Delete</.button>
-      </:actions>
-    </.simple_form>
+    <div class="grid grid-cols-1 sm:grid-cols-2">
+      <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit" autowidth={false}>
+        <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update form</h2>
+        <.input field={@ash_form[:name]} label="Name" />
+        <.input type="textarea" rows="20" field={@ash_form[:json_schema]} label="Schema" />
+        <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
+        <.input field={@ash_form[:type]} label="Type" />
+        <:actions>
+          <.button>Save</.button>
+          <.button :if={false} type="delete">Delete</.button>
+        </:actions>
+      </.simple_form>
+      <div class="p-4">
+        <h3 class="mb-2 font-bold text-gray-900 dark:text-white">Example form:</h3>
+        <.json_form form={@schema_form} json_schema={@json_schema} embed={true} add_custom_root={false} />
+      </div>
+    </div>
     """
   end
 
@@ -42,8 +48,23 @@ defmodule HousingAppWeb.Live.Forms.Edit do
           |> to_form()
 
         {:ok,
-         assign(socket, ash_form: ash_form, status_options: status_options(), sidebar: :forms, page_title: "Edit Form")}
+         assign(socket,
+           ash_form: ash_form,
+           schema_form: to_form(%{"schema" => %{}}, as: "schema"),
+           json_schema: Jason.decode!(form.json_schema),
+           status_options: status_options(),
+           sidebar: :forms,
+           page_title: "Edit Form"
+         )}
     end
+  end
+
+  def handle_event("validate", %{"_target" => ["form", "json_schema"], "form" => params}, socket) do
+    ash_form = AshPhoenix.Form.validate(socket.assigns.ash_form, params)
+    {:noreply, assign(socket, ash_form: ash_form, json_schema: Jason.decode!(params["json_schema"]))}
+  rescue
+    Jason.DecodeError ->
+      {:noreply, socket}
   end
 
   def handle_event("validate", %{"form" => params}, socket) do
