@@ -27,7 +27,15 @@ defmodule HousingAppWeb.Components.Settings.Queries do
       >
         <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Query</h2>
         <.input field={@user_form[:name]} label="Name" />
-        <div id="query-builder" name="form[query]" class="mb-4" phx-hook="QueryBuilder" data-phoenix-target={@myself} />
+        <div
+          id="query-builder"
+          name="form[query]"
+          class="mb-4"
+          phx-hook="QueryBuilder"
+          data-query={@query}
+          data-fields={@fields}
+          data-phoenix-target={@myself}
+        />
 
         <:actions>
           <.button>Add</.button>
@@ -49,7 +57,9 @@ defmodule HousingAppWeb.Components.Settings.Queries do
      |> assign(params)
      |> assign(
        user_tenants: user_tenants(current_user_tenant),
-       user_form: to_form(%{}, as: "form")
+       user_form: to_form(%{}, as: "form"),
+       query: Jason.encode!(%{combinator: "", rules: []}),
+       fields: Jason.encode!([%{name: "firstName", label: "First Name"}, %{name: "lastName", label: "Last Name"}])
      )}
   end
 
