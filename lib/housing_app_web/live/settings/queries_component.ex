@@ -32,6 +32,7 @@ defmodule HousingAppWeb.Components.Settings.Queries do
           name="form[query]"
           class="mb-4"
           phx-hook="QueryBuilder"
+          phx-update="ignore"
           data-query={@query}
           data-fields={@fields}
           data-phoenix-target={@myself}

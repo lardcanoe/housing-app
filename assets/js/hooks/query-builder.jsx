@@ -1,6 +1,4 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { QueryBuilderComponent } from '../react/query-builder.jsx';
+import { mount } from '../react/query-builder';
 
 export default {
     mounted() {
@@ -14,14 +12,18 @@ export default {
             ? JSON.parse(this.el.dataset.fields)
             : [];
 
-        createRoot(this.el).render(
-            <QueryBuilderComponent
-                initialQuery={initialQuery}
-                fields={fields}
-                queryChange={(q) => { this.queryChange(q) }} />
-        )
+        this.unmountComponent = mount(this.el, {
+            initialQuery: initialQuery,
+            fields: fields,
+            queryChange: (q) => { this.queryChange(q) }
+        })
     },
     queryChange(q) {
         this.pushEventTo(this.target, 'query-changed', { q });
     },
+    destryed() {
+        if (this.unmountComponent) {
+            this.unmountComponent(this.el);
+        }
+    }
 };
