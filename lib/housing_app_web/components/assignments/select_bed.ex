@@ -20,7 +20,7 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
           options={@roommate_group_options}
           label="Roommate Group"
           required
-          {if(@booking, do: [{"disabled",""}])}
+          {if(@booking, do: [{"disabled",""}], else: [])}
         />
 
         <.async_result :let={rooms} :if={@selection == :room} assign={@rooms}>
@@ -35,7 +35,7 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
             label="Room"
             prompt="Select a room..."
             required
-            {if(@booking, do: [{"disabled",""}])}
+            {if(@booking, do: [{"disabled",""}], else: [])}
           />
         </.async_result>
 
@@ -51,7 +51,7 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
             label="Bed"
             prompt="Select a bed..."
             required
-            {if(@booking, do: [{"disabled",""}])}
+            {if(@booking, do: [{"disabled",""}], else: [])}
           />
         </.async_result>
 

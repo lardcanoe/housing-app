@@ -58,4 +58,8 @@ defmodule HousingApp.Management.Service do
       true
     end)
   end
+
+  def filter_resources(resources, _common_query) do
+    resources
+  end
 end

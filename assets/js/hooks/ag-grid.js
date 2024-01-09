@@ -90,6 +90,7 @@ export default {
         window.addEventListener("edit:clicked", this.handleEditClick);
         window.addEventListener("link:clicked", this.handleLinkClick);
         window.addEventListener("phx:page-loading-stop", this.handleRefreshData)
+        window.addEventListener("phx:ag-grid:refresh", this.handleRefreshData)
     },
 
     // TODO: This is broken when switching page params

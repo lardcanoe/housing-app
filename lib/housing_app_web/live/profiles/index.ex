@@ -17,6 +17,43 @@ defmodule HousingAppWeb.Live.Profiles.Index do
       current_tenant={@current_tenant}
     >
       <:actions>
+        <div class={["relative", not @queries.ok? or (length(@queries.result) <= 1 && "hidden")]}>
+          <button
+            type="button"
+            id="dropdownQueries"
+            data-dropdown-toggle="dropdownQueriesMenu"
+            class="w-full md:w-auto flex items-center justify-center py-2 px-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+          >
+            <.icon name="hero-chevron-down-solid" class="w-4 h-4 mr-2" /> Apply Query
+          </button>
+          <!-- Dropdown menu -->
+          <div
+            id="dropdownQueriesMenu"
+            class="hidden z-10 absolute list-none -translate-x-1/2 top-10 -left-32 w-48 bg-white divide-y divide-gray-100 rounded-lg dark:bg-gray-700 dark:divide-gray-600"
+          >
+            <ul class="p-3 space-y-3 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownQueries">
+              <%= if @queries.ok? && @queries.result do %>
+                <li :for={q <- @queries.result}>
+                  <div class="flex items-center" phx-click="change-query" phx-value-query-id={q.id || "default"}>
+                    <input
+                      id={"selected-query-#{q.id || "default"}"}
+                      type="radio"
+                      value={q.id}
+                      name="selected-query"
+                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                      {if(@query_id == q.id, do: [{"checked",""}], else: [])}
+                    />
+                    <label for="selected-query" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                      <%= q.name %>
+                    </label>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </:actions>
+      <:actions>
         <.link patch={~p"/profiles/new"}>
           <button
             type="button"
@@ -36,7 +73,16 @@ defmodule HousingAppWeb.Live.Profiles.Index do
     case HousingApp.Management.Service.get_profile_form(actor: current_user_tenant, tenant: tenant) do
       {:ok, profile_form} ->
         {:ok,
-         assign(socket, profile_form: profile_form, loading: true, count: 0, sidebar: :profiles, page_title: "Profiles")}
+         socket
+         |> assign(
+           query_id: nil,
+           profile_form: profile_form,
+           loading: true,
+           count: 0,
+           sidebar: :profiles,
+           page_title: "Profiles"
+         )
+         |> load_async_assigns()}
 
       _ ->
         {:ok,
@@ -44,6 +90,19 @@ defmodule HousingAppWeb.Live.Profiles.Index do
          |> put_flash(:error, "Error loading profile form.")
          |> push_navigate(~p"/")}
     end
+  end
+
+  defp load_async_assigns(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    assign_async(socket, [:queries], fn ->
+      queries =
+        [actor: current_user_tenant, tenant: tenant]
+        |> HousingApp.Management.CommonQuery.list!()
+        |> Enum.filter(&(&1.resource == :profile))
+
+      {:ok, %{queries: [%{id: nil, name: "Default"}] ++ queries}}
+    end)
   end
 
   def handle_params(params, _url, socket) do
@@ -59,58 +118,106 @@ defmodule HousingAppWeb.Live.Profiles.Index do
     {:noreply, push_navigate(socket, to: ~p"/profiles/#{id}/edit")}
   end
 
-  def handle_event("load-data", %{}, %{assigns: %{profile_form: profile_form}} = socket) do
+  def handle_event("change-query", %{"query-id" => "default"}, %{assigns: %{query_id: nil}} = socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("change-query", %{"query-id" => "default"}, socket) do
+    {:noreply, socket |> assign(query_id: nil) |> push_event("ag-grid:refresh", %{})}
+  end
+
+  def handle_event("change-query", %{"query-id" => value}, %{assigns: %{query_id: query_id}} = socket)
+      when query_id == value do
+    {:noreply, socket}
+  end
+
+  def handle_event("change-query", %{"query-id" => value}, socket) do
+    {:noreply, socket |> assign(query_id: value) |> push_event("ag-grid:refresh", %{})}
+  end
+
+  def handle_event("load-data", %{}, socket) do
+    res = load_data(socket)
+
+    {:reply, res, assign(socket, loading: false, count: length(res.data))}
+  end
+
+  defp load_profiles(socket) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
-    profiles =
-      [actor: current_user_tenant, tenant: tenant]
-      |> HousingApp.Management.Profile.list!()
-      |> Enum.sort_by(& &1.user_tenant.user.name)
-      |> Enum.map(fn p ->
-        Map.merge(
-          p.data,
-          %{
-            "id" => p.id,
-            "user_name" => p.user_tenant.user.name,
-            "user_email" => p.user_tenant.user.email,
-            "actions" => [["Edit"], ["View"]]
-          }
-        )
-      end)
+    [actor: current_user_tenant, tenant: tenant]
+    |> HousingApp.Management.Profile.list!()
+    |> filter_profiles(socket)
+    |> Enum.sort_by(& &1.user_tenant.user.name)
+    |> Enum.map(fn p ->
+      Map.merge(
+        p.data,
+        %{
+          "id" => p.id,
+          "user_name" => p.user_tenant.user.name,
+          "user_email" => p.user_tenant.user.email,
+          "actions" => [["Edit"], ["View"]]
+        }
+      )
+    end)
+  end
+
+  defp filter_profiles(profiles, %{assigns: %{query_id: nil}}) do
+    profiles
+  end
+
+  defp filter_profiles(profiles, %{assigns: %{queries: %{ok?: false}}}) do
+    # TODO: Handle still loading?
+    profiles
+  end
+
+  defp filter_profiles(profiles, %{assigns: %{query_id: query_id, queries: %{ok?: true, result: queries}}}) do
+    query = Enum.find(queries, &(&1.id == query_id))
+
+    if query do
+      HousingApp.Management.Service.filter_resources(profiles, query)
+    else
+      # TODO: Not found
+      profiles
+    end
+  end
+
+  # Reload as needed instead of keeping in memory during life cycle of page
+  defp load_columns(socket) do
+    %{profile_form: profile_form} = socket.assigns
 
     schema = Jason.decode!(profile_form.json_schema)
 
-    columns =
+    [
+      %{
+        field: "user_name",
+        headerName: "User",
+        minWidth: 220,
+        pinned: "left",
+        checkboxSelection: true,
+        headerCheckboxSelection: true
+      },
+      %{field: "id", minWidth: 120, pinned: "left", hide: true},
+      %{field: "user_email", headerName: "Email", minWidth: 250}
+    ] ++
+      HousingApp.Utils.JsonSchema.schema_to_aggrid_columns(schema) ++
       [
         %{
-          field: "user_name",
-          headerName: "User",
-          minWidth: 160,
-          pinned: "left",
-          checkboxSelection: true,
-          headerCheckboxSelection: true
-        },
-        %{field: "id", minWidth: 120, pinned: "left", hide: true},
-        %{field: "user_email", headerName: "Email", minWidth: 160}
-      ] ++
-        HousingApp.Utils.JsonSchema.schema_to_aggrid_columns(schema) ++
-        [
-          %{
-            field: "actions",
-            pinned: "right",
-            minWidth: 120,
-            maxWidth: 120,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
+          field: "actions",
+          pinned: "right",
+          minWidth: 120,
+          maxWidth: 120,
+          filter: false,
+          editable: false,
+          sortable: false,
+          resizable: false
+        }
+      ]
+  end
 
-    {:reply,
-     %{
-       columns: columns,
-       data: profiles
-     }, assign(socket, loading: false, count: length(profiles))}
+  defp load_data(socket) do
+    %{
+      columns: load_columns(socket),
+      data: load_profiles(socket)
+    }
   end
 end
