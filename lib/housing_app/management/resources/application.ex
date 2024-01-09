@@ -133,7 +133,7 @@ defmodule HousingApp.Management.Application do
 
     read :list_approved do
       prepare build(
-                select: [:id, :name, :type, :submission_type, :description, :status, :form_id],
+                select: [:id, :name, :type, :submission_type, :description, :status, :form_id, :conditions],
                 load: [:form],
                 sort: [:name]
               )

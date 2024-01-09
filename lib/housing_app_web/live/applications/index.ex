@@ -114,10 +114,22 @@ defmodule HousingAppWeb.Live.Applications.Index do
          %{assigns: %{current_user_tenant: %{user_type: :user} = current_user_tenant, current_tenant: tenant}} = socket
        ) do
     assign_async(socket, [:applications, :submissions], fn ->
+      {:ok, profile} =
+        HousingApp.Management.Profile.get_by_user_tenant(current_user_tenant.id,
+          actor: current_user_tenant,
+          tenant: tenant
+        )
+
       applications =
         if connected?(socket) do
           [actor: current_user_tenant, tenant: tenant]
           |> HousingApp.Management.Application.list_approved!()
+          |> Enum.filter(fn app ->
+            HousingApp.Management.Service.profile_meets_application_conditions?(profile, app,
+              actor: current_user_tenant,
+              tenant: tenant
+            )
+          end)
           |> Enum.sort_by(& &1.name)
         else
           []

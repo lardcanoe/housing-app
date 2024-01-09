@@ -51,4 +51,11 @@ defmodule HousingApp.Management.Service do
         {:error, nil}
     end
   end
+
+  def profile_meets_application_conditions?(_profile, application, actor: actor, tenant: tenant) do
+    Enum.all?(application.conditions, fn condition ->
+      _condition = HousingApp.Management.load!(condition, :common_query, actor: actor, tenant: tenant)
+      true
+    end)
+  end
 end
