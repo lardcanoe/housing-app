@@ -175,7 +175,7 @@ defmodule HousingApp.Management.Application do
 
       get? true
 
-      prepare build(load: [:form, :time_period, :count_of_submissions, steps: [:form]])
+      prepare build(load: [:form, :time_period, :count_of_submissions, steps: [:form], conditions: [:common_query]])
 
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
