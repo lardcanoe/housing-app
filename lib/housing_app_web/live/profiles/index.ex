@@ -142,11 +142,8 @@ defmodule HousingAppWeb.Live.Profiles.Index do
   end
 
   defp load_profiles(socket) do
-    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
-
-    [actor: current_user_tenant, tenant: tenant]
-    |> HousingApp.Management.Profile.list!()
-    |> filter_profiles(socket)
+    socket
+    |> filter_profiles()
     |> Enum.sort_by(& &1.user_tenant.user.name)
     |> Enum.map(fn p ->
       Map.merge(
@@ -161,23 +158,31 @@ defmodule HousingAppWeb.Live.Profiles.Index do
     end)
   end
 
-  defp filter_profiles(profiles, %{assigns: %{query_id: nil}}) do
-    profiles
+  defp filter_profiles(%{assigns: %{query_id: nil}} = socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    HousingApp.Management.Profile.list!(actor: current_user_tenant, tenant: tenant)
   end
 
-  defp filter_profiles(profiles, %{assigns: %{queries: %{ok?: false}}}) do
+  defp filter_profiles(%{assigns: %{queries: %{ok?: false}}} = socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
     # TODO: Handle still loading?
-    profiles
+    HousingApp.Management.Profile.list!(actor: current_user_tenant, tenant: tenant)
   end
 
-  defp filter_profiles(profiles, %{assigns: %{query_id: query_id, queries: %{ok?: true, result: queries}}}) do
+  defp filter_profiles(%{assigns: %{query_id: query_id, queries: %{ok?: true, result: queries}}} = socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     query = Enum.find(queries, &(&1.id == query_id))
 
     if query do
-      HousingApp.Management.Service.filter_resources(profiles, query)
+      HousingApp.Management.Service.filter_resource(HousingApp.Management.Profile, :list, query,
+        actor: current_user_tenant,
+        tenant: tenant
+      )
     else
       # TODO: Not found
-      profiles
+      HousingApp.Management.Profile.list!(actor: current_user_tenant, tenant: tenant)
     end
   end
 

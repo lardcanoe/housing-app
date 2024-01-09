@@ -34,5 +34,8 @@ config :logger, level: :warning
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 
+# Speed up making accounts that need passwords
+config :bcrypt_elixir, :log_rounds, 1
+
 config :housing_app,
   token_signing_secret: "this-is-a-secret"

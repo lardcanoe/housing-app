@@ -104,6 +104,16 @@ defmodule HousingApp.Management.Profile do
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
 
+    read :match_by_id do
+      argument :id, :uuid do
+        allow_nil? false
+      end
+
+      prepare build(select: [:id])
+      get? true
+      filter expr(id == ^arg(:id) and is_nil(archived_at))
+    end
+
     read :get_by_user_tenant do
       argument :user_tenant_id, :uuid do
         allow_nil? false
@@ -131,6 +141,7 @@ defmodule HousingApp.Management.Profile do
     define :list
     define :get_mine
     define :get_by_id, args: [:id]
+    define :match_by_id, args: [:id]
     define :get_by_user_tenant, args: [:user_tenant_id]
     define :submit
   end

@@ -291,10 +291,6 @@ defmodule HousingAppWeb.Components.Settings.Queries do
 
   defp build_filter_form do
     AshPhoenix.FilterForm.new(HousingApp.Management.Profile)
-
-    # {:ok, frag1} = AshPostgres.Functions.Fragment.casted_new(["data->'location'->>'city' = ?", "Boston"])
-    # HousingApp.Management.Profile |> Ash.Query.for_read(:read, %{}, actor: ut, tenant: "tenant_9d3b4eb3-f3d1-467f-abb5-51ddb6a71b18") |> Ash.Query.do_filter([frag1, frag2]) |> HousingApp.Management.exists?()
-
     # |> AshPhoenix.FilterForm.add_predicate(:name, :contains, nil)
   end
 
