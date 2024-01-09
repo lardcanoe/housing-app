@@ -22,7 +22,7 @@ defmodule HousingAppWeb.Components.Settings.User do
     <div>
       <.table
         :if={@user_tenants != []}
-        id="user_tenants"
+        id="user-tenants-table"
         rows={@user_tenants}
         pagination={false}
         row_id={fn row -> "user-row-#{row.id}" end}
@@ -84,7 +84,7 @@ defmodule HousingAppWeb.Components.Settings.User do
      |> assign(params)
      |> assign(
        user_tenants: user_tenants(current_user_tenant),
-       user_form: to_form(%{"user_type" => :staff}, as: "form")
+       user_form: to_form(%{"user_type" => :staff}, as: "u_form")
      )}
   end
 
@@ -92,7 +92,7 @@ defmodule HousingAppWeb.Components.Settings.User do
     {:noreply, socket}
   end
 
-  def handle_event("submit", %{"form" => data}, socket) do
+  def handle_event("submit", %{"u_form" => data}, socket) do
     %{current_user_tenant: current_user_tenant} = socket.assigns
 
     case HousingApp.Accounts.Service.invite_user_to_tenant(data["email"], data["name"], data["user_type"],
@@ -101,7 +101,7 @@ defmodule HousingAppWeb.Components.Settings.User do
       {:ok, _ut} ->
         {:noreply,
          assign(socket,
-           user_form: to_form(%{}, as: "form"),
+           user_form: to_form(%{}, as: "u_form"),
            user_tenants: user_tenants(current_user_tenant)
          )}
 

@@ -13,5 +13,6 @@ defmodule HousingApp.Management.Registry do
     entry HousingApp.Management.Form
     entry HousingApp.Management.FormSubmission
     entry HousingApp.Management.Notification
+    entry HousingApp.Management.CommonQuery
   end
 end

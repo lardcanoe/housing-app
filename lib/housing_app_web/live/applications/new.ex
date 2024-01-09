@@ -24,7 +24,11 @@ defmodule HousingAppWeb.Live.Applications.New do
 
     {:ok,
      assign(socket,
-       ash_form: new_management_ash_form(HousingApp.Management.Application, current_user_tenant, tenant),
+       ash_form:
+         generate_management_ash_form(HousingApp.Management.Application, :new, "form",
+           actor: current_user_tenant,
+           tenant: tenant
+         ),
        forms: all_form_options(current_user_tenant, tenant),
        status_options: status_options(),
        submission_types: submission_type_options(),

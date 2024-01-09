@@ -19,7 +19,7 @@ defmodule HousingAppWeb.Components.TimePeriodsForm do
     <div>
       <.table
         :if={@time_periods != []}
-        id="time_periods"
+        id="time-periods-table"
         rows={@time_periods}
         pagination={false}
         row_id={fn row -> "time-period-row-#{row.id}" end}
@@ -67,7 +67,11 @@ defmodule HousingAppWeb.Components.TimePeriodsForm do
     {:ok,
      assign(socket,
        time_periods: time_periods(current_user_tenant, tenant),
-       tp_form: new_management_ash_form(HousingApp.Management.TimePeriod, current_user_tenant, tenant),
+       tp_form:
+         generate_management_ash_form(HousingApp.Management.TimePeriod, :new, "tp_form",
+           actor: current_user_tenant,
+           tenant: tenant
+         ),
        current_user_tenant: current_user_tenant,
        current_tenant: tenant
      )}
@@ -77,14 +81,18 @@ defmodule HousingAppWeb.Components.TimePeriodsForm do
     {:noreply, socket}
   end
 
-  def handle_event("submit", %{"form" => data}, socket) do
+  def handle_event("submit", %{"tp_form" => data}, socket) do
     %{tp_form: tp_form, current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     case AshPhoenix.Form.submit(tp_form, params: data) do
       {:ok, _tp} ->
         {:noreply,
          assign(socket,
-           tp_form: new_management_ash_form(HousingApp.Management.TimePeriod, current_user_tenant, tenant),
+           tp_form:
+             generate_management_ash_form(HousingApp.Management.TimePeriod, :new, "tp_form",
+               actor: current_user_tenant,
+               tenant: tenant
+             ),
            time_periods: time_periods(current_user_tenant, tenant)
          )}
 

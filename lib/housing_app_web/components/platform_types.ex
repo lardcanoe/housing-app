@@ -19,6 +19,10 @@ defmodule HousingAppWeb.PlatformTypes do
     {"Staff", :staff}
   ]
 
+  @resource_options [
+    {"Profile", :profile}
+  ]
+
   @empty_option {"-- Select a default --", nil}
 
   def time_periods(actor, tenant) do
@@ -39,6 +43,8 @@ defmodule HousingAppWeb.PlatformTypes do
   def submission_type_options, do: @submission_types
 
   def user_type_options, do: @user_types
+
+  def resource_options, do: @resource_options
 
   def all_forms(actor, tenant) do
     HousingApp.Management.Form.list!(actor: actor, tenant: tenant)
@@ -68,13 +74,11 @@ defmodule HousingAppWeb.PlatformTypes do
     [@empty_option] ++ approved_form_options(actor, tenant)
   end
 
-  def new_management_ash_form(resource, actor, tenant) do
+  def generate_management_ash_form(resource, action, form_name \\ "form", opts \\ []) do
     resource
-    |> AshPhoenix.Form.for_create(:new,
-      api: HousingApp.Management,
-      forms: [auto?: true],
-      actor: actor,
-      tenant: tenant
+    |> AshPhoenix.Form.for_create(
+      action,
+      [api: HousingApp.Management, forms: [auto?: true], as: form_name] ++ opts
     )
     |> Phoenix.Component.to_form()
   end

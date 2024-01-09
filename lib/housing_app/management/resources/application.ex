@@ -45,6 +45,11 @@ defmodule HousingApp.Management.Application do
       allow_nil? false
     end
 
+    attribute :conditions, {:array, HousingApp.Management.ApplicationCondition} do
+      default []
+      allow_nil? false
+    end
+
     create_timestamp :created_at
     update_timestamp :updated_at
 
