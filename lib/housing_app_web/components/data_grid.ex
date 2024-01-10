@@ -30,11 +30,12 @@ defmodule HousingAppWeb.Components.DataGrid do
               <div :if={@loading} class="text-gray-400 font-medium">Loading...</div>
               <div :if={!@loading && @count == 1} class="text-gray-400 font-medium">1 result</div>
               <div :if={!@loading && @count != 1} class="text-gray-400 font-medium"><%= @count %> results</div>
-            </div>
-            <div class="w-full flex flex-row items-center justify-end space-x-3">
-              <div :for={action <- @actions} :if={@actions != []}>
+
+              <div class="grow"></div>
+
+              <%= for action <- @actions do %>
                 <%= render_slot(action) %>
-              </div>
+              <% end %>
 
               <div class="relative">
                 <button

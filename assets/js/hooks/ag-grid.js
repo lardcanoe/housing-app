@@ -54,6 +54,11 @@ export default {
             },
             rowSelection: 'multiple',
             suppressRowClickSelection: true,
+            // FUTURE:
+            // sideBar: 'filters',
+            // onGridReady: (params) => {
+            //     params.api.getToolPanelInstance('filters').expandFilters();
+            // },
             columnDefs: [],
             rowData: []
         };
@@ -80,6 +85,13 @@ export default {
                 this.gridOptions.rowData = reply.data
                 this.gridInstance = agGrid.createGrid(this.el, this.gridOptions);
                 this.addTableSettingListeners(this.gridInstance);
+
+                let quickfilter = document.getElementById('datagrid-quickfilter');
+                if (quickfilter) {
+                    quickfilter.oninput = () => {
+                        this.gridInstance.setGridOption('quickFilterText', quickfilter.value);
+                    }
+                }
 
                 // Ideally do this:
                 // this.gridInstance.updateGridOptions({ columnDefs: reply.columns, rowData: reply.data });
