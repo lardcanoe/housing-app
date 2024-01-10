@@ -15,6 +15,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
       drawer={HousingAppWeb.Components.Drawer.Profile}
       current_user_tenant={@current_user_tenant}
       current_tenant={@current_tenant}
+      filter_changes={true}
     >
       <:actions>
         <input
@@ -100,6 +101,14 @@ defmodule HousingAppWeb.Live.Profiles.Index do
     end
   end
 
+  def handle_params(%{"filter" => filter}, _uri, socket) do
+    {:noreply, assign(socket, filter: filter |> URI.decode() |> Jason.decode!())}
+  end
+
+  def handle_params(_params, _uri, socket) do
+    {:noreply, assign(socket, filter: nil)}
+  end
+
   defp load_async_assigns(socket) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
@@ -143,6 +152,10 @@ defmodule HousingAppWeb.Live.Profiles.Index do
     res = load_data(socket)
 
     {:reply, res, assign(socket, loading: false, count: length(res.data))}
+  end
+
+  def handle_event("filter-changed", %{"filter" => filter}, socket) do
+    {:noreply, push_patch(socket, to: ~p"/profiles?filter=#{filter |> Jason.encode!() |> URI.encode()}")}
   end
 
   defp load_profiles(socket) do
@@ -226,7 +239,8 @@ defmodule HousingAppWeb.Live.Profiles.Index do
   defp load_data(socket) do
     %{
       columns: load_columns(socket),
-      data: load_profiles(socket)
+      data: load_profiles(socket),
+      filter: socket.assigns.filter
     }
   end
 end

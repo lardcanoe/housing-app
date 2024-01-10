@@ -59,11 +59,18 @@ export default {
             cacheQuickFilter: true,
             includeHiddenColumnsInQuickFilter: true,
 
+            onFilterChanged: (e) => {
+                if (this.el.dataset.filterChanges == "true") {
+                    this.pushEvent("filter-changed", { filter: this.gridInstance.getFilterModel() })
+                }
+            },
+
             // FUTURE:
             // sideBar: 'filters',
             // onGridReady: (params) => {
             //     params.api.getToolPanelInstance('filters').expandFilters();
             // },
+
             columnDefs: [],
             rowData: []
         };
@@ -96,6 +103,10 @@ export default {
                     quickfilter.oninput = () => {
                         this.gridInstance.setGridOption('quickFilterText', quickfilter.value);
                     }
+                }
+
+                if (reply.filter) {
+                    this.gridInstance.setFilterModel(reply.filter);
                 }
 
                 // Ideally do this:

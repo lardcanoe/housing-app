@@ -16,6 +16,7 @@ defmodule HousingAppWeb.Components.DataGrid do
   attr :drawer, :any, default: nil
   attr :current_user_tenant, :any, required: true
   attr :current_tenant, :string
+  attr :filter_changes, :boolean, default: false
 
   slot :actions, doc: "the slot for showing user actions in the last table column"
 
@@ -118,7 +119,14 @@ defmodule HousingAppWeb.Components.DataGrid do
           </div>
 
           <div class="dashboard-area-height mt-2">
-            <div id={@id} style="width: 100%; height: 100%;" aria-multiselectable="true" phx-hook="AgGrid"></div>
+            <div
+              id={@id}
+              style="width: 100%; height: 100%;"
+              aria-multiselectable="true"
+              phx-hook="AgGrid"
+              data-filter-changes={if(@filter_changes, do: "true", else: "false")}
+            >
+            </div>
           </div>
         </div>
       </div>
