@@ -1,13 +1,21 @@
 import React from 'react';
-import { useState } from 'react';
-import { createRoot, unmountComponentAtNode } from "react-dom/client";
+import { useState, StrictMode } from 'react';
+import { createRoot } from "react-dom/client";
 import { defaultValidator, QueryBuilder } from 'react-querybuilder';
 
 export const QueryBuilderComponent = ({ initialQuery, fields, queryChange }) => {
     const [query, setQuery] = useState(initialQuery);
 
+    // UNCOMMENT to see how noisy we are
+    // console.log('Rendering QueryBuilderComponent with', query);
+
+    // useEffect(() => {
+    //     console.log('Query updated:', query);
+    // }, [query]);
+
     return (
         <QueryBuilder
+            debugMode={true}
             fields={fields}
             query={query}
             validator={defaultValidator}
@@ -17,14 +25,11 @@ export const QueryBuilderComponent = ({ initialQuery, fields, queryChange }) => 
 };
 
 export function mount(rootElement, opts) {
-
-    createRoot(rootElement).render(
-        <React.StrictMode>
+    const root = createRoot(rootElement)
+    root.render(
+        <StrictMode>
             <QueryBuilderComponent {...opts} />
-        </React.StrictMode>
-    );
-
-    return (el) => {
-        unmountComponentAtNode(el);
-    };
+        </StrictMode>
+    )
+    return root;
 }

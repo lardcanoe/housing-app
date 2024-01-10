@@ -74,9 +74,18 @@ defmodule HousingAppWeb.PlatformTypes do
     [@empty_option] ++ approved_form_options(actor, tenant)
   end
 
-  def generate_management_ash_form(resource, action, form_name \\ "form", opts \\ []) do
+  def management_form_for_create(resource, action, form_name \\ "form", opts \\ []) do
     resource
     |> AshPhoenix.Form.for_create(
+      action,
+      [api: HousingApp.Management, forms: [auto?: true], as: form_name] ++ opts
+    )
+    |> Phoenix.Component.to_form()
+  end
+
+  def management_form_for_update(record, action, form_name \\ "form", opts \\ []) do
+    record
+    |> AshPhoenix.Form.for_update(
       action,
       [api: HousingApp.Management, forms: [auto?: true], as: form_name] ++ opts
     )

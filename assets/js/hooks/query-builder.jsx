@@ -2,6 +2,9 @@ import { mount } from '../react/query-builder';
 
 export default {
     mounted() {
+        this.updated();
+    },
+    updated() {
         const initialQuery = this.el.dataset.query
             ? JSON.parse(this.el.dataset.query)
             : { combinator: 'and', rules: [] };
@@ -10,7 +13,12 @@ export default {
             ? JSON.parse(this.el.dataset.fields)
             : [];
 
-        this.unmountComponent = mount(this.el, {
+        // FUTURE: THIS IS A COMPLETE HACK TO MAKE IT REFRESH!
+        if (this.root) {
+            this.root.unmount();
+        }
+
+        this.root = mount(this.el, {
             initialQuery: initialQuery,
             fields: fields,
             queryChange: (q) => { this.queryChange(q) }
@@ -19,9 +27,9 @@ export default {
     queryChange(q) {
         this.pushEventTo(this.el, 'query-changed', { q });
     },
-    destryed() {
-        if (this.unmountComponent) {
-            this.unmountComponent(this.el);
+    destroyed() {
+        if (this.root) {
+            this.root.unmount();
         }
     }
 };

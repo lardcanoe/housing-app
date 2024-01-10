@@ -33,6 +33,11 @@ defmodule HousingAppWeb.Components.Settings.Queries do
         <:col :let={q} label="resource">
           <%= q.resource %>
         </:col>
+        <:col :let={q} label="edit">
+          <.button phx-click="edit" phx-value-id={q.id} phx-target={@myself} type="button">
+            Edit
+          </.button>
+        </:col>
       </.table>
 
       <.simple_form
@@ -43,10 +48,19 @@ defmodule HousingAppWeb.Components.Settings.Queries do
         phx-submit="submit"
         phx-target={@myself}
       >
-        <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Query</h2>
+        <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">
+          <span :if={@query_form.source.action == :update}>Update Query</span>
+          <span :if={@query_form.source.action == :create}>New Query</span>
+        </h2>
         <.input field={@query_form[:name]} label="Name" />
         <.input field={@query_form[:description]} label="Description" />
-        <.input type="select" options={@resource_types} field={@query_form[:resource]} label="Resource" />
+        <.input
+          type="select"
+          options={@resource_types}
+          field={@query_form[:resource]}
+          label="Resource"
+          {if(@query_form.source.action == :update, do: [{"disabled", ""}], else: [])}
+        />
 
         <div
           id="query-builder"
@@ -59,7 +73,10 @@ defmodule HousingAppWeb.Components.Settings.Queries do
         />
 
         <:actions>
-          <.button>Add</.button>
+          <.button>
+            <span :if={@query_form.source.action == :update}>Update</span>
+            <span :if={@query_form.source.action == :create}>Add</span>
+          </.button>
         </:actions>
       </.simple_form>
 
@@ -202,18 +219,34 @@ defmodule HousingAppWeb.Components.Settings.Queries do
     assign(socket,
       queries: load_queries(current_user_tenant, tenant),
       query_form:
-        HousingApp.Management.CommonQuery
-        |> generate_management_ash_form(:create, "cq_form",
+        management_form_for_create(HousingApp.Management.CommonQuery, :create, "cq_form",
           actor: current_user_tenant,
           tenant: tenant
-        )
-        |> dbg(),
+        ),
       query: Jason.encode!(%{combinator: "", rules: [%{field: first_field[:name], operator: "=", value: ""}]})
     )
   end
 
   def handle_event("query-changed", %{"q" => q}, socket) do
     {:noreply, assign(socket, query: Jason.encode!(q))}
+  end
+
+  def handle_event("edit", %{"id" => id}, socket) do
+    %{queries: queries, current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    case Enum.find(queries, &(&1.id == id)) do
+      nil ->
+        {:noreply, socket}
+
+      cq ->
+        query = ash_filter_to_react_query(cq.filter)
+
+        {:noreply,
+         assign(socket,
+           query_form: management_form_for_update(cq, :update, "cq_form", actor: current_user_tenant, tenant: tenant),
+           query: Jason.encode!(query)
+         )}
+    end
   end
 
   def handle_event("validate", _data, socket) do
@@ -310,5 +343,17 @@ defmodule HousingAppWeb.Components.Settings.Queries do
       end)
 
     Map.put(%{}, combinator, predicates)
+  end
+
+  defp ash_filter_to_react_query(%{"and" => predicates}) do
+    # dbg(filter)
+    # %{"and" => %{"major" => "EE"}}
+
+    rules =
+      Enum.map(predicates, fn {k, v} ->
+        %{field: k, operator: "=", value: v, id: HousingApp.Utils.Random.Token.generate()}
+      end)
+
+    %{combinator: "and", id: HousingApp.Utils.Random.Token.generate(), rules: rules}
   end
 end
