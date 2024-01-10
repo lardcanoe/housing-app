@@ -54,6 +54,11 @@ export default {
             },
             rowSelection: 'multiple',
             suppressRowClickSelection: true,
+
+            // https://www.ag-grid.com/javascript-data-grid/filter-quick/#quick-filter-cache
+            cacheQuickFilter: true,
+            includeHiddenColumnsInQuickFilter: true,
+
             // FUTURE:
             // sideBar: 'filters',
             // onGridReady: (params) => {
