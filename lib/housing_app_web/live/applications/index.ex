@@ -12,7 +12,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
         :for={application <- @applications.result}
         class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
       >
-        <.link patch={~p"/applications/#{application.id}"}>
+        <.link navigate={~p"/applications/#{application.id}"}>
           <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             <%= application.name %>
           </h5>
@@ -21,7 +21,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
           <%= application.description %>
         </p>
         <.link
-          patch={~p"/applications/#{application.id}"}
+          navigate={~p"/applications/#{application.id}"}
           class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
           <span :if={application.submission_type == :once && :completed == Map.get(@submissions.result, application.id)}>
@@ -69,7 +69,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
       current_tenant={@current_tenant}
     >
       <:actions>
-        <.link patch={~p"/applications/new"}>
+        <.link navigate={~p"/applications/new"}>
           <button
             type="button"
             class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
@@ -98,16 +98,9 @@ defmodule HousingAppWeb.Live.Applications.Index do
     {:ok, assign(socket, params: params, loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
   end
 
-  def handle_params(_params, _url, %{assigns: %{current_user_tenant: %{user_type: :user}}} = socket) do
-    {:noreply,
-     socket
-     |> assign(sidebar: :applications, page_title: "Applications")
-     |> load_async_assigns()}
-  end
-
+  # Need for "link patch" to work
   def handle_params(params, _url, socket) do
-    {:noreply,
-     assign(socket, params: params, loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
+    {:noreply, assign(socket, params: params)}
   end
 
   defp load_async_assigns(

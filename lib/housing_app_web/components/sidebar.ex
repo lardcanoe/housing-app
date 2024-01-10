@@ -18,7 +18,7 @@ defmodule HousingAppWeb.Components.Sidebar do
         <ul class="space-y-2">
           <li>
             <.link
-              patch={~p"/"}
+              navigate={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -36,7 +36,7 @@ defmodule HousingAppWeb.Components.Sidebar do
           </li>
           <li>
             <.link
-              patch={~p"/applications"}
+              navigate={~p"/applications"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -54,7 +54,7 @@ defmodule HousingAppWeb.Components.Sidebar do
           </li>
           <li>
             <.link
-              patch={~p"/roommates"}
+              navigate={~p"/roommates"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -72,7 +72,7 @@ defmodule HousingAppWeb.Components.Sidebar do
           </li>
           <li>
             <.link
-              patch={~p"/"}
+              navigate={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -133,7 +133,7 @@ defmodule HousingAppWeb.Components.Sidebar do
           <!-- Overview -->
           <li>
             <.link
-              patch={~p"/"}
+              navigate={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -167,7 +167,7 @@ defmodule HousingAppWeb.Components.Sidebar do
             <ul id="dropdown-forms" class={["py-2 space-y-2", @section != :forms && "hidden"]}>
               <li>
                 <.link
-                  patch={~p"/forms"}
+                  navigate={~p"/forms"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Manage
@@ -203,7 +203,7 @@ defmodule HousingAppWeb.Components.Sidebar do
             <ul id="dropdown-applications" class={["py-2 space-y-2", @section != :applications && "hidden"]}>
               <li>
                 <.link
-                  patch={~p"/applications"}
+                  navigate={~p"/applications"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Manage
@@ -239,7 +239,7 @@ defmodule HousingAppWeb.Components.Sidebar do
             <ul id="dropdown-assignments" class={["py-2 space-y-2", @section != :assignments && "hidden"]}>
               <li>
                 <.link
-                  patch={~p"/assignments/buildings"}
+                  navigate={~p"/assignments/buildings"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Buildings
@@ -247,7 +247,7 @@ defmodule HousingAppWeb.Components.Sidebar do
               </li>
               <li>
                 <.link
-                  patch={~p"/assignments/rooms"}
+                  navigate={~p"/assignments/rooms"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Rooms
@@ -255,7 +255,7 @@ defmodule HousingAppWeb.Components.Sidebar do
               </li>
               <li>
                 <.link
-                  patch={~p"/assignments/beds"}
+                  navigate={~p"/assignments/beds"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Beds
@@ -263,7 +263,7 @@ defmodule HousingAppWeb.Components.Sidebar do
               </li>
               <li>
                 <.link
-                  patch={~p"/assignments/bookings"}
+                  navigate={~p"/assignments/bookings"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Bookings
@@ -271,7 +271,7 @@ defmodule HousingAppWeb.Components.Sidebar do
               </li>
               <li>
                 <.link
-                  patch={~p"/assignments/roommates"}
+                  navigate={~p"/assignments/roommates"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Roommates
@@ -297,7 +297,7 @@ defmodule HousingAppWeb.Components.Sidebar do
             <ul id="dropdown-profiles" class={["py-2 space-y-2", @section != :profiles && "hidden"]}>
               <li>
                 <.link
-                  patch={~p"/profiles"}
+                  navigate={~p"/profiles"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Manage
@@ -323,7 +323,7 @@ defmodule HousingAppWeb.Components.Sidebar do
             <ul id="dropdown-accounting" class={["py-2 space-y-2", @section != :accounting && "hidden"]}>
               <li>
                 <.link
-                  patch={~p"/accounting/products"}
+                  navigate={~p"/accounting/products"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Products
@@ -349,7 +349,7 @@ defmodule HousingAppWeb.Components.Sidebar do
             <ul id="dropdown-reporting" class={["py-2 space-y-2", @section != :reporting && "hidden"]}>
               <li>
                 <.link
-                  patch={~p"/reporting"}
+                  navigate={~p"/reporting"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   View
@@ -377,7 +377,7 @@ defmodule HousingAppWeb.Components.Sidebar do
             <ul id="dropdown-new" class="hidden py-2 space-y-2">
               <li>
                 <.link
-                  patch={~p"/forms/new"}
+                  navigate={~p"/forms/new"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   New Form
@@ -385,7 +385,7 @@ defmodule HousingAppWeb.Components.Sidebar do
               </li>
               <li>
                 <.link
-                  patch={~p"/applications/new"}
+                  navigate={~p"/applications/new"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   New Application
@@ -393,7 +393,7 @@ defmodule HousingAppWeb.Components.Sidebar do
               </li>
               <li>
                 <.link
-                  patch={~p"/profiles/new"}
+                  navigate={~p"/profiles/new"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   New Profile
@@ -404,7 +404,7 @@ defmodule HousingAppWeb.Components.Sidebar do
 
           <li>
             <.link
-              patch={~p"/"}
+              navigate={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
             >
               <svg
@@ -427,7 +427,7 @@ defmodule HousingAppWeb.Components.Sidebar do
           </li>
           <li>
             <.link
-              patch={~p"/"}
+              navigate={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
             >
               <svg
@@ -445,7 +445,7 @@ defmodule HousingAppWeb.Components.Sidebar do
           </li>
           <li>
             <.link
-              patch={~p"/"}
+              navigate={~p"/"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group"
             >
               <svg

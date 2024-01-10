@@ -163,10 +163,6 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Form do
     end)
   end
 
-  def handle_params(params, _url, socket) do
-    {:noreply, assign(socket, params: params)}
-  end
-
   def handle_event("validate", %{"_target" => ["form", "bed_id"], "form" => %{"bed_id" => bed_id} = params}, socket)
       when is_binary(bed_id) and bed_id != "" do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns

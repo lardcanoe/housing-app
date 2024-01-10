@@ -16,7 +16,7 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.Index do
       current_tenant={@current_tenant}
     >
       <:actions>
-        <.link patch={~p"/assignments/roommates/new"}>
+        <.link navigate={~p"/assignments/roommates/new"}>
           <button
             type="button"
             class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
@@ -31,17 +31,6 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.Index do
 
   def mount(_params, _session, socket) do
     {:ok, assign(socket, loading: true, count: 0, sidebar: :assignments, page_title: "Roommates")}
-  end
-
-  def handle_params(params, _url, socket) do
-    {:noreply,
-     assign(socket,
-       params: params,
-       loading: true,
-       count: 0,
-       sidebar: :assignments,
-       page_title: "Roommates"
-     )}
   end
 
   def handle_event("view-row", %{"id" => _id}, socket) do

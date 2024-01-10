@@ -54,7 +54,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
         </div>
       </:actions>
       <:actions>
-        <.link patch={~p"/profiles/new"}>
+        <.link navigate={~p"/profiles/new"}>
           <button
             type="button"
             class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
@@ -103,10 +103,6 @@ defmodule HousingAppWeb.Live.Profiles.Index do
 
       {:ok, %{queries: [%{id: nil, name: "Default"}] ++ queries}}
     end)
-  end
-
-  def handle_params(params, _url, socket) do
-    {:noreply, assign(socket, params: params, loading: true, count: 0, sidebar: :profiles, page_title: "Profiles")}
   end
 
   def handle_event("view-row", %{"id" => id}, socket) do

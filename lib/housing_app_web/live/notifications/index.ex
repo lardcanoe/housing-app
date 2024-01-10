@@ -38,10 +38,6 @@ defmodule HousingAppWeb.Live.Notifications.Index do
     {:ok, socket |> assign(sidebar: :overview, page_title: "Notifications") |> load_notifications()}
   end
 
-  def handle_params(_params, _url, socket) do
-    {:noreply, socket |> assign(sidebar: :overview, page_title: "Notifications") |> load_notifications()}
-  end
-
   defp load_notifications(socket) do
     if connected?(socket) do
       %{current_user_tenant: current_user_tenant} = socket.assigns

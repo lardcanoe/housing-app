@@ -74,11 +74,11 @@ defmodule HousingAppWeb.Live.Reporting.Index do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, socket |> assign(sidebar: :reporting, page_title: "Reporting Dashboard") |> load_housing() |> load_bookings()}
-  end
-
-  def handle_params(params, _url, socket) do
-    {:noreply, socket |> assign(params: params) |> load_housing() |> load_bookings()}
+    {:ok,
+     socket
+     |> assign(sidebar: :reporting, page_title: "Reporting Dashboard")
+     |> load_housing()
+     |> load_bookings()}
   end
 
   defp load_housing(socket) do

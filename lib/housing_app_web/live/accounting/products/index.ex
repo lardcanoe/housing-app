@@ -22,7 +22,7 @@ defmodule HousingAppWeb.Live.Accounting.Products.Index do
             d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
           />
         </svg>
-        <.link patch={~p"/accounting/products/new"}>
+        <.link navigate={~p"/accounting/products/new"}>
           Add product
         </.link>
       </:button>
@@ -37,7 +37,7 @@ defmodule HousingAppWeb.Live.Accounting.Products.Index do
       </:col>
       <:action :let={product}>
         <.link
-          patch={~p"/accounting/products/#{product.id}/edit"}
+          navigate={~p"/accounting/products/#{product.id}/edit"}
           class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
         >
           Edit
@@ -56,19 +56,6 @@ defmodule HousingAppWeb.Live.Accounting.Products.Index do
         {:ok,
          socket
          |> assign(products: [], sidebar: :accounting, page_title: "Products")
-         |> put_flash(:error, "Error loading products.")}
-    end
-  end
-
-  def handle_params(_params, _url, socket) do
-    case fetch_products(socket) do
-      {:ok, products} ->
-        {:noreply, assign(socket, products: products, sidebar: :accounting, page_title: "Product")}
-
-      _ ->
-        {:noreply,
-         socket
-         |> assign(products: [], sidebar: :accounting, page_title: "Product")
          |> put_flash(:error, "Error loading products.")}
     end
   end

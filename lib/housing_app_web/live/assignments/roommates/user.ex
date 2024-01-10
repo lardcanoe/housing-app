@@ -19,7 +19,7 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.User do
           Create a new group of roommates to use in your housing application.
         </p>
         <.link
-          patch={~p"/roommates/new"}
+          navigate={~p"/roommates/new"}
           class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
           <span>
@@ -142,10 +142,6 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.User do
 
   def mount(_params, _session, socket) do
     {:ok, load_roommate_groups(socket)}
-  end
-
-  def handle_params(_params, _url, socket) do
-    {:noreply, load_roommate_groups(socket)}
   end
 
   defp load_roommate_groups(socket) do

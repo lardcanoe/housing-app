@@ -51,7 +51,7 @@ defmodule HousingAppWeb.Components.Navbar do
             </svg>
             <span class="sr-only">Toggle sidebar</span>
           </button>
-          <.link patch={~p"/"} class="flex items-center justify-between mr-4">
+          <.link navigate={~p"/"} class="flex items-center justify-between mr-4">
             <img src="https://flowbite.s3.amazonaws.com/logo.svg" class="mr-3 h-8" alt="Flowbite Logo" />
             <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
               Housing App
@@ -112,7 +112,7 @@ defmodule HousingAppWeb.Components.Navbar do
           </button>
           <!-- Notifications -->
           <.link
-            patch={~p"/notifications"}
+            navigate={~p"/notifications"}
             class="p-2 mr-1 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
           >
             <span class="sr-only">View notifications</span>
@@ -148,7 +148,7 @@ defmodule HousingAppWeb.Components.Navbar do
             </div>
             <div class="grid grid-cols-3 gap-4 p-4">
               <.link
-                patch={~p"/profiles"}
+                navigate={~p"/profiles"}
                 class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group"
               >
                 <svg
@@ -168,7 +168,7 @@ defmodule HousingAppWeb.Components.Navbar do
                 <div class="text-sm text-gray-900 dark:text-white">Profiles</div>
               </.link>
               <.link
-                patch={~p"/forms"}
+                navigate={~p"/forms"}
                 class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group"
               >
                 <svg
@@ -188,7 +188,7 @@ defmodule HousingAppWeb.Components.Navbar do
                 <div class="text-sm text-gray-900 dark:text-white">Forms</div>
               </.link>
               <.link
-                patch={~p"/applications"}
+                navigate={~p"/applications"}
                 class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group"
               >
                 <svg
@@ -203,7 +203,7 @@ defmodule HousingAppWeb.Components.Navbar do
                 </svg>
                 <div class="text-sm text-gray-900 dark:text-white">Applications</div>
               </.link>
-              <.link patch={~p"/"} class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
+              <.link navigate={~p"/"} class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
                 <svg
                   aria-hidden="true"
                   class="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
@@ -222,7 +222,7 @@ defmodule HousingAppWeb.Components.Navbar do
               </.link>
               <.link
                 :if={@user_type == :admin}
-                patch={~p"/settings/account"}
+                navigate={~p"/settings/account"}
                 class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group"
               >
                 <svg
@@ -243,7 +243,7 @@ defmodule HousingAppWeb.Components.Navbar do
                   Account Settings
                 </div>
               </.link>
-              <.link patch={~p"/"} class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
+              <.link navigate={~p"/"} class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
                 <svg
                   aria-hidden="true"
                   class="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
@@ -263,7 +263,7 @@ defmodule HousingAppWeb.Components.Navbar do
                   Maintenance
                 </div>
               </.link>
-              <.link patch={~p"/"} class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
+              <.link navigate={~p"/"} class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
                 <svg
                   aria-hidden="true"
                   class="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
@@ -349,7 +349,7 @@ defmodule HousingAppWeb.Components.Navbar do
             <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
               <li>
                 <.link
-                  patch={~p"/settings/profile"}
+                  navigate={~p"/settings/profile"}
                   class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
                 >
                   My profile
@@ -357,7 +357,7 @@ defmodule HousingAppWeb.Components.Navbar do
               </li>
               <li :if={@user_type == :admin}>
                 <.link
-                  patch={~p"/settings/account"}
+                  navigate={~p"/settings/account"}
                   class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
                 >
                   Account settings

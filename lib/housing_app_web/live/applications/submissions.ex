@@ -41,10 +41,6 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
     end
   end
 
-  def handle_params(params, _url, socket) do
-    {:noreply, assign(socket, params: params, count: 0, loading: true)}
-  end
-
   def handle_event("load-data", %{}, %{assigns: %{application: application}} = socket) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 

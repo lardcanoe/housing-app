@@ -73,10 +73,6 @@ defmodule HousingAppWeb.Live.HomeLive do
     {:ok, assign(socket, create_form: form, faker_form: faker_form, page_title: "Dashboard")}
   end
 
-  def handle_params(params, _url, socket) do
-    {:noreply, assign(socket, params: params)}
-  end
-
   def handle_event("validate", %{"form" => params}, socket) do
     create_form = AshPhoenix.Form.validate(socket.assigns.create_form, params)
     {:noreply, assign(socket, create_form: create_form)}

@@ -160,8 +160,4 @@ defmodule HousingAppWeb.Live.Settings.TenantSettings do
   def mount(_params, _session, socket) do
     {:ok, assign(socket, page_title: "Account Settings")}
   end
-
-  def handle_params(params, _url, socket) do
-    {:noreply, assign(socket, params: params)}
-  end
 end
