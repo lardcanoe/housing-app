@@ -25,7 +25,7 @@ defmodule HousingAppWeb.Live.Applications.New do
     {:ok,
      assign(socket,
        ash_form:
-         management_form_for_create(HousingApp.Management.Application, :new, "form",
+         management_form_for_create(HousingApp.Management.Application, :new,
            actor: current_user_tenant,
            tenant: tenant
          ),

@@ -25,7 +25,7 @@ defmodule HousingAppWeb.Live.Applications.Edit do
             type="button"
             class="text-white absolute right-8 bottom-2.5 px-3 py-0.5 bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-xs dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
             phx-click="remove-condition"
-            phx-value-path={cond_form.id}
+            phx-value-path={cond_form.name}
           >
             Remove
           </.button>
@@ -106,7 +106,6 @@ defmodule HousingAppWeb.Live.Applications.Edit do
     end
   end
 
-  # TODO: This doesn't work
   def handle_event("remove-condition", %{"path" => path}, socket) do
     ash_form = AshPhoenix.Form.remove_form(socket.assigns.ash_form, path)
     {:noreply, assign(socket, ash_form: ash_form)}

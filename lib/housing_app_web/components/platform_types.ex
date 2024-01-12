@@ -23,6 +23,12 @@ defmodule HousingAppWeb.PlatformTypes do
     {"Profile", :profile}
   ]
 
+  @role_resource_options [
+    {"Application", :application},
+    {"Form", :form},
+    {"Profile", :profile}
+  ]
+
   @empty_option {"-- Select a default --", nil}
 
   def time_periods(actor, tenant) do
@@ -45,6 +51,8 @@ defmodule HousingAppWeb.PlatformTypes do
   def user_type_options, do: @user_types
 
   def resource_options, do: @resource_options
+
+  def role_resource_options, do: @role_resource_options
 
   def all_forms(actor, tenant) do
     HousingApp.Management.Form.list!(actor: actor, tenant: tenant)
@@ -74,21 +82,35 @@ defmodule HousingAppWeb.PlatformTypes do
     [@empty_option] ++ approved_form_options(actor, tenant)
   end
 
-  def management_form_for_create(resource, action, form_name \\ "form", opts \\ []) do
+  def management_form_for_create(resource, action, opts \\ []) do
+    opts =
+      Keyword.merge(
+        [
+          api: HousingApp.Management,
+          forms: [auto?: true],
+          as: "form"
+        ],
+        opts
+      )
+
     resource
-    |> AshPhoenix.Form.for_create(
-      action,
-      [api: HousingApp.Management, forms: [auto?: true], as: form_name] ++ opts
-    )
+    |> AshPhoenix.Form.for_create(action, opts)
     |> Phoenix.Component.to_form()
   end
 
-  def management_form_for_update(record, action, form_name \\ "form", opts \\ []) do
+  def management_form_for_update(record, action, opts \\ []) do
+    opts =
+      Keyword.merge(
+        [
+          api: HousingApp.Management,
+          forms: [auto?: true],
+          as: "form"
+        ],
+        opts
+      )
+
     record
-    |> AshPhoenix.Form.for_update(
-      action,
-      [api: HousingApp.Management, forms: [auto?: true], as: form_name] ++ opts
-    )
+    |> AshPhoenix.Form.for_update(action, opts)
     |> Phoenix.Component.to_form()
   end
 end

@@ -219,7 +219,8 @@ defmodule HousingAppWeb.Components.Settings.Queries do
     assign(socket,
       queries: load_queries(current_user_tenant, tenant),
       query_form:
-        management_form_for_create(HousingApp.Management.CommonQuery, :create, "cq_form",
+        management_form_for_create(HousingApp.Management.CommonQuery, :create,
+          as: "cq_form",
           actor: current_user_tenant,
           tenant: tenant
         ),
@@ -243,7 +244,8 @@ defmodule HousingAppWeb.Components.Settings.Queries do
 
         {:noreply,
          assign(socket,
-           query_form: management_form_for_update(cq, :update, "cq_form", actor: current_user_tenant, tenant: tenant),
+           query_form:
+             management_form_for_update(cq, :update, as: "cq_form", actor: current_user_tenant, tenant: tenant),
            query: Jason.encode!(query)
          )}
     end

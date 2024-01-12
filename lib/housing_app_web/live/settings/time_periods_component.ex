@@ -68,7 +68,8 @@ defmodule HousingAppWeb.Components.TimePeriodsForm do
      assign(socket,
        time_periods: time_periods(current_user_tenant, tenant),
        tp_form:
-         management_form_for_create(HousingApp.Management.TimePeriod, :new, "tp_form",
+         management_form_for_create(HousingApp.Management.TimePeriod, :new,
+           as: "tp_form",
            actor: current_user_tenant,
            tenant: tenant
          ),
@@ -89,7 +90,8 @@ defmodule HousingAppWeb.Components.TimePeriodsForm do
         {:noreply,
          assign(socket,
            tp_form:
-             management_form_for_create(HousingApp.Management.TimePeriod, :new, "tp_form",
+             management_form_for_create(HousingApp.Management.TimePeriod, :new,
+               as: "tp_form",
                actor: current_user_tenant,
                tenant: tenant
              ),

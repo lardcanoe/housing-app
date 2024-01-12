@@ -33,6 +33,21 @@ defmodule HousingAppWeb.Live.Settings.TenantSettings do
         </li>
         <li role="presentation">
           <.link
+            patch={~p"/settings/account?#{%{tab: "roles"}}"}
+            class="inline-flex items-center px-4 py-3 rounded-lg hover:text-gray-900 bg-gray-50 hover:bg-gray-100 w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
+            aria-current="page"
+            id="roles-tab"
+            data-tabs-target="#roles"
+            type="button"
+            role="tab"
+            aria-controls="roles"
+            aria-selected={if(@tab == "roles", do: "true", else: "false")}
+          >
+            <.icon name="hero-bolt-solid" class="w-4 h-4 me-2 text-white" /> Roles
+          </.link>
+        </li>
+        <li role="presentation">
+          <.link
             patch={~p"/settings/account?#{%{tab: "users"}}"}
             class="inline-flex items-center px-4 py-3 rounded-lg hover:text-gray-900 bg-gray-50 hover:bg-gray-100 w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
             aria-current="page"
@@ -119,6 +134,22 @@ defmodule HousingAppWeb.Live.Settings.TenantSettings do
             id="tenant-time-periods-component"
             current_user_tenant={@current_user_tenant}
             current_tenant={@current_tenant}
+          >
+          </.live_component>
+        </div>
+        <div
+          class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800"
+          id="roles"
+          role="tabpanel"
+          aria-labelledby="roles-tab"
+        >
+          <.live_component
+            module={HousingAppWeb.Components.Settings.Roles}
+            id="tenant-roles-component"
+            current_user_tenant={@current_user_tenant}
+            current_tenant={@current_tenant}
+            timezone={@timezone}
+            locale={@locale}
           >
           </.live_component>
         </div>

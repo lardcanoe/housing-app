@@ -54,7 +54,12 @@ defmodule HousingApp.Management.Role do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:read, :update, :destroy]
+
+    create :new do
+      accept [:name, :description, :permissions]
+      change set_attribute(:tenant_id, actor(:tenant_id))
+    end
 
     read :list do
     end
