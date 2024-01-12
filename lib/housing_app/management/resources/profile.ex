@@ -90,7 +90,7 @@ defmodule HousingApp.Management.Profile do
     repo HousingApp.Repo
 
     custom_indexes do
-      index [:_data], using: "GIN"
+      index [:data], using: "GIN"
     end
   end
 

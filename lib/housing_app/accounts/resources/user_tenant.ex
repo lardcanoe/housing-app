@@ -34,6 +34,12 @@ defmodule HousingApp.Accounts.UserTenant do
       attribute_writable? true
       allow_nil? false
     end
+
+    has_many :roles, HousingApp.Management.UserTenantRole do
+      api HousingApp.Management
+      source_attribute :id
+      destination_attribute :user_tenant_id
+    end
   end
 
   policies do

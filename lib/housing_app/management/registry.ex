@@ -14,5 +14,7 @@ defmodule HousingApp.Management.Registry do
     entry HousingApp.Management.FormSubmission
     entry HousingApp.Management.Notification
     entry HousingApp.Management.CommonQuery
+    entry HousingApp.Management.Role
+    entry HousingApp.Management.UserTenantRole
   end
 end
