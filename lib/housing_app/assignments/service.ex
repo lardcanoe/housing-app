@@ -91,7 +91,7 @@ defmodule HousingApp.Assignments.Service do
        ) do
     with {:ok, application_submission} <-
            HousingApp.Management.load(application_submission, [application: :time_period], actor: actor, tenant: tenant),
-         {:ok, profile} <- HousingApp.Management.Profile.get_mine(actor: actor, tenant: tenant),
+         {:ok, %{id: profile_id}} <- HousingApp.Management.Profile.get_my_id(actor: actor, tenant: tenant),
          {:ok, bed} <- get_bed(bed_id, actor: actor, tenant: tenant) do
       HousingApp.Assignments.Booking
       |> Ash.Changeset.for_create(
@@ -99,7 +99,7 @@ defmodule HousingApp.Assignments.Service do
         %{
           application_submission_id: application_submission.id,
           bed_id: bed_id,
-          profile_id: profile.id,
+          profile_id: profile_id,
           product_id: bed.room.product_id,
           start_at: application_submission.application.time_period.start_at,
           end_at: application_submission.application.time_period.end_at,

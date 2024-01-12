@@ -22,7 +22,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
           type="text"
           id="datagrid-quickfilter"
           class="block w-52 p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-          placeholder="Search"
+          placeholder="Filter results..."
         />
       </:actions>
       <:actions>
@@ -164,7 +164,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
     |> Enum.sort_by(& &1.user_tenant.user.name)
     |> Enum.map(fn p ->
       Map.merge(
-        p.data,
+        p.sanitized_data,
         %{
           "id" => p.id,
           "user_name" => p.user_tenant.user.name,

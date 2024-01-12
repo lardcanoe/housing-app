@@ -9,4 +9,6 @@ defmodule HousingApp.Utils.Random do
   # iex> Random.Token.generate()
   # "6621e014ba61d7c314107a28"
   defmodule(Token, do: use(Puid, bits: 256, chars: :hex))
+
+  def uuid, do: Ash.UUID.generate()
 end

@@ -89,7 +89,7 @@ defmodule HousingAppWeb.Live.Settings.UserSettings do
        |> assign(
          json_schema: Jason.decode!(profile_form.json_schema),
          profile: profile,
-         profile_form: to_form(profile.data, as: "profile"),
+         profile_form: to_form(profile.sanitized_data, as: "profile"),
          user_form: user_form(current_user),
          page_title: "Profile Settings"
        )
@@ -155,7 +155,10 @@ defmodule HousingAppWeb.Live.Settings.UserSettings do
 
     with :ok <- ExJsonSchema.Validator.validate(ref_schema, data),
          {:ok, profile} <-
-           HousingApp.Management.Profile.submit(profile, %{data: data}, actor: current_user_tenant, tenant: tenant) do
+           HousingApp.Management.Profile.submit(profile, %{sanitized_data: data},
+             actor: current_user_tenant,
+             tenant: tenant
+           ) do
       {:noreply,
        socket
        |> assign(

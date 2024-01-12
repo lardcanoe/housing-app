@@ -9,9 +9,20 @@ defmodule HousingApp.Management.Profile do
   attributes do
     uuid_primary_key :id
 
-    attribute :data, :map do
+    attribute :_data, :map do
       default %{}
       allow_nil? false
+      sensitive? true
+      private? true
+      source :data
+    end
+
+    # FUTURE: This is not ideal, since we load a large map from the db twice
+    attribute :sanitized_data, :map do
+      default %{}
+      allow_nil? false
+      sensitive? true
+      source :data
     end
 
     create_timestamp :created_at
@@ -79,16 +90,18 @@ defmodule HousingApp.Management.Profile do
     repo HousingApp.Repo
 
     custom_indexes do
-      index [:data], using: "GIN"
+      index [:_data], using: "GIN"
     end
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    # No :read because we always need to filter data
+    # No :update because we need :submit logic to deal with merging santized data
+    defaults [:create, :destroy]
 
     read :list do
       prepare build(load: [user_tenant: [:user]])
-
+      prepare &HousingApp.Checks.FilterData.filter_records/2
       filter expr(is_nil(archived_at))
     end
 
@@ -98,9 +111,8 @@ defmodule HousingApp.Management.Profile do
       end
 
       get? true
-
       prepare build(load: [user_tenant: [:user]])
-
+      prepare &HousingApp.Checks.FilterData.filter_records/2
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
 
@@ -109,6 +121,7 @@ defmodule HousingApp.Management.Profile do
         allow_nil? false
       end
 
+      # NOTE: We don't filter, since only :id is selected
       prepare build(select: [:id])
       get? true
       filter expr(id == ^arg(:id) and is_nil(archived_at))
@@ -120,18 +133,32 @@ defmodule HousingApp.Management.Profile do
       end
 
       get? true
-
+      prepare &HousingApp.Checks.FilterData.filter_records/2
       filter expr(user_tenant_id == ^arg(:user_tenant_id) and is_nil(archived_at))
     end
 
     read :get_mine do
       get? true
+      prepare &HousingApp.Checks.FilterData.filter_records/2
+      filter expr(user_tenant_id == ^actor(:id) and is_nil(archived_at))
+    end
 
+    read :get_my_id do
+      get? true
+      prepare build(select: [:id])
       filter expr(user_tenant_id == ^actor(:id) and is_nil(archived_at))
     end
 
     update :submit do
-      accept [:data]
+      accept [:sanitized_data]
+
+      change fn changset, _context ->
+        changset
+        |> Ash.Changeset.before_action(&HousingApp.Checks.FilterData.merge_sanitized_data/1)
+        |> Ash.Changeset.after_action(fn _changeset, record ->
+          {:ok, HousingApp.Checks.FilterData.filter_record(record)}
+        end)
+      end
     end
   end
 
@@ -140,6 +167,7 @@ defmodule HousingApp.Management.Profile do
 
     define :list
     define :get_mine
+    define :get_my_id
     define :get_by_id, args: [:id]
     define :match_by_id, args: [:id]
     define :get_by_user_tenant, args: [:user_tenant_id]

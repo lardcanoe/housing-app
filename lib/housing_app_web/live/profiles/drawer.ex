@@ -60,7 +60,7 @@ defmodule HousingAppWeb.Components.Drawer.Profile do
         <% end %>
       </dl>
 
-      <.json_view data={@profile.data} json_schema={@json_schema} />
+      <.json_view data={@profile.sanitized_data} json_schema={@json_schema} />
     </div>
     """
   end

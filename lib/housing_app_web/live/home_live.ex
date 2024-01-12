@@ -110,7 +110,7 @@ defmodule HousingAppWeb.Live.HomeLive do
   end
 
   def handle_event("submit-faker", params, socket) do
-    Task.async(fn ->
+    Task.start(fn ->
       HousingApp.Faker.generate(
         params,
         tenant: socket.assigns.current_tenant,

@@ -42,7 +42,10 @@ defmodule HousingAppWeb.Components.Management.UpdateProfile do
 
     with :ok <- ExJsonSchema.Validator.validate(ref_schema, cast_data),
          {:ok, updated_profile} <-
-           HousingApp.Management.Profile.submit(profile, %{data: cast_data}, actor: current_user_tenant, tenant: tenant) do
+           HousingApp.Management.Profile.submit(profile, %{sanitized_data: cast_data},
+             actor: current_user_tenant,
+             tenant: tenant
+           ) do
       send(self(), {:component_submit, cast_data})
       {:noreply, assign(socket, profile: updated_profile)}
     else
@@ -56,7 +59,7 @@ defmodule HousingAppWeb.Components.Management.UpdateProfile do
 
     case HousingApp.Management.Profile.get_mine(actor: current_user_tenant, tenant: tenant) do
       {:ok, profile} ->
-        assign(socket, profile: profile, form: to_form(profile.data, as: "profile"))
+        assign(socket, profile: profile, form: to_form(profile.sanitized_data, as: "profile"))
 
       {:error, %Ash.Error.Query.NotFound{}} ->
         {:ok, profile} =
@@ -70,7 +73,7 @@ defmodule HousingAppWeb.Components.Management.UpdateProfile do
           )
           |> HousingApp.Management.create()
 
-        assign(socket, profile: profile, form: to_form(profile.data, as: "profile"))
+        assign(socket, profile: profile, form: to_form(profile.sanitized_data, as: "profile"))
     end
   end
 

@@ -18,7 +18,7 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
        assign(socket,
          json_schema: Jason.decode!(profile_form.json_schema),
          profile: profile,
-         form: to_form(profile.data, as: "profile"),
+         form: to_form(profile.sanitized_data, as: "profile"),
          sidebar: :profiles,
          page_title: "Edit Profile"
        )}
@@ -54,7 +54,10 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
 
     case ExJsonSchema.Validator.validate(ref_schema, data) do
       :ok ->
-        HousingApp.Management.Profile.submit(profile, %{data: data}, actor: current_user_tenant, tenant: tenant)
+        HousingApp.Management.Profile.submit(profile, %{sanitized_data: data},
+          actor: current_user_tenant,
+          tenant: tenant
+        )
 
         {:noreply,
          socket
