@@ -99,6 +99,7 @@ defmodule HousingAppWeb.Components.Settings.Roles do
             <span :if={@role_form.source.action == :update}>Update Role</span>
             <span :if={@role_form.source.action == :new}>Create Role</span>
           </.button>
+          <.button type="reset" name="reset">Reset</.button>
         </:actions>
       </.simple_form>
     </div>
@@ -127,6 +128,20 @@ defmodule HousingAppWeb.Components.Settings.Roles do
      |> assign(
        roles: roles(current_user_tenant, tenant),
        role_form: role_form
+     )}
+  end
+
+  def handle_event("validate", %{"_target" => ["reset"]}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    {:noreply,
+     assign(socket,
+       role_form:
+         management_form_for_create(HousingApp.Management.Role, :new,
+           as: "role_form",
+           actor: current_user_tenant,
+           tenant: tenant
+         )
      )}
   end
 
