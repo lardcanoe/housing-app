@@ -66,12 +66,19 @@ defmodule HousingAppWeb.Components.Settings.Roles do
               <.input type="select" options={@role_resource_options} field={perm_form[:resource]} label="Resource" />
             </div>
             <div class="w-full">
-              <.input type="checkbox" field={perm_form[:read]} label="Read Access" />
+              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                Access
+              </label>
+              <div class="flex items-center space-x-4">
+                <div class="flex items-center">
+                  <.input type="checkbox" field={perm_form[:read]} label="Read" />
+                </div>
+                <div class="flex items-center">
+                  <.input type="checkbox" field={perm_form[:write]} label="Write" />
+                </div>
+              </div>
             </div>
-            <div class="w-full">
-              <.input type="checkbox" field={perm_form[:write]} label="Write Access" />
-            </div>
-            <div class="w-full pt-7">
+            <div class="pt-7">
               <.button
                 type="button"
                 class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-xs dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
@@ -99,7 +106,7 @@ defmodule HousingAppWeb.Components.Settings.Roles do
             <span :if={@role_form.source.action == :update}>Update Role</span>
             <span :if={@role_form.source.action == :new}>Create Role</span>
           </.button>
-          <.button type="reset" name="reset">Reset</.button>
+          <.button type="reset" name="reset">Reset Form</.button>
         </:actions>
       </.simple_form>
     </div>
@@ -179,22 +186,18 @@ defmodule HousingAppWeb.Components.Settings.Roles do
   def handle_event("submit", %{"role_form" => params}, socket) do
     %{role_form: role_form, current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
-    with %{source: %{valid?: true}} = role_form <- AshPhoenix.Form.validate(role_form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(role_form) do
-      {:noreply,
-       assign(socket,
-         role_form:
-           management_form_for_create(HousingApp.Management.Role, :new,
-             as: "role_form",
-             actor: current_user_tenant,
-             tenant: tenant
-           ),
-         roles: roles(current_user_tenant, tenant)
-       )}
-    else
-      %{source: %{valid?: false}} = role_form ->
-        IO.inspect(role_form.source)
-        {:noreply, assign(socket, role_form: role_form)}
+    case AshPhoenix.Form.submit(role_form, params: params) do
+      {:ok, _app} ->
+        {:noreply,
+         assign(socket,
+           role_form:
+             management_form_for_create(HousingApp.Management.Role, :new,
+               as: "role_form",
+               actor: current_user_tenant,
+               tenant: tenant
+             ),
+           roles: roles(current_user_tenant, tenant)
+         )}
 
       {:error, role_form} ->
         IO.inspect(role_form.source)

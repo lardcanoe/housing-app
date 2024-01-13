@@ -35,7 +35,7 @@ defmodule HousingApp.Accounts.UserTenant do
       allow_nil? false
     end
 
-    has_many :roles, HousingApp.Management.UserTenantRole do
+    has_many :user_tenant_roles, HousingApp.Management.UserTenantRole do
       api HousingApp.Management
       source_attribute :id
       destination_attribute :user_tenant_id
@@ -72,7 +72,13 @@ defmodule HousingApp.Accounts.UserTenant do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:create, :read, :destroy]
+
+    update :update do
+      argument :user_tenant_roles, {:array, :map}
+
+      change manage_relationship(:user_tenant_roles, type: :direct_control)
+    end
 
     read :get_mine_for_tenant do
       argument :tenant_id, :uuid do
@@ -117,7 +123,7 @@ defmodule HousingApp.Accounts.UserTenant do
     end
 
     read :list_staff do
-      prepare build(load: [:user])
+      prepare build(load: [:user, :user_tenant_roles])
 
       filter expr(tenant_id == ^actor(:tenant_id) and user_type in [:staff, :admin])
     end

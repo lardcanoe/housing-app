@@ -71,15 +71,12 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.New do
   end
 
   def handle_event("submit", %{"form" => params}, socket) do
-    with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
-      {:noreply,
-       socket
-       |> put_flash(:info, "Successfully created the room.")
-       |> push_navigate(to: ~p"/assignments/rooms")}
-    else
-      %{source: %{valid?: false}} = ash_form ->
-        {:noreply, assign(socket, ash_form: ash_form)}
+    case AshPhoenix.Form.submit(socket.assigns.ash_form, params: params) do
+      {:ok, _app} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Successfully created the room.")
+         |> push_navigate(to: ~p"/assignments/rooms")}
 
       {:error, ash_form} ->
         {:noreply, assign(socket, ash_form: ash_form)}

@@ -77,15 +77,12 @@ defmodule HousingAppWeb.Live.Assignments.Beds.Edit do
     # TODO: Validate "data" against JSON schema of form
     params = Map.put(params, "data", payload["data"] || %{})
 
-    with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
-      {:noreply,
-       socket
-       |> put_flash(:info, "Successfully updated the bed.")
-       |> push_navigate(to: ~p"/assignments/beds")}
-    else
-      %{source: %{valid?: false}} = ash_form ->
-        {:noreply, assign(socket, ash_form: ash_form)}
+    case AshPhoenix.Form.submit(socket.assigns.ash_form, params: params) do
+      {:ok, _app} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Successfully updated the bed.")
+         |> push_navigate(to: ~p"/assignments/beds")}
 
       {:error, ash_form} ->
         {:noreply, assign(socket, ash_form: ash_form)}

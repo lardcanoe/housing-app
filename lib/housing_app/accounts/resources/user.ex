@@ -113,7 +113,8 @@ defmodule HousingApp.Accounts.User do
   end
 
   actions do
-    defaults [:read, :update]
+    # NOTE: :create is just here to make it so AshPhoenix.Form works
+    defaults [:create, :read, :update]
 
     read :get_by_id do
       argument :id, :uuid do

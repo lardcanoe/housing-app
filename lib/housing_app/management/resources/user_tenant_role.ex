@@ -63,6 +63,11 @@ defmodule HousingApp.Management.UserTenantRole do
   actions do
     defaults [:create, :read, :update, :destroy]
 
+    create :new do
+      accept [:role_id, :time_period_id, :start_at, :end_at, :user_tenant_id, :tenant_id]
+      change set_attribute(:tenant_id, actor(:tenant_id))
+    end
+
     read :list do
     end
 

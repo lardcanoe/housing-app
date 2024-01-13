@@ -39,17 +39,13 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.New do
   def handle_event("submit", %{"form" => params}, socket) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
-    with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
-         {:ok, roommate_group} <- AshPhoenix.Form.submit(ash_form),
+    with {:ok, roommate_group} <- AshPhoenix.Form.submit(socket.assigns.ash_form, params),
          {:ok, _roommate} <- add_self_to_group(roommate_group, current_user_tenant, tenant) do
       {:noreply,
        socket
        |> put_flash(:info, "Successfully created the new group.")
        |> push_navigate(to: ~p"/roommates")}
     else
-      %{source: %{valid?: false}} = ash_form ->
-        {:noreply, assign(socket, ash_form: ash_form)}
-
       {:error, ash_form} ->
         {:noreply, assign(socket, ash_form: ash_form)}
     end

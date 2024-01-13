@@ -40,15 +40,12 @@ defmodule HousingAppWeb.Live.Accounting.Products.New do
 
   def handle_event("submit", %{"form" => params}, socket) do
     # Database constraints will validate that :form_id is a valid form for the current tenant
-    with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
-      {:noreply,
-       socket
-       |> put_flash(:info, "Successfully created the product.")
-       |> push_navigate(to: ~p"/accounting/products")}
-    else
-      %{source: %{valid?: false}} = ash_form ->
-        {:noreply, assign(socket, ash_form: ash_form)}
+    case AshPhoenix.Form.submit(socket.assigns.ash_form, params: params) do
+      {:ok, _app} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Successfully created the product.")
+         |> push_navigate(to: ~p"/accounting/products")}
 
       {:error, ash_form} ->
         {:noreply, assign(socket, ash_form: ash_form)}

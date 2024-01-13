@@ -194,16 +194,12 @@ defmodule HousingAppWeb.Live.Applications.Edit do
     #     %{"title" => "Finish and submit", "step" => 7, "form_id" => "5105c01b-2cb4-4504-a4ae-fb99561d6432"}
     #   ])
 
-    with %{source: %{valid?: true}} = ash_form <- AshPhoenix.Form.validate(socket.assigns.ash_form, params),
-         {:ok, _app} <- AshPhoenix.Form.submit(ash_form) do
-      {:noreply,
-       socket
-       |> put_flash(:info, "Successfully updated the application.")
-       |> push_navigate(to: ~p"/applications")}
-    else
-      %{source: %{valid?: false}} = ash_form ->
-        IO.inspect(ash_form.source)
-        {:noreply, assign(socket, ash_form: ash_form)}
+    case AshPhoenix.Form.submit(socket.assigns.ash_form, params: params) do
+      {:ok, _app} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Successfully updated the application.")
+         |> push_navigate(to: ~p"/applications")}
 
       {:error, ash_form} ->
         IO.inspect(ash_form.source)

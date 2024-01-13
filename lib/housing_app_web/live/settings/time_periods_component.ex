@@ -59,10 +59,6 @@ defmodule HousingAppWeb.Components.TimePeriodsForm do
     """
   end
 
-  def mount(socket) do
-    {:ok, assign(socket, tp_form: nil, time_periods: [])}
-  end
-
   def update(%{current_user_tenant: current_user_tenant, current_tenant: tenant}, socket) do
     {:ok,
      assign(socket,
