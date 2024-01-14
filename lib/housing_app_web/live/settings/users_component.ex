@@ -91,12 +91,36 @@ defmodule HousingAppWeb.Components.Settings.User do
             <div class="w-full">
               <.input type="select" options={@time_periods} field={role_form[:time_period_id]} label="Time Period" />
             </div>
-            <div :if={is_nil(role_form[:time_period_id].value)} class="w-full">
-              <.input type="date" field={role_form[:start_at]} label="Start At" />
-            </div>
-            <div :if={is_nil(role_form[:time_period_id].value)} class="w-full">
-              <.input type="date" field={role_form[:end_at]} label="End At" />
-            </div>
+            <%= if is_nil(role_form[:time_period_id].value) do %>
+              <div class="w-full">
+                <.input type="date" field={role_form[:start_at]} label="Start At" />
+              </div>
+              <div class="w-full">
+                <.input type="date" field={role_form[:end_at]} label="End At" />
+              </div>
+            <% else %>
+              <input type="hidden" name={role_form[:start_at].name} value={role_form[:start_at].value} />
+              <input type="hidden" name={role_form[:end_at].name} value={role_form[:end_at].value} />
+              <div class="w-full">
+                <.input
+                  type="date"
+                  name={"temp_" <> role_form[:start_at].name}
+                  value={role_form[:start_at].value}
+                  label="Start At"
+                  disabled
+                />
+              </div>
+              <div class="w-full">
+                <.input
+                  type="date"
+                  name={"temp_" <> role_form[:end_at].name}
+                  value={role_form[:end_at].value}
+                  label="End At"
+                  disabled
+                />
+              </div>
+            <% end %>
+
             <div class="pt-7">
               <.button
                 type="button"
@@ -137,7 +161,14 @@ defmodule HousingAppWeb.Components.Settings.User do
   def update(params, socket) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = params
 
-    time_period_options = current_user_tenant |> time_periods(tenant) |> Enum.map(&{&1.name, &1.id})
+    tps = time_periods(current_user_tenant, tenant)
+
+    time_period_options = Enum.map(tps, &{&1.name, &1.id})
+
+    time_period_dates =
+      Enum.reduce(tps, %{}, fn tp, acc ->
+        Map.put(acc, tp.id, {tp.start_at, tp.end_at})
+      end)
 
     {:ok,
      socket
@@ -146,6 +177,7 @@ defmodule HousingAppWeb.Components.Settings.User do
        form_action: :create,
        user_types: user_type_options(),
        time_periods: [{"Custom", nil}] ++ time_period_options,
+       time_period_dates: time_period_dates,
        user_tenants: user_tenants(current_user_tenant),
        roles: roles(current_user_tenant, tenant),
        user_form: new_user_form()
@@ -154,6 +186,53 @@ defmodule HousingAppWeb.Components.Settings.User do
 
   def handle_event("validate", %{"_target" => ["reset"]}, socket) do
     {:noreply, assign(socket, user_form: new_user_form(), form_action: :create)}
+  end
+
+  def handle_event(
+        "validate",
+        %{"_target" => ["u_form", "user_tenant_roles", role_index, "time_period_id"], "u_form" => params},
+        socket
+      ) do
+    %{time_period_dates: time_period_dates, user_form: user_form} = socket.assigns
+
+    time_period_id = get_in(params, ["user_tenant_roles", role_index, "time_period_id"])
+
+    main_params =
+      if time_period_id != "" do
+        {start_at, end_at} = Map.get(time_period_dates, time_period_id)
+
+        params
+        |> put_in(["user_tenant_roles", role_index, "start_at"], start_at)
+        |> put_in(["user_tenant_roles", role_index, "end_at"], end_at)
+      else
+        params
+        |> put_in(["user_tenant_roles", role_index, "start_at"], nil)
+        |> put_in(["user_tenant_roles", role_index, "end_at"], nil)
+      end
+
+    user_form = AshPhoenix.Form.validate(user_form, main_params)
+
+    # Doesn't work without the above validate also
+    # Leaving for future reference
+    # https://elixirforum.com/t/update-fields-of-a-nested-ashphoenix-form-on-change-of-a-different-field/60954/3
+    # path = "u_form[user_tenant_roles][#{role_index}]"
+    # user_form =
+    #   AshPhoenix.Form.update_form(socket.assigns.user_form, path, fn nested_form ->
+    #     params =
+    #       if time_period_id != "" do
+    #         Map.merge(nested_form.params, %{
+    #           "time_period_id" => time_period_id,
+    #           "start_at" => Date.from_iso8601!("2019-01-01"),
+    #           "end_at" => Date.from_iso8601!("2020-01-01")
+    #         })
+    #       else
+    #         Map.merge(nested_form.params, %{"time_period_id" => nil, "start_at" => nil, "end_at" => nil})
+    #       end
+
+    #     AshPhoenix.Form.validate(nested_form, params)
+    #   end)
+
+    {:noreply, assign(socket, user_form: user_form)}
   end
 
   def handle_event("validate", %{"u_form" => params}, socket) do
@@ -214,9 +293,6 @@ defmodule HousingAppWeb.Components.Settings.User do
   def handle_event("submit", %{"u_form" => params}, %{assigns: %{user_form: %{source: %{action: :update}}}} = socket) do
     %{user_form: user_form, current_user_tenant: current_user_tenant} = socket.assigns
 
-    # TODO: If they change from custom back to a time period, we need to reset the start_at and end_at fields
-    #       Pattern match on the validate event to know when they change, and alter accordingly
-
     case AshPhoenix.Form.submit(user_form, params: params) do
       {:ok, _app} ->
         {:noreply,
@@ -234,7 +310,7 @@ defmodule HousingAppWeb.Components.Settings.User do
 
   # Create
   def handle_event("submit", %{"u_form" => data}, socket) do
-    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+    %{current_user_tenant: current_user_tenant} = socket.assigns
 
     case HousingApp.Accounts.Service.invite_user_to_tenant(data["email"], data["name"], data["user_type"],
            actor: current_user_tenant
