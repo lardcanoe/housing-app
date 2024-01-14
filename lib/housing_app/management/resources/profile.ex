@@ -95,9 +95,14 @@ defmodule HousingApp.Management.Profile do
   end
 
   actions do
-    # No :read because we always need to filter data
     # No :update because we need :submit logic to deal with merging santized data
     defaults [:create, :destroy]
+
+    read :read do
+      primary? true
+      prepare &HousingApp.Checks.FilterData.filter_records/2
+      filter expr(is_nil(archived_at))
+    end
 
     read :list do
       prepare build(load: [user_tenant: [:user]])
