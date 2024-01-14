@@ -129,6 +129,10 @@ defmodule HousingAppWeb.Router do
         scope "/roommates", Roommates do
           live "/", Index, :index
         end
+
+        scope "/roles", Roles do
+          live "/", Index, :index
+        end
       end
 
       scope "/notifications", Live.Notifications do

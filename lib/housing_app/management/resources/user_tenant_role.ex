@@ -101,6 +101,12 @@ defmodule HousingApp.Management.UserTenantRole do
     define :get_by_id, args: [:id]
   end
 
+  # FUTURE: validate all date permutations
+  validations do
+    # validate compare(:end_at, greater_than: :start_at)
+    # FUTURE: , message: "must be a date after %{start_at}."
+  end
+
   multitenancy do
     strategy :context
   end

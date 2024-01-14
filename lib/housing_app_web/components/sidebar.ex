@@ -277,6 +277,14 @@ defmodule HousingAppWeb.Components.Sidebar do
                   Roommates
                 </.link>
               </li>
+              <li>
+                <.link
+                  navigate={~p"/assignments/roles"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Roles
+                </.link>
+              </li>
             </ul>
           </li>
           <!-- Students -->
