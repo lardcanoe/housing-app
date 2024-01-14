@@ -69,6 +69,7 @@ defmodule HousingApp.Management.UserTenantRole do
     end
 
     read :list do
+      prepare build(load: [:role, :time_period, user_tenant: [:user]])
     end
 
     read :list_my_active do
