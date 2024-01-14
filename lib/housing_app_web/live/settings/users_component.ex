@@ -71,15 +71,23 @@ defmodule HousingAppWeb.Components.Settings.User do
         <div class="max-w-md">
           <.input :if={@form_action == :create} field={@user_form[:name]} label="Name" />
           <.input :if={@form_action == :create} type="email" field={@user_form[:email]} label="Email" />
+          <.input :if={@form_action == :update} field={@user_form[:user_id]} label="User.Id" disabled />
+          <.input :if={@form_action == :update} field={@user_form[:id]} label="UserTenant.Id" disabled />
           <.input type="select" options={@user_types} field={@user_form[:user_type]} label="User Type" />
         </div>
 
         <h3 :if={Enum.any?(@roles) && @form_action == :update} class="mb-4 text-lg font-bold text-gray-900 dark:text-white">
           Roles
         </h3>
+        <p
+          :if={@user_form[:user_type].value == :admin && @form_action == :update}
+          class="text-gray-900 dark:text-white pb-4"
+        >
+          <span class="font-bold">Note:</span> You can only add roles to staff users.
+        </p>
         <.inputs_for
           :let={role_form}
-          :if={Enum.any?(@roles) && @form_action == :update}
+          :if={Enum.any?(@roles) && @form_action == :update && @user_form[:user_type].value != :admin}
           field={@user_form[:user_tenant_roles]}
         >
           <input type="hidden" name={role_form[:tenant_id].name} value={role_form[:tenant_id].value} />
@@ -136,7 +144,7 @@ defmodule HousingAppWeb.Components.Settings.User do
         </.inputs_for>
 
         <:actions>
-          <%= if not is_nil(@user_form[:user_tenant_roles].value) && Enum.any?(@roles) do %>
+          <%= if not is_nil(@user_form[:user_tenant_roles].value) && Enum.any?(@roles) && @user_form[:user_type].value != :admin do %>
             <.button
               type="button"
               phx-click="add-role"

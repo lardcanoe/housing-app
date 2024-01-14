@@ -71,6 +71,17 @@ defmodule HousingApp.Management.UserTenantRole do
     read :list do
     end
 
+    read :list_my_active do
+      prepare build(load: [:role])
+
+      filter expr(
+               user_tenant_id == ^actor(:id) and
+                 is_nil(archived_at) and
+                 (is_nil(end_at) or end_at > ^Date.utc_today()) and
+                 (is_nil(start_at) or start_at <= ^Date.utc_today())
+             )
+    end
+
     read :get_by_id do
       argument :id, :uuid do
         allow_nil? false
@@ -86,6 +97,7 @@ defmodule HousingApp.Management.UserTenantRole do
     define_for HousingApp.Management
 
     define :list
+    define :list_my_active
     define :get_by_id, args: [:id]
   end
 
