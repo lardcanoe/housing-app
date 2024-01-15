@@ -1,5 +1,7 @@
 import { mount } from '../react/query-builder';
 
+window.previousQuery = null;
+
 export default {
     mounted() {
         this.updated();
@@ -25,6 +27,10 @@ export default {
         })
     },
     queryChange(q) {
+        if (window.previousQuery === JSON.stringify(q)) {
+            return;
+        }
+        window.previousQuery = JSON.stringify(q);
         this.pushEventTo(this.el, 'query-changed', { q });
     },
     destroyed() {

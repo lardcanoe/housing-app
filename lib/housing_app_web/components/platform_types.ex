@@ -20,7 +20,8 @@ defmodule HousingAppWeb.PlatformTypes do
   ]
 
   @resource_options [
-    {"Profile", :profile}
+    {"Profile", :profile},
+    {"Booking", :booking}
   ]
 
   @role_resource_options [

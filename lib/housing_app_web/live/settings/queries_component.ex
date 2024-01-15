@@ -186,7 +186,15 @@ defmodule HousingAppWeb.Components.Settings.Queries do
   end
 
   def update(params, socket) do
-    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = params
+    {:ok,
+     socket
+     |> assign(params)
+     |> load_resource_fields("profile")
+     |> reset_query_fields()}
+  end
+
+  defp load_resource_fields(socket, "profile") do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     case HousingApp.Management.Service.get_profile_form(actor: current_user_tenant, tenant: tenant) do
       {:ok, profile_form} ->
@@ -198,16 +206,43 @@ defmodule HousingAppWeb.Components.Settings.Queries do
             %{name: k, label: v["title"] || String.capitalize(k)}
           end)
 
-        {:ok,
-         socket
-         |> assign(params)
-         |> assign(resource_fields: fields)
-         |> assign(fields: Jason.encode!(fields))
-         |> reset_query_fields()}
+        socket
+        |> assign(resource_fields: fields)
+        |> assign(fields: Jason.encode!(fields))
 
       _ ->
-        assign(socket, params)
+        socket
     end
+  end
+
+  defp load_resource_fields(socket, "booking") do
+    fields =
+      resource_fields(HousingApp.Assignments.Booking)
+
+    socket
+    |> assign(resource_fields: fields)
+    |> assign(fields: Jason.encode!(fields))
+  end
+
+  defp resource_fields(resource, path \\ []) do
+    resource_fields =
+      resource
+      |> Ash.Resource.Info.public_aggregates()
+      |> Enum.concat(Ash.Resource.Info.public_calculations(resource))
+      |> Enum.concat(Ash.Resource.Info.public_attributes(resource))
+      |> Enum.map(&%{name: Enum.join(path ++ [&1.name], "."), label: Enum.join(path ++ [&1.name], " / ")})
+
+    relations =
+      resource
+      |> Ash.Resource.Info.public_relationships()
+      |> Enum.filter(&(&1.type == :belongs_to && &1.name != :tenant && &1.name != :user_tenant))
+      |> Enum.flat_map(&resource_fields(&1.destination, path ++ [&1.name]))
+
+    # IO.inspect(resource)
+    # IO.inspect(Enum.concat(relations, resource_fields))
+    # IO.puts("--------")
+
+    Enum.concat(relations, resource_fields)
   end
 
   defp reset_query_fields(socket) do
@@ -216,7 +251,8 @@ defmodule HousingAppWeb.Components.Settings.Queries do
 
     first_field = hd(resource_fields)
 
-    assign(socket,
+    socket
+    |> assign(
       queries: load_queries(current_user_tenant, tenant),
       query_form:
         management_form_for_create(HousingApp.Management.CommonQuery, :create,
@@ -226,6 +262,7 @@ defmodule HousingAppWeb.Components.Settings.Queries do
         ),
       query: Jason.encode!(%{combinator: "", rules: [%{field: first_field[:name], operator: "=", value: ""}]})
     )
+    |> load_resource_fields("profile")
   end
 
   def handle_event("query-changed", %{"q" => q}, socket) do
@@ -243,12 +280,19 @@ defmodule HousingAppWeb.Components.Settings.Queries do
         query = ash_filter_to_react_query(cq.filter)
 
         {:noreply,
-         assign(socket,
+         socket
+         |> assign(
            query_form:
              management_form_for_update(cq, :update, as: "cq_form", actor: current_user_tenant, tenant: tenant),
            query: Jason.encode!(query)
-         )}
+         )
+         |> load_resource_fields(Atom.to_string(cq.resource))}
     end
+  end
+
+  def handle_event("validate", %{"_target" => ["cq_form", "resource"], "cq_form" => params}, socket) do
+    query_form = AshPhoenix.Form.validate(socket.assigns.query_form, params)
+    {:noreply, socket |> assign(query_form: query_form) |> load_resource_fields(params["resource"])}
   end
 
   def handle_event("validate", _data, socket) do
@@ -258,7 +302,9 @@ defmodule HousingAppWeb.Components.Settings.Queries do
   def handle_event("submit", %{"cq_form" => data}, socket) do
     %{query_form: query_form} = socket.assigns
 
-    data = Map.put(data, "filter", socket.assigns.query |> Jason.decode!() |> react_query_to_ash_filter())
+    query = Jason.decode!(socket.assigns.query)
+    ash_filter = react_query_to_ash_filter(data["resource"], query)
+    data = Map.put(data, "filter", ash_filter)
 
     case AshPhoenix.Form.submit(query_form, params: data) do
       {:ok, _cq} ->
@@ -333,13 +379,15 @@ defmodule HousingAppWeb.Components.Settings.Queries do
     HousingApp.Management.CommonQuery.list!(actor: current_user_tenant, tenant: tenant)
   end
 
-  defp react_query_to_ash_filter(query, combinator \\ "and") do
+  defp react_query_to_ash_filter(resource, query, combinator \\ "and")
+
+  defp react_query_to_ash_filter("profile", query, combinator) do
     predicates =
       query
       |> Map.get("rules")
       |> Enum.reduce(%{}, fn rule, acc ->
         case rule["operator"] do
-          "=" -> Map.put(acc, rule["field"], rule["value"])
+          "=" -> Map.put(acc, rule["field"], parse_value(rule["value"]))
           _ -> acc
         end
       end)
@@ -347,15 +395,56 @@ defmodule HousingAppWeb.Components.Settings.Queries do
     Map.put(%{}, combinator, predicates)
   end
 
+  defp react_query_to_ash_filter(_resource, query, combinator) do
+    predicates =
+      query
+      |> Map.get("rules")
+      |> Enum.reduce(%{}, fn rule, acc ->
+        case rule["operator"] do
+          "=" -> convert_filter(acc, String.split(rule["field"], "."), parse_value(rule["value"]))
+          _ -> acc
+        end
+      end)
+
+    Map.put(%{}, combinator, predicates)
+  end
+
+  defp parse_value(val) when is_integer(val), do: val
+
+  defp parse_value(val) do
+    case Integer.parse(val) do
+      {num, ""} -> num
+      {_, _rest} -> val
+      :error -> val
+    end
+  end
+
+  defp convert_filter(map, [field | []], value) do
+    Map.put(map, field, value)
+  end
+
+  defp convert_filter(map, [field | remaining], value) do
+    HousingApp.Utils.MapUtil.deep_merge(map, %{field => convert_filter(%{}, remaining, value)})
+  end
+
   defp ash_filter_to_react_query(%{"and" => predicates}) do
-    # dbg(filter)
-    # %{"and" => %{"major" => "EE"}}
+    # Convert from: %{"and" => %{"major" => "EE"}}
 
     rules =
-      Enum.map(predicates, fn {k, v} ->
-        %{field: k, operator: "=", value: v, id: HousingApp.Utils.Random.Token.generate()}
+      Enum.flat_map(predicates, fn {k, v} ->
+        predicate_to_query(k, v)
       end)
 
     %{combinator: "and", id: HousingApp.Utils.Random.Token.generate(), rules: rules}
+  end
+
+  defp predicate_to_query(field, %{} = value) do
+    Enum.flat_map(value, fn {k, v} ->
+      predicate_to_query("#{field}.#{k}", v)
+    end)
+  end
+
+  defp predicate_to_query(field, value) do
+    [%{field: field, operator: "=", value: value, id: HousingApp.Utils.Random.Token.generate()}]
   end
 end

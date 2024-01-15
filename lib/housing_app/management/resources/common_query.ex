@@ -19,7 +19,7 @@ defmodule HousingApp.Management.CommonQuery do
     end
 
     attribute :resource, :atom do
-      constraints one_of: [:profile]
+      constraints one_of: [:profile, :booking]
       allow_nil? false
     end
 
