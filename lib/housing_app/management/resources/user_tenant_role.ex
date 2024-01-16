@@ -97,6 +97,7 @@ defmodule HousingApp.Management.UserTenantRole do
   code_interface do
     define_for HousingApp.Management
 
+    define :new
     define :list
     define :list_my_active
     define :get_by_id, args: [:id]

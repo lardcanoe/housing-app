@@ -128,6 +128,12 @@ defmodule HousingApp.Accounts.UserTenant do
       filter expr(tenant_id == ^actor(:tenant_id) and user_type in [:staff, :admin])
     end
 
+    read :list_students do
+      prepare build(load: [:user])
+
+      filter expr(tenant_id == ^actor(:tenant_id) and user_type == :user)
+    end
+
     read :get_by_id do
       argument :id, :uuid do
         allow_nil? false
@@ -181,6 +187,7 @@ defmodule HousingApp.Accounts.UserTenant do
     define :get_for_user_of_my_tenant, args: [:user_id]
     define :find_for_my_user
     define :list_staff
+    define :list_students
     define :get_by_id, args: [:id]
     define :get_by_api_key, args: [:key]
     define :generate_api_key

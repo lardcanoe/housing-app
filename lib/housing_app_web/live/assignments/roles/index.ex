@@ -16,12 +16,20 @@ defmodule HousingAppWeb.Live.Assignments.Roles.Index do
       current_tenant={@current_tenant}
     >
       <:actions>
+        <.link navigate={~p"/assignments/roles/new?for=student"}>
+          <button
+            type="button"
+            class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
+          >
+            <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add student assignment
+          </button>
+        </.link>
         <.link navigate={~p"/assignments/roles/new"}>
           <button
             type="button"
             class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
           >
-            <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add role assignment
+            <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add staff assignment
           </button>
         </.link>
       </:actions>

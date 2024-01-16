@@ -70,7 +70,7 @@ defmodule HousingApp.Assignments.RoleQuery do
   end
 
   code_interface do
-    define_for HousingApp.Management
+    define_for HousingApp.Assignments
 
     define :new
     define :list
