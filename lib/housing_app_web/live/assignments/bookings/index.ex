@@ -15,7 +15,14 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
       drawer={HousingAppWeb.Components.Drawer.Booking}
       current_user_tenant={@current_user_tenant}
       current_tenant={@current_tenant}
+      filter_changes={true}
     >
+      <:actions>
+        <.data_grid_quick_filter />
+      </:actions>
+      <:actions>
+        <.common_query_filter queries={@queries} query_id={@query_id} />
+      </:actions>
       <:actions>
         <.link navigate={~p"/assignments/bookings/new"}>
           <button
@@ -31,7 +38,31 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, loading: true, count: 0, sidebar: :assignments, page_title: "Bookings")}
+    {:ok,
+     socket
+     |> assign(query_id: nil, loading: true, count: 0, sidebar: :assignments, page_title: "Bookings")
+     |> load_async_assigns()}
+  end
+
+  def handle_params(%{"filter" => filter}, _uri, socket) do
+    {:noreply, assign(socket, filter: filter |> URI.decode() |> Jason.decode!())}
+  end
+
+  def handle_params(_params, _uri, socket) do
+    {:noreply, assign(socket, filter: nil)}
+  end
+
+  defp load_async_assigns(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    assign_async(socket, [:queries], fn ->
+      queries =
+        [actor: current_user_tenant, tenant: tenant]
+        |> HousingApp.Management.CommonQuery.list!()
+        |> Enum.filter(&(&1.resource == :booking))
+
+      {:ok, %{queries: [%{id: nil, name: "Default"}] ++ queries}}
+    end)
   end
 
   def handle_event("view-row", %{"id" => id}, socket) do
@@ -43,34 +74,87 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
     {:noreply, push_navigate(socket, to: ~p"/assignments/bookings/#{id}/edit")}
   end
 
+  def handle_event("change-query", %{"query-id" => "default"}, %{assigns: %{query_id: nil}} = socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("change-query", %{"query-id" => "default"}, socket) do
+    {:noreply, socket |> assign(query_id: nil) |> push_event("ag-grid:refresh", %{})}
+  end
+
+  def handle_event("change-query", %{"query-id" => value}, %{assigns: %{query_id: query_id}} = socket)
+      when query_id == value do
+    {:noreply, socket}
+  end
+
+  def handle_event("change-query", %{"query-id" => value}, socket) do
+    {:noreply, socket |> assign(query_id: value) |> push_event("ag-grid:refresh", %{})}
+  end
+
+  def handle_event("filter-changed", %{"filter" => filter}, socket) do
+    {:noreply, push_patch(socket, to: ~p"/assignments/bookings?filter=#{filter |> Jason.encode!() |> URI.encode()}")}
+  end
+
   def handle_event("load-data", %{}, socket) do
+    res = load_data(socket)
+
+    {:reply, res, assign(socket, loading: false, count: length(res.data))}
+  end
+
+  defp load_data(socket) do
+    %{
+      columns: load_columns(socket),
+      data: load_bookings(socket),
+      filter: socket.assigns.filter
+    }
+  end
+
+  defp load_bookings(socket) do
+    socket
+    |> filter_bookings()
+    |> Enum.sort_by(& &1.profile.user_tenant.user.name)
+    |> Enum.map(fn b ->
+      %{
+        "id" => b.id,
+        "profile" => b.profile.user_tenant.user.name,
+        "building" => b.bed.room.building.name,
+        "room" => b.bed.room.name,
+        "bed" => b.bed.name,
+        "rate" => "#{b.product.name} ($#{b.product.rate})",
+        "submission" => b.application_submission_id || "",
+        "submission_link" =>
+          if(b.application_submission_id,
+            do: ~p"/applications/#{b.application_submission.application_id}/submissions/#{b.application_submission_id}",
+            else: ""
+          ),
+        "start_at" => b.start_at,
+        "end_at" => b.end_at,
+        "data" => b.data,
+        "actions" => [["Edit"], ["View"]]
+      }
+    end)
+  end
+
+  defp filter_bookings(%{assigns: %{query_id: query_id, queries: %{ok?: true, result: queries}}} = socket)
+       when not is_nil(query_id) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
-    bookings =
-      [actor: current_user_tenant, tenant: tenant]
-      |> HousingApp.Assignments.Booking.list!()
-      |> Enum.sort_by(& &1.profile.user_tenant.user.name)
-      |> Enum.map(fn b ->
-        %{
-          "id" => b.id,
-          "profile" => b.profile.user_tenant.user.name,
-          "building" => b.bed.room.building.name,
-          "room" => b.bed.room.name,
-          "bed" => b.bed.name,
-          "rate" => "#{b.product.name} ($#{b.product.rate})",
-          "submission" => b.application_submission_id || "",
-          "submission_link" =>
-            if(b.application_submission_id,
-              do:
-                ~p"/applications/#{b.application_submission.application_id}/submissions/#{b.application_submission_id}",
-              else: ""
-            ),
-          "start_at" => b.start_at,
-          "end_at" => b.end_at,
-          "data" => b.data,
-          "actions" => [["Edit"], ["View"]]
-        }
-      end)
+    query = Enum.find(queries, &(&1.id == query_id))
+
+    HousingApp.Assignments.Service.filter_resource(HousingApp.Assignments.Booking, :list, query,
+      actor: current_user_tenant,
+      tenant: tenant
+    )
+  end
+
+  defp filter_bookings(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+    HousingApp.Assignments.Booking.list!(actor: current_user_tenant, tenant: tenant)
+  end
+
+  # Reload as needed instead of keeping in memory during life cycle of page
+  defp load_columns(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     form_columns =
       case HousingApp.Management.Service.get_booking_form(actor: current_user_tenant, tenant: tenant) do
@@ -83,36 +167,29 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
           []
       end
 
-    columns =
+    [
+      %{field: "profile", minWidth: 160, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+      %{field: "id", minWidth: 120, pinned: "left", hide: true},
+      %{field: "building"},
+      %{field: "room"},
+      %{field: "bed"},
+      %{field: "rate"},
+      %{field: "start_at", headerName: "Start", type: "dateColumn"},
+      %{field: "end_at", headerName: "End", type: "dateColumn"},
+      %{field: "submission", headerName: "Submission", cellRenderer: "link"}
+    ] ++
+      form_columns ++
       [
-        %{field: "profile", minWidth: 160, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
-        %{field: "id", minWidth: 120, pinned: "left", hide: true},
-        %{field: "building"},
-        %{field: "room"},
-        %{field: "bed"},
-        %{field: "rate"},
-        %{field: "start_at", headerName: "Start", type: "dateColumn"},
-        %{field: "end_at", headerName: "End", type: "dateColumn"},
-        %{field: "submission", headerName: "Submission", cellRenderer: "link"}
-      ] ++
-        form_columns ++
-        [
-          %{
-            field: "actions",
-            pinned: "right",
-            minWidth: 120,
-            maxWidth: 120,
-            filter: false,
-            editable: false,
-            sortable: false,
-            resizable: false
-          }
-        ]
-
-    {:reply,
-     %{
-       columns: columns,
-       data: bookings
-     }, assign(socket, loading: false, count: length(bookings))}
+        %{
+          field: "actions",
+          pinned: "right",
+          minWidth: 120,
+          maxWidth: 120,
+          filter: false,
+          editable: false,
+          sortable: false,
+          resizable: false
+        }
+      ]
   end
 end

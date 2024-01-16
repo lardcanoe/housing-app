@@ -147,4 +147,58 @@ defmodule HousingAppWeb.Components.DataGrid do
     </div>
     """
   end
+
+  def data_grid_quick_filter(assigns) do
+    ~H"""
+    <input
+      type="text"
+      id="datagrid-quickfilter"
+      class="block w-52 p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+      placeholder="Filter results..."
+    />
+    """
+  end
+
+  attr :queries, :list, required: true
+  attr :query_id, :string, required: true
+
+  def common_query_filter(assigns) do
+    ~H"""
+    <div class={["relative", not @queries.ok? or (length(@queries.result) <= 1 && "hidden")]}>
+      <button
+        type="button"
+        id="dropdownQueries"
+        data-dropdown-toggle="dropdownQueriesMenu"
+        class="w-full md:w-auto flex items-center justify-center py-2 px-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+      >
+        <.icon name="hero-chevron-down-solid" class="w-4 h-4 mr-2" /> Apply Query
+      </button>
+      <!-- Dropdown menu -->
+      <div
+        id="dropdownQueriesMenu"
+        class="hidden z-10 absolute list-none -translate-x-1/2 top-10 -left-32 w-48 bg-white divide-y divide-gray-100 rounded-lg dark:bg-gray-700 dark:divide-gray-600"
+      >
+        <ul class="p-3 space-y-3 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownQueries">
+          <%= if @queries.ok? && @queries.result do %>
+            <li :for={q <- @queries.result}>
+              <div class="flex items-center" phx-click="change-query" phx-value-query-id={q.id || "default"}>
+                <input
+                  id={"selected-query-#{q.id || "default"}"}
+                  type="radio"
+                  value={q.id}
+                  name="selected-query"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                  {if(@query_id == q.id, do: [{"checked",""}], else: [])}
+                />
+                <label for="selected-query" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                  <%= q.name %>
+                </label>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+    """
+  end
 end

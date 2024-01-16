@@ -78,6 +78,7 @@ defmodule HousingApp.Management.Service do
     |> HousingApp.Management.read!()
   end
 
+  # TODO: Should only do filter_to_fragments for profile data field
   def filter_resource(resource, read_action, common_query, actor: actor, tenant: tenant) do
     resource
     |> Ash.Query.for_read(read_action, %{}, actor: actor, tenant: tenant)

@@ -3,8 +3,14 @@ defmodule HousingApp.Utils.Filters do
 
   # alias HousingApp.Utils.Random.Token
 
-  def ash_filter_to_react_query(%{"and" => predicates}) do
+  def ash_filter_to_react_query(%{} = filter) do
     # Convert from: %{"and" => %{"major" => "EE"}}
+    {combinator, predicates} =
+      case filter do
+        %{"" => predicates} -> {"and", predicates}
+        %{"and" => predicates} -> {"and", predicates}
+        %{"or" => predicates} -> {"or", predicates}
+      end
 
     rules =
       Enum.flat_map(predicates, fn {k, v} ->
@@ -12,7 +18,7 @@ defmodule HousingApp.Utils.Filters do
       end)
 
     # FUTURE: , id: Token.generate()
-    %{combinator: "and", rules: rules}
+    %{combinator: combinator, rules: rules}
   end
 
   defp predicate_to_query(field, %{} = value) do
