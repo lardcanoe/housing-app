@@ -277,7 +277,7 @@ defmodule HousingAppWeb.Components.Settings.Queries do
         {:noreply, socket}
 
       cq ->
-        query = ash_filter_to_react_query(cq.filter)
+        query = HousingApp.Utils.Filters.ash_filter_to_react_query(cq.filter)
 
         {:noreply,
          socket
@@ -303,7 +303,7 @@ defmodule HousingAppWeb.Components.Settings.Queries do
     %{query_form: query_form} = socket.assigns
 
     query = Jason.decode!(socket.assigns.query)
-    ash_filter = react_query_to_ash_filter(data["resource"], query)
+    ash_filter = HousingApp.Utils.Filters.react_query_to_ash_filter(data["resource"], query)
     data = Map.put(data, "filter", ash_filter)
 
     case AshPhoenix.Form.submit(query_form, params: data) do
@@ -377,74 +377,5 @@ defmodule HousingAppWeb.Components.Settings.Queries do
 
   defp load_queries(current_user_tenant, tenant) do
     HousingApp.Management.CommonQuery.list!(actor: current_user_tenant, tenant: tenant)
-  end
-
-  defp react_query_to_ash_filter(resource, query, combinator \\ "and")
-
-  defp react_query_to_ash_filter("profile", query, combinator) do
-    predicates =
-      query
-      |> Map.get("rules")
-      |> Enum.reduce(%{}, fn rule, acc ->
-        case rule["operator"] do
-          "=" -> Map.put(acc, rule["field"], parse_value(rule["value"]))
-          _ -> acc
-        end
-      end)
-
-    Map.put(%{}, combinator, predicates)
-  end
-
-  defp react_query_to_ash_filter(_resource, query, combinator) do
-    predicates =
-      query
-      |> Map.get("rules")
-      |> Enum.reduce(%{}, fn rule, acc ->
-        case rule["operator"] do
-          "=" -> convert_filter(acc, String.split(rule["field"], "."), parse_value(rule["value"]))
-          _ -> acc
-        end
-      end)
-
-    Map.put(%{}, combinator, predicates)
-  end
-
-  defp parse_value(val) when is_integer(val), do: val
-
-  defp parse_value(val) do
-    case Integer.parse(val) do
-      {num, ""} -> num
-      {_, _rest} -> val
-      :error -> val
-    end
-  end
-
-  defp convert_filter(map, [field | []], value) do
-    Map.put(map, field, value)
-  end
-
-  defp convert_filter(map, [field | remaining], value) do
-    HousingApp.Utils.MapUtil.deep_merge(map, %{field => convert_filter(%{}, remaining, value)})
-  end
-
-  defp ash_filter_to_react_query(%{"and" => predicates}) do
-    # Convert from: %{"and" => %{"major" => "EE"}}
-
-    rules =
-      Enum.flat_map(predicates, fn {k, v} ->
-        predicate_to_query(k, v)
-      end)
-
-    %{combinator: "and", id: HousingApp.Utils.Random.Token.generate(), rules: rules}
-  end
-
-  defp predicate_to_query(field, %{} = value) do
-    Enum.flat_map(value, fn {k, v} ->
-      predicate_to_query("#{field}.#{k}", v)
-    end)
-  end
-
-  defp predicate_to_query(field, value) do
-    [%{field: field, operator: "=", value: value, id: HousingApp.Utils.Random.Token.generate()}]
   end
 end
