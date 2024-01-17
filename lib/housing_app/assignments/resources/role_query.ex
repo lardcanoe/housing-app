@@ -11,6 +11,7 @@ defmodule HousingApp.Assignments.RoleQuery do
     update_timestamp :updated_at
 
     attribute :archived_at, :utc_datetime_usec do
+      private? true
       allow_nil? true
     end
   end
