@@ -62,15 +62,7 @@ defmodule HousingAppWeb.Components.Settings.Queries do
           {if(@query_form.source.action == :update, do: [{"disabled", ""}], else: [])}
         />
 
-        <div
-          id="query-builder"
-          name="cq_form[filters]"
-          class="mb-4"
-          phx-hook="QueryBuilder"
-          phx-update="ignore"
-          data-query={@query}
-          data-fields={@fields}
-        />
+        <div id="query-builder" name="cq_form[filters]" class="mb-4" phx-hook="QueryBuilder" phx-update="ignore" />
 
         <:actions>
           <.button>
@@ -206,9 +198,7 @@ defmodule HousingAppWeb.Components.Settings.Queries do
             %{name: k, label: v["title"] || String.capitalize(k)}
           end)
 
-        socket
-        |> assign(resource_fields: fields)
-        |> assign(fields: Jason.encode!(fields))
+        assign(socket, resource_fields: fields)
 
       _ ->
         socket
@@ -219,9 +209,7 @@ defmodule HousingAppWeb.Components.Settings.Queries do
     fields =
       resource_fields(HousingApp.Assignments.Booking)
 
-    socket
-    |> assign(resource_fields: fields)
-    |> assign(fields: Jason.encode!(fields))
+    assign(socket, resource_fields: fields)
   end
 
   defp resource_fields(resource, path \\ []) do
@@ -260,13 +248,18 @@ defmodule HousingAppWeb.Components.Settings.Queries do
           actor: current_user_tenant,
           tenant: tenant
         ),
-      query: Jason.encode!(%{combinator: "", rules: [%{field: first_field[:name], operator: "=", value: ""}]})
+      query: %{combinator: "", rules: [%{field: first_field[:name], operator: "=", value: ""}]}
     )
     |> load_resource_fields("profile")
   end
 
+  def handle_event("load-query", _params, socket) do
+    %{query: query, resource_fields: resource_fields} = socket.assigns
+    {:reply, %{query: query, fields: resource_fields}, socket}
+  end
+
   def handle_event("query-changed", %{"q" => q}, socket) do
-    {:noreply, assign(socket, query: Jason.encode!(q))}
+    {:noreply, assign(socket, query: q)}
   end
 
   def handle_event("edit", %{"id" => id}, socket) do
@@ -284,9 +277,10 @@ defmodule HousingAppWeb.Components.Settings.Queries do
          |> assign(
            query_form:
              management_form_for_update(cq, :update, as: "cq_form", actor: current_user_tenant, tenant: tenant),
-           query: Jason.encode!(query)
+           query: query
          )
-         |> load_resource_fields(Atom.to_string(cq.resource))}
+         |> load_resource_fields(Atom.to_string(cq.resource))
+         |> push_event("query-builder:refresh", %{})}
     end
   end
 
@@ -300,15 +294,14 @@ defmodule HousingAppWeb.Components.Settings.Queries do
   end
 
   def handle_event("submit", %{"cq_form" => data}, socket) do
-    %{query_form: query_form} = socket.assigns
+    %{query_form: query_form, query: query} = socket.assigns
 
-    query = Jason.decode!(socket.assigns.query)
     ash_filter = HousingApp.Utils.Filters.react_query_to_ash_filter(data["resource"], query)
     data = Map.put(data, "filter", ash_filter)
 
     case AshPhoenix.Form.submit(query_form, params: data) do
       {:ok, _cq} ->
-        {:noreply, reset_query_fields(socket)}
+        {:noreply, socket |> reset_query_fields() |> push_event("query-builder:refresh", %{})}
 
       {:error, query_form} ->
         dbg(query_form)

@@ -1,41 +1,35 @@
 import { mount } from '../react/query-builder';
 
-window.previousQuery = null;
-
 export default {
     mounted() {
-        this.updated();
-    },
-    updated() {
-        const initialQuery = this.el.dataset.query
-            ? JSON.parse(this.el.dataset.query)
-            : { combinator: 'and', rules: [] };
+        this.handleRefreshData = () => {
+            this.pushEventTo(this.el, "load-query", {}, (reply, _ref) => {
+                if (this.root) {
+                    this.root.unmount();
+                }
+                this.root = mount(this.el, {
+                    initialQuery: reply.query,
+                    fields: reply.fields,
+                    queryChange: (q) => { this.queryChange(q) }
+                });
+            })
+        };
 
-        const fields = this.el.dataset.fields
-            ? JSON.parse(this.el.dataset.fields)
-            : [];
+        window.addEventListener("phx:query-builder:refresh", this.handleRefreshData)
 
-        // FUTURE: THIS IS A COMPLETE HACK TO MAKE IT REFRESH!
-        if (this.root) {
-            this.root.unmount();
-        }
-
-        this.root = mount(this.el, {
-            initialQuery: initialQuery,
-            fields: fields,
-            queryChange: (q) => { this.queryChange(q) }
-        })
+        this.handleRefreshData();
     },
     queryChange(q) {
-        if (window.previousQuery === JSON.stringify(q)) {
+        if (this.previousQuery === JSON.stringify(q)) {
             return;
         }
-        window.previousQuery = JSON.stringify(q);
+        this.previousQuery = JSON.stringify(q);
         this.pushEventTo(this.el, 'query-changed', { q });
     },
     destroyed() {
         if (this.root) {
             this.root.unmount();
         }
+        window.removeEventListener("phx:query-builder:refresh", this.handleRefreshData)
     }
 };
