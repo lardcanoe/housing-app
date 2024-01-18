@@ -13,6 +13,12 @@
     </script>
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.0.0/jsoneditor.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.0.0/jsoneditor.min.js" />
     <script>
       // On page load or when changing themes, best to add inline in `head` to avoid FOUC
       if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {

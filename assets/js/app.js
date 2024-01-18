@@ -24,12 +24,20 @@ import topbar from "../vendor/topbar"
 import "flowbite/dist/flowbite.phoenix.min.js"
 import AgGrid from "./hooks/ag-grid"
 import QueryBuilder from "./hooks/query-builder"
+import JsonViewHook from "./hooks/json_view"
+import JsonEditorHook from "./hooks/json_editor"
+import JsonEditorSourceHook from "./hooks/json_editor_source"
 import './darkmode'
+
+window.json_editors = {};
 
 // FUTURE: Load hooks dynamically, https://aswinmohan.me/pagewise-js-liveview
 let Hooks = {}
 Hooks.AgGrid = AgGrid
 Hooks.QueryBuilder = QueryBuilder
+Hooks.JsonEditor = JsonEditorHook
+Hooks.JsonEditorSource = JsonEditorSourceHook
+Hooks.JsonView = JsonViewHook
 
 let localeCache = {
     locale: Intl.NumberFormat().resolvedOptions().locale,

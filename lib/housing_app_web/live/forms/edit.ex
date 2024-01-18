@@ -9,7 +9,7 @@ defmodule HousingAppWeb.Live.Forms.Edit do
       <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit" autowidth={false}>
         <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update form</h2>
         <.input field={@ash_form[:name]} label="Name" />
-        <.input type="textarea" rows="20" field={@ash_form[:json_schema]} label="Schema" />
+        <.input type="json" field={@ash_form[:json_schema]} label="Schema" />
         <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
         <.input field={@ash_form[:type]} label="Type" />
         <:actions>
@@ -62,8 +62,8 @@ defmodule HousingAppWeb.Live.Forms.Edit do
   end
 
   def handle_event("validate", %{"_target" => ["form", "json_schema"], "form" => params}, socket) do
-    ash_form = AshPhoenix.Form.validate(socket.assigns.ash_form, params)
-    {:noreply, assign(socket, ash_form: ash_form, json_schema: Jason.decode!(params["json_schema"]))}
+    # ash_form = AshPhoenix.Form.validate(socket.assigns.ash_form, params)
+    {:noreply, assign(socket, json_schema: Jason.decode!(params["json_schema"]))}
   rescue
     Jason.DecodeError ->
       {:noreply, socket}

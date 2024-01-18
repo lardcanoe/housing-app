@@ -556,7 +556,7 @@ defmodule HousingAppWeb.CoreComponents do
   attr :type, :string,
     default: "text",
     values: ~w(checkbox color date datetime-local email file hidden month number password
-               range radio search select tel text textarea time url week message)
+               range radio search select tel text textarea time url week message json)
 
   attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
@@ -645,6 +645,37 @@ defmodule HousingAppWeb.CoreComponents do
         ]}
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
+      <.error :for={msg <- @errors}><%= msg %></.error>
+    </div>
+    """
+  end
+
+  def input(%{type: "json"} = assigns) do
+    ~H"""
+    <div phx-feedback-for={@name} class="mb-5">
+      <.label for={@id}><%= @label %></.label>
+
+      <div
+        phx-hook="JsonEditor"
+        phx-update="ignore"
+        data-input-id={@name}
+        id={"#{@name}_editor"}
+        class={[
+          "h-96",
+          @errors == [] && "border-zinc-300 focus:border-zinc-400",
+          @errors != [] && "border-rose-400 focus:border-rose-400"
+        ]}
+      />
+
+      <input
+        type="hidden"
+        phx-hook="JsonEditorSource"
+        data-editor-id={"#{@name}_editor"}
+        value={@value}
+        name={@name}
+        id={@name}
+      />
+
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
