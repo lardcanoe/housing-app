@@ -110,7 +110,7 @@ defmodule HousingApp.Assignments.Booking do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:create, :read, :update]
 
     create :new do
       accept [
@@ -218,6 +218,12 @@ defmodule HousingApp.Assignments.Booking do
         end)
         |> then(&{:ok, &1})
       end
+    end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
     end
   end
 

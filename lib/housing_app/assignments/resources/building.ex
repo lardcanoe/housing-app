@@ -78,7 +78,7 @@ defmodule HousingApp.Assignments.Building do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:create, :read, :update]
 
     create :new do
       accept [:name, :location, :floor_count, :room_count]
@@ -97,6 +97,12 @@ defmodule HousingApp.Assignments.Building do
       get? true
 
       filter expr(id == ^arg(:id) and is_nil(archived_at))
+    end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
     end
   end
 

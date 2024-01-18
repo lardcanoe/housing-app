@@ -70,7 +70,7 @@ defmodule HousingApp.Management.ApplicationStepSubmission do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:create, :read, :update]
 
     create :submit do
       accept [:application_submission_id, :step_id, :data]
@@ -105,6 +105,12 @@ defmodule HousingApp.Management.ApplicationStepSubmission do
                step_id == ^arg(:step_id) and application_submission_id == ^arg(:application_submission_id) and
                  is_nil(archived_at)
              )
+    end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
     end
   end
 

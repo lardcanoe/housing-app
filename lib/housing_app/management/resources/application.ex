@@ -114,7 +114,7 @@ defmodule HousingApp.Management.Application do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:create, :read, :update]
 
     create :new do
       accept [:name, :description, :form_id, :time_period_id, :status, :type, :submission_type]
@@ -195,6 +195,12 @@ defmodule HousingApp.Management.Application do
 
         {:ok, types}
       end
+    end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
     end
   end
 

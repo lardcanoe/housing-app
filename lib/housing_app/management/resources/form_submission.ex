@@ -76,7 +76,7 @@ defmodule HousingApp.Management.FormSubmission do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:create, :read, :update]
 
     create :submit do
       accept [:form_id, :data]
@@ -104,6 +104,12 @@ defmodule HousingApp.Management.FormSubmission do
 
     #   filter expr(id == ^arg(:id))
     # end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
+    end
   end
 
   code_interface do

@@ -83,7 +83,7 @@ defmodule HousingApp.Management.Form do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:create, :read, :update]
 
     create :new do
       accept [:name, :description, :json_schema, :type]
@@ -154,6 +154,12 @@ defmodule HousingApp.Management.Form do
 
         {:ok, types}
       end
+    end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
     end
   end
 

@@ -97,7 +97,7 @@ defmodule HousingApp.Management.Profile do
 
   actions do
     # No :update because we need :submit logic to deal with merging santized data
-    defaults [:create, :destroy]
+    defaults [:create]
 
     read :read do
       primary? true
@@ -165,6 +165,12 @@ defmodule HousingApp.Management.Profile do
           {:ok, HousingApp.Checks.FilterData.filter_record(record)}
         end)
       end
+    end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
     end
   end
 

@@ -98,7 +98,7 @@ defmodule HousingApp.Management.Notification do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:create, :read, :update]
 
     read :list do
       prepare build(sort: [created_at: :desc])
@@ -131,6 +131,12 @@ defmodule HousingApp.Management.Notification do
     update :mark_as_read do
       accept []
       change set_attribute(:read, true)
+    end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
     end
   end
 

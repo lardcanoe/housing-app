@@ -62,7 +62,7 @@ defmodule HousingApp.Management.UserTenantRole do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:read, :create, :update]
 
     create :new do
       accept [:role_id, :time_period_id, :start_at, :end_at, :user_tenant_id, :tenant_id]
@@ -71,6 +71,7 @@ defmodule HousingApp.Management.UserTenantRole do
 
     read :list do
       prepare build(load: [:role, :time_period, user_tenant: [:user]])
+      filter expr(is_nil(archived_at))
     end
 
     read :list_my_active do
@@ -92,6 +93,12 @@ defmodule HousingApp.Management.UserTenantRole do
       get? true
 
       filter expr(id == ^arg(:id) and is_nil(archived_at))
+    end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
     end
   end
 

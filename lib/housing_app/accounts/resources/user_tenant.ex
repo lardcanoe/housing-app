@@ -3,6 +3,7 @@ defmodule HousingApp.Accounts.UserTenant do
 
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
+    extensions: [AshAdmin.Resource],
     authorizers: [Ash.Policy.Authorizer]
 
   attributes do
@@ -25,6 +26,10 @@ defmodule HousingApp.Accounts.UserTenant do
     end
   end
 
+  admin do
+    actor?(true)
+  end
+
   relationships do
     belongs_to :user, HousingApp.Accounts.User do
       attribute_writable? true
@@ -38,6 +43,7 @@ defmodule HousingApp.Accounts.UserTenant do
 
     has_many :user_tenant_roles, HousingApp.Management.UserTenantRole do
       api HousingApp.Management
+      filter expr(is_nil(archived_at))
       source_attribute :id
       destination_attribute :user_tenant_id
     end
@@ -73,7 +79,7 @@ defmodule HousingApp.Accounts.UserTenant do
   end
 
   actions do
-    defaults [:create, :read, :destroy]
+    defaults [:create, :read]
 
     update :update do
       argument :user_tenant_roles, {:array, :map}
@@ -176,6 +182,12 @@ defmodule HousingApp.Accounts.UserTenant do
     update :revoke_api_key do
       accept []
       change set_attribute(:api_key, nil)
+    end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
     end
   end
 

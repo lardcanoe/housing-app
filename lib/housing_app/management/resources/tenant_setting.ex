@@ -46,7 +46,7 @@ defmodule HousingApp.Management.TenantSetting do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:create, :read, :update]
 
     read :list_settings do
       prepare build(select: [:namespace, :setting, :value])

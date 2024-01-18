@@ -90,7 +90,7 @@ defmodule HousingApp.Assignments.Room do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:create, :read, :update]
 
     create :new do
       accept [:name, :floor, :block, :max_capacity, :building_id, :product_id]
@@ -113,6 +113,13 @@ defmodule HousingApp.Assignments.Room do
 
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
+    end
+
   end
 
   code_interface do

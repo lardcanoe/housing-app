@@ -76,7 +76,7 @@ defmodule HousingApp.Assignments.RoommateInvite do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:create, :read, :update]
 
     create :invite do
       accept [:roommate_group_id, :user_tenant_id]
@@ -105,6 +105,12 @@ defmodule HousingApp.Assignments.RoommateInvite do
       get? true
 
       filter expr(id == ^arg(:id) and user_tenant_id == ^actor(:id) and is_nil(archived_at))
+    end
+
+    destroy :archive do
+      primary? true
+      soft? true
+      change set_attribute(:archived_at, &DateTime.utc_now/0)
     end
   end
 
