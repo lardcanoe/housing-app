@@ -10,7 +10,8 @@ defmodule HousingApp.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      consolidate_protocols: Mix.env() != :dev
+      consolidate_protocols: Mix.env() != :dev,
+      compilers: [:yecc, :leex] ++ Mix.compilers()
     ]
   end
 
