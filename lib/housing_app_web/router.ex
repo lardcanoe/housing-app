@@ -134,6 +134,7 @@ defmodule HousingAppWeb.Router do
           live "/staff", Index, :staff_index
           live "/students", Index, :student_index
           live "/ra", View, :role_ra
+          live "/housing-director", View, :role_housing_director
           live "/new", Form, :new
           live "/:id/edit", Form, :edit
         end
