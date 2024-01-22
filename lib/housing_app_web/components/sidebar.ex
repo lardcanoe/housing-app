@@ -5,6 +5,7 @@ defmodule HousingAppWeb.Components.Sidebar do
 
   attr :current_user_tenant, :any, required: true
   attr :current_tenant, :string, required: true
+  attr :current_roles, :any, required: true
   attr :section, :any, default: nil
 
   def render(%{current_user_tenant: %{user_type: :user}} = assigns) do
@@ -70,9 +71,9 @@ defmodule HousingAppWeb.Components.Sidebar do
               <span class="ml-3">My Roommates</span>
             </.link>
           </li>
-          <li>
+          <li :if={Enum.any?(@current_roles, &(&1.name == "RA"))}>
             <.link
-              navigate={~p"/"}
+              navigate={~p"/assignments/roles/ra"}
               class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <svg
@@ -85,7 +86,7 @@ defmodule HousingAppWeb.Components.Sidebar do
                 <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
                 <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
               </svg>
-              <span class="ml-3">Housing</span>
+              <span class="ml-3">RA Assignments</span>
             </.link>
           </li>
         </ul>

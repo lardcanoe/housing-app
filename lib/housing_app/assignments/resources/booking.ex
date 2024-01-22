@@ -94,6 +94,11 @@ defmodule HousingApp.Assignments.Booking do
     policy action(:swap_bed) do
       authorize_if relates_to_actor_via([:profile, :user_tenant])
     end
+
+    policy action_type(:read) do
+      # Overly permissive since RAs need to read
+      authorize_if always()
+    end
   end
 
   postgres do
@@ -137,6 +142,17 @@ defmodule HousingApp.Assignments.Booking do
                 load: [
                   :product,
                   :application_submission,
+                  profile: [user_tenant: [:user]],
+                  bed: [room: [:building]]
+                ]
+              )
+
+      filter expr(is_nil(archived_at))
+    end
+
+    read :list_for_assignments do
+      prepare build(
+                load: [
                   profile: [user_tenant: [:user]],
                   bed: [room: [:building]]
                 ]

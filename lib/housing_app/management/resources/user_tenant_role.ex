@@ -42,6 +42,10 @@ defmodule HousingApp.Management.UserTenantRole do
     belongs_to :time_period, HousingApp.Management.TimePeriod do
       attribute_writable? true
     end
+
+    has_many :role_queries, HousingApp.Assignments.RoleQuery do
+      api HousingApp.Assignments
+    end
   end
 
   policies do
@@ -90,8 +94,8 @@ defmodule HousingApp.Management.UserTenantRole do
         allow_nil? false
       end
 
+      prepare build(load: [:role, role_queries: [:common_query]])
       get? true
-
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
 

@@ -75,8 +75,7 @@ defmodule HousingApp.Management.Profile do
     end
 
     policy action_type(:read) do
-      authorize_if HousingApp.Checks.IsTenantAdmin
-      authorize_if relates_to_actor_via(:user_tenant)
+      authorize_if always()
     end
 
     policy action_type(:update) do

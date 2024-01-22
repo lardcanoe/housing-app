@@ -159,7 +159,7 @@ defmodule HousingAppWeb.Live.Assignments.Roles.Form do
          socket
          |> assign(sidebar: :assignments)
          |> put_flash(:error, "Not found")
-         |> push_navigate(to: ~p"/assignments/roles")}
+         |> push_navigate(to: ~p"/")}
 
       {:ok, app} ->
         ash_form =
@@ -338,7 +338,7 @@ defmodule HousingAppWeb.Live.Assignments.Roles.Form do
     {:noreply,
      socket
      |> put_flash(:info, "Successfully created the role query.")
-     |> push_navigate(to: ~p"/assignments/roles")}
+     |> push_navigate(to: ~p"/assignments/roles/students")}
   end
 
   def handle_event("submit", %{"form" => params}, %{assigns: %{live_action: action}} = socket) do
@@ -350,7 +350,7 @@ defmodule HousingAppWeb.Live.Assignments.Roles.Form do
            :info,
            if(action == :new, do: "Successfully created the role query.", else: "Successfully updated the role query.")
          )
-         |> push_navigate(to: ~p"/assignments/roles")}
+         |> push_navigate(to: ~p"/assignments/roles/staff")}
 
       {:error, ash_form} ->
         IO.inspect(ash_form, label: "ash_form :error")

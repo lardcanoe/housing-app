@@ -96,7 +96,7 @@ defmodule HousingAppWeb.LiveUserAuth do
 
     [actor: current_user_tenant, tenant: current_tenant]
     |> HousingApp.Management.UserTenantRole.list_my_active!()
-    |> Enum.map(&%{name: &1.role.name, id: &1.role_id})
+    |> Enum.map(&%{id: &1.id, name: &1.role.name, role_id: &1.role_id})
     |> then(fn roles ->
       assign(socket, :current_roles, roles)
     end)
