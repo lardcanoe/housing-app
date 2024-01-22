@@ -88,4 +88,26 @@ config :ash, :policies, show_policy_breakdowns?: true
 # https://hexdocs.pm/ash/pub_sub.html#debugging-pubsub
 config :ash, :pub_sub, debug?: true
 
+# config :crawly,
+#   start_http_api?: true,
+#   # closespider_timeout: 10,
+#   concurrent_requests_per_domain: 5,
+#   # closespider_itemcount: 1,
+#   item: [:host, :tool, :portal, :source],
+#   item_id: :host,
+#   middlewares: [
+#     Crawly.Middlewares.UniqueRequest,
+#     # HousingApp.Utils.DomainsFilterMiddleware,
+#     {Crawly.Middlewares.UserAgent,
+#      user_agents: [
+#        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+#      ]}
+#   ],
+#   pipelines: [
+#     # {Crawly.Pipelines.Validate, fields: [:host]},
+#     {Crawly.Pipelines.DuplicatesFilter, item_id: :host},
+#     {Crawly.Pipelines.CSVEncoder, fields: [:host, :tool, :portal, :source]},
+#     {HousingApp.Utils.CrawlWriteToFile, filename: "./crawlers.csv"}
+#   ]
+
 import_config "#{config_env()}.local.exs"

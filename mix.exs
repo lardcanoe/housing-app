@@ -73,6 +73,9 @@ defmodule HousingApp.MixProject do
       {:credo, "~> 1.7.1", only: [:dev, :test], runtime: false},
       {:styler, "~> 0.11.1", only: [:dev, :test], runtime: false}
     ]
+
+    # {:crawly, "~> 0.16.0", runtime: Mix.env() == :dev},
+    # {:floki, ">= 0.30.0", only: [:dev, :test]},
   end
 
   # Aliases are shortcuts or tasks specific to the current project.
