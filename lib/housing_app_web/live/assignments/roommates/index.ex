@@ -30,7 +30,7 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.Index do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, loading: true, count: 0, sidebar: :assignments, page_title: "Roommates")}
+    {:ok, assign(socket, loading: true, count: 0, sidebar: :residents, page_title: "Roommates")}
   end
 
   def handle_event("view-row", %{"id" => _id}, socket) do

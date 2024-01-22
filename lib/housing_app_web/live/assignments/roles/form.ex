@@ -189,7 +189,7 @@ defmodule HousingAppWeb.Live.Assignments.Roles.Form do
      |> assign(
        for_user_type: "student",
        ash_form: to_form(%{"user_tenant_id" => nil}, as: "student_form"),
-       sidebar: :assignments,
+       sidebar: :residents,
        page_title: "New Student Role Query"
      )
      |> load_async_assigns()}

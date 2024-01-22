@@ -27,7 +27,7 @@ defmodule HousingAppWeb.Live.Profiles.New do
       )
       |> to_form()
 
-    {:ok, assign(socket, ash_form: ash_form, sidebar: :profiles, page_title: "New Profile")}
+    {:ok, assign(socket, ash_form: ash_form, sidebar: :residents, page_title: "New Profile")}
   end
 
   def handle_event("validate", %{"form" => params}, socket) do

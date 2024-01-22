@@ -5,7 +5,7 @@ defmodule HousingAppWeb.Live.Assignments.Roles.Index do
 
   import HousingAppWeb.Components.DataGrid
 
-  def render(%{live_action: :index} = assigns) do
+  def render(assigns) do
     ~H"""
     <.data_grid
       id="ag-data-grid"
@@ -16,7 +16,7 @@ defmodule HousingAppWeb.Live.Assignments.Roles.Index do
       current_tenant={@current_tenant}
     >
       <:actions>
-        <.link navigate={~p"/assignments/roles/new?for=student"}>
+        <.link :if={@live_action == :student_index} navigate={~p"/assignments/roles/new?for=student"}>
           <button
             type="button"
             class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
@@ -24,7 +24,7 @@ defmodule HousingAppWeb.Live.Assignments.Roles.Index do
             <.icon name="hero-plus-small-solid" class="w-4 h-4 mr-2" /> Add student assignment
           </button>
         </.link>
-        <.link navigate={~p"/assignments/roles/new"}>
+        <.link :if={@live_action == :staff_index} navigate={~p"/assignments/roles/new"}>
           <button
             type="button"
             class="w-full md:w-auto flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
@@ -37,8 +37,12 @@ defmodule HousingAppWeb.Live.Assignments.Roles.Index do
     """
   end
 
-  def mount(_params, _session, socket) do
-    {:ok, assign(socket, loading: true, count: 0, sidebar: :assignments, page_title: "Role Assignments")}
+  def mount(_params, _session, %{assigns: %{live_action: :student_index}} = socket) do
+    {:ok, assign(socket, loading: true, count: 0, sidebar: :residents, page_title: "Student Staff")}
+  end
+
+  def mount(_params, _session, %{assigns: %{live_action: :staff_index}} = socket) do
+    {:ok, assign(socket, loading: true, count: 0, sidebar: :assignments, page_title: "Staff Assignments")}
   end
 
   def handle_event("view-row", %{"id" => _id}, socket) do
@@ -51,11 +55,18 @@ defmodule HousingAppWeb.Live.Assignments.Roles.Index do
   end
 
   def handle_event("load-data", %{}, socket) do
-    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+    %{live_action: live_action, current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    read_action =
+      case live_action do
+        :student_index -> :list_student
+        :staff_index -> :list_staff
+      end
 
     role_queries =
-      [actor: current_user_tenant, tenant: tenant]
-      |> HousingApp.Assignments.RoleQuery.list!()
+      HousingApp.Assignments.RoleQuery
+      |> Ash.Query.for_read(read_action, %{}, actor: current_user_tenant, tenant: tenant)
+      |> HousingApp.Assignments.read!()
       |> Enum.sort_by(& &1.user_tenant_role.role.name)
       |> Enum.map(fn r ->
         %{

@@ -271,23 +271,15 @@ defmodule HousingAppWeb.Components.Sidebar do
               </li>
               <li>
                 <.link
-                  navigate={~p"/assignments/roommates"}
+                  navigate={~p"/assignments/roles/staff"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
-                  Roommates
-                </.link>
-              </li>
-              <li>
-                <.link
-                  navigate={~p"/assignments/roles"}
-                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  Roles
+                  Staff Roles
                 </.link>
               </li>
             </ul>
           </li>
-          <!-- Students -->
+          <!-- Residents -->
           <li>
             <button
               type="button"
@@ -299,16 +291,32 @@ defmodule HousingAppWeb.Components.Sidebar do
                 name="hero-users-solid"
                 class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
               />
-              <span class="flex-1 ml-3 text-left whitespace-nowrap">Students</span>
+              <span class="flex-1 ml-3 text-left whitespace-nowrap">Residents</span>
               <.svg_dropdown />
             </button>
-            <ul id="dropdown-profiles" class={["py-2 space-y-2", @section != :profiles && "hidden"]}>
+            <ul id="dropdown-profiles" class={["py-2 space-y-2", @section != :residents && "hidden"]}>
               <li>
                 <.link
                   navigate={~p"/profiles"}
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
-                  Manage
+                  Profiles
+                </.link>
+              </li>
+              <li>
+                <.link
+                  navigate={~p"/assignments/roles/students"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Student Staff
+                </.link>
+              </li>
+              <li>
+                <.link
+                  navigate={~p"/assignments/roommates"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Roommates
                 </.link>
               </li>
             </ul>

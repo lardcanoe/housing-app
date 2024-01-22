@@ -28,7 +28,7 @@ defmodule HousingAppWeb.Live.Assignments.Roommates.New do
       )
       |> to_form()
 
-    {:ok, assign(socket, ash_form: ash_form, sidebar: :assignments, page_title: "New Roommate Group")}
+    {:ok, assign(socket, ash_form: ash_form, sidebar: :residents, page_title: "New Roommate Group")}
   end
 
   def handle_event("validate", %{"form" => params}, socket) do

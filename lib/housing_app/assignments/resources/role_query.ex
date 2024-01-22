@@ -58,6 +58,16 @@ defmodule HousingApp.Assignments.RoleQuery do
       filter expr(is_nil(archived_at))
     end
 
+    read :list_staff do
+      prepare build(load: [:common_query, user_tenant_role: [:role, :time_period, user_tenant: [:user]]])
+      filter expr(user_tenant_role.user_tenant.user_type in [:admin, :staff] and is_nil(archived_at))
+    end
+
+    read :list_student do
+      prepare build(load: [:common_query, user_tenant_role: [:role, :time_period, user_tenant: [:user]]])
+      filter expr(user_tenant_role.user_tenant.user_type == :user and is_nil(archived_at))
+    end
+
     # TODO: Only an owner or member should be able to read
     read :get_by_id do
       argument :id, :uuid do

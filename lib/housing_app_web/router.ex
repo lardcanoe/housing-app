@@ -131,7 +131,8 @@ defmodule HousingAppWeb.Router do
         end
 
         scope "/roles", Roles do
-          live "/", Index, :index
+          live "/staff", Index, :staff_index
+          live "/students", Index, :student_index
           live "/new", Form, :new
           live "/:id/edit", Form, :edit
         end

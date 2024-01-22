@@ -19,14 +19,14 @@ defmodule HousingAppWeb.Live.Profiles.Edit do
          json_schema: Jason.decode!(profile_form.json_schema),
          profile: profile,
          form: to_form(profile.sanitized_data, as: "profile"),
-         sidebar: :profiles,
+         sidebar: :residents,
          page_title: "Edit Profile"
        )}
     else
       {:error, _} ->
         {:ok,
          socket
-         |> assign(sidebar: :profiles)
+         |> assign(sidebar: :residents)
          |> put_flash(:error, "Not found")
          |> push_navigate(to: ~p"/profiles")}
     end

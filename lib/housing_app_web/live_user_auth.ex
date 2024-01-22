@@ -73,6 +73,7 @@ defmodule HousingAppWeb.LiveUserAuth do
     socket
     |> assign(:current_user_tenant, current_user_tenant)
     |> assign(:current_tenant, tenant)
+    |> load_active_roles()
     |> assign(:unread_notifications, unread_notifications)
     |> attach_hook(:notifications_pubsub, :handle_info, &handle_info/2)
   end
@@ -88,5 +89,16 @@ defmodule HousingAppWeb.LiveUserAuth do
   # Stub out so that not all pages need handle_info defined for our notifications pubsub
   defp handle_info(_, socket) do
     {:cont, socket}
+  end
+
+  defp load_active_roles(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: current_tenant} = socket.assigns
+
+    [actor: current_user_tenant, tenant: current_tenant]
+    |> HousingApp.Management.UserTenantRole.list_my_active!()
+    |> Enum.map(&%{name: &1.role.name, id: &1.role_id})
+    |> then(fn roles ->
+      assign(socket, :current_roles, roles)
+    end)
   end
 end

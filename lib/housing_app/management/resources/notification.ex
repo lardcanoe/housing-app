@@ -75,12 +75,12 @@ defmodule HousingApp.Management.Notification do
 
     policy action_type(:read) do
       authorize_if HousingApp.Checks.IsTenantAdmin
-      authorize_if relates_to_actor_via(:user_tenant)
+      authorize_if expr(user_tenant_id == ^actor(:id))
     end
 
     policy action_type(:update) do
       authorize_if HousingApp.Checks.IsTenantAdmin
-      authorize_if relates_to_actor_via(:user_tenant)
+      authorize_if expr(user_tenant_id == ^actor(:id))
     end
 
     policy action(:count_unread) do
@@ -121,10 +121,15 @@ defmodule HousingApp.Management.Notification do
     end
 
     action :count_unread, :integer do
-      run fn _, context ->
+      run fn input, context ->
+        # FUTURE: > HousingApp.Management.count!() is broken
+
         __MODULE__
         |> Ash.Query.for_read(:list_unread, %{}, actor: context.actor, tenant: context.tenant)
-        |> HousingApp.Management.count()
+        |> Ash.Query.build(select: [:id])
+        |> HousingApp.Management.read!()
+        |> Enum.count()
+        |> then(&{:ok, &1})
       end
     end
 

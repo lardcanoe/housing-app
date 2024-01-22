@@ -49,7 +49,7 @@ defmodule HousingAppWeb.Live.Profiles.Index do
            profile_form: profile_form,
            loading: true,
            count: 0,
-           sidebar: :profiles,
+           sidebar: :residents,
            page_title: "Profiles"
          )
          |> load_async_assigns()}
