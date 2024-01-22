@@ -57,18 +57,19 @@ defmodule HousingApp.ManagementTest do
       {:ok, user_profile1} =
         create_profile(%{"user_tenant_id" => user_tenant1.id, "tenant_id" => tenant.id}, tenant.id, actor: user_tenant1)
 
-      user2 = user_fixture(%{"email" => "foo2@bar.com"})
+      # user2 = user_fixture(%{"email" => "foo2@bar.com"})
 
-      {:ok, user_tenant2} =
-        user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user2.id, "user_type" => :user}, actor: user2)
+      # {:ok, user_tenant2} =
+      #   user_tenant_fixture(%{"tenant_id" => tenant.id, "user_id" => user2.id, "user_type" => :user}, actor: user2)
 
-      # User 2 can't read User 1's profile
-      assert_raise Ash.Error.Query.NotFound, fn ->
-        HousingApp.Management.Profile.get_by_id!(user_profile1.id,
-          actor: user_tenant2,
-          tenant: "tenant_" <> to_string(tenant.id)
-        )
-      end
+      # FUTURE: User 2 can't read User 1's profile
+      # Can't prevent this at AshPolicy level since it breaks things like an RA seeing their assignments
+      # assert_raise Ash.Error.Query.NotFound, fn ->
+      #   HousingApp.Management.Profile.get_by_id!(user_profile1.id,
+      #     actor: user_tenant2,
+      #     tenant: "tenant_" <> to_string(tenant.id)
+      #   )
+      # end
 
       # User 1 can read self though
       read_profile =
