@@ -434,15 +434,26 @@ defmodule HousingAppWeb.CoreComponents do
   defp render_json_view(assigns) do
     ~H"""
     <%= for definition <- @definitions do %>
-      <%= case definition.type do %>
-        <% "object" -> %>
+      <%= case definition do %>
+        <% %{type: "object"} -> %>
           <dt
             :if={!is_nil(definition.title) && definition.title != ""}
             class="mb-2 font-semibold leading-none text-gray-900 dark:text-white"
           >
             <%= definition.title %>
           </dt>
-          <%= render_json_view(%{definitions: definition.definitions, data: @data[Atom.to_string(definition.key)]}) %>
+          <div class="pl-4">
+            <%= render_json_view(%{definitions: definition.definitions, data: @data[Atom.to_string(definition.key)]}) %>
+          </div>
+        <% %{type: "select", multiple: true} -> %>
+          <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-300">
+            <%= Atom.to_string(definition.key) |> HousingApp.Utils.String.titlize() %>:
+            <div class="flex items-center space-x-2">
+              <span :for={item <- @data[Atom.to_string(definition.key)]} class="rounded-sm p-2 bg-gray-800 dark:bg-gray-700">
+                <%= item %>
+              </span>
+            </div>
+          </dd>
         <% _ -> %>
           <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
             <%= Atom.to_string(definition.key) |> HousingApp.Utils.String.titlize() %>: <%= @data[

@@ -102,7 +102,7 @@ defmodule HousingApp.Utils.JsonSchema do
 
     id = String.replace("#{id_prefix}#{key}", ".", "-") <> "-field"
 
-    key = String.to_existing_atom(key)
+    key = String.to_atom(key)
 
     case value do
       %{"type" => "string", "template" => template} when is_binary(template) and template != "" ->
@@ -171,13 +171,13 @@ defmodule HousingApp.Utils.JsonSchema do
           acc
 
         %{"type" => type} when type in ["string", "integer", "boolean"] ->
-          Map.put(acc, String.to_existing_atom(key), String.to_existing_atom(type))
+          Map.put(acc, String.to_atom(key), String.to_atom(type))
 
         %{"type" => "array", "items" => %{"type" => type}} when type in ["string", "integer", "boolean"] ->
-          Map.put(acc, String.to_existing_atom(key), {:array, String.to_existing_atom(type)})
+          Map.put(acc, String.to_atom(key), {:array, String.to_atom(type)})
 
         %{"type" => "array"} ->
-          Map.put(acc, String.to_existing_atom(key), {:array, :string})
+          Map.put(acc, String.to_atom(key), {:array, :string})
 
         _ ->
           acc
@@ -338,7 +338,7 @@ defmodule HousingApp.Utils.JsonSchema do
       Enum.reduce(schema["properties"], %{}, fn {key, value}, acc ->
         case Map.get(value, "type") do
           type when type == "string" or type == "integer" or type == "boolean" ->
-            Map.put(acc, String.to_existing_atom(key), String.to_existing_atom(type))
+            Map.put(acc, String.to_atom(key), String.to_atom(type))
 
           _ ->
             acc

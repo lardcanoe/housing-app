@@ -24,10 +24,9 @@ defmodule HousingApp.Utils.MapUtil do
     Map.new(json, &reduce_keys_to_atoms/1)
   end
 
-  defp reduce_keys_to_atoms({key, val}) when is_map(val), do: {String.to_existing_atom(key), keys_to_atoms(val)}
+  defp reduce_keys_to_atoms({key, val}) when is_map(val), do: {String.to_atom(key), keys_to_atoms(val)}
 
-  defp reduce_keys_to_atoms({key, val}) when is_list(val),
-    do: {String.to_existing_atom(key), Enum.map(val, &keys_to_atoms(&1))}
+  defp reduce_keys_to_atoms({key, val}) when is_list(val), do: {String.to_atom(key), Enum.map(val, &keys_to_atoms(&1))}
 
-  defp reduce_keys_to_atoms({key, val}), do: {String.to_existing_atom(key), val}
+  defp reduce_keys_to_atoms({key, val}), do: {String.to_atom(key), val}
 end
