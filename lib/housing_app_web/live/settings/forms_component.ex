@@ -88,7 +88,9 @@ defmodule HousingAppWeb.Components.TenantForms do
       |> Enum.reduce(%{}, fn {key, value}, acc ->
         case HousingApp.Management.TenantSetting
              |> Ash.Changeset.new()
-             |> Ash.Changeset.for_create(:create, %{namespace: :system, setting: String.to_atom(key), value: value},
+             |> Ash.Changeset.for_create(
+               :create,
+               %{namespace: :system, setting: String.to_existing_atom(key), value: value},
                actor: current_user_tenant,
                tenant: tenant,
                upsert?: true

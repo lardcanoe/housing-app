@@ -35,6 +35,15 @@ defmodule HousingApp.Utils.JsonSchema do
             headerTooltip: Map.get(value, "title")
           }
 
+        %{"type" => "array", "items" => %{"enum" => enum}} when is_list(enum) ->
+          %{
+            field: "#{prefix}#{key}",
+            # FUTURE: Maybe a special tag cell
+            width: 220,
+            headerName: header_name,
+            headerTooltip: Map.get(value, "title")
+          }
+
         %{"type" => "object"} ->
           %{
             field: "#{prefix}#{key}",
@@ -93,7 +102,7 @@ defmodule HousingApp.Utils.JsonSchema do
 
     id = String.replace("#{id_prefix}#{key}", ".", "-") <> "-field"
 
-    key = String.to_atom(key)
+    key = String.to_existing_atom(key)
 
     case value do
       %{"type" => "string", "template" => template} when is_binary(template) and template != "" ->
@@ -136,6 +145,17 @@ defmodule HousingApp.Utils.JsonSchema do
       %{"type" => "boolean"} ->
         %{type: "checkbox", key: key, name: name, id: id, label: title}
 
+      %{"type" => "array", "items" => %{"enum" => enum}} ->
+        %{
+          type: "select",
+          key: key,
+          name: "#{name}[]",
+          id: id,
+          label: title,
+          multiple: true,
+          options: Enum.map(enum, fn v -> {v, v} end)
+        }
+
       %{"type" => "object"} ->
         %{type: "object", key: key, id: id, title: title, definitions: to_html_form_inputs(value, name)}
 
@@ -150,8 +170,14 @@ defmodule HousingApp.Utils.JsonSchema do
         %{"template" => template} when is_binary(template) and template != "" ->
           acc
 
-        %{"type" => type} when type == "string" or type == "integer" or type == "boolean" ->
-          Map.put(acc, String.to_atom(key), String.to_atom(type))
+        %{"type" => type} when type in ["string", "integer", "boolean"] ->
+          Map.put(acc, String.to_existing_atom(key), String.to_existing_atom(type))
+
+        %{"type" => "array", "items" => %{"type" => type}} when type in ["string", "integer", "boolean"] ->
+          Map.put(acc, String.to_existing_atom(key), {:array, String.to_existing_atom(type)})
+
+        %{"type" => "array"} ->
+          Map.put(acc, String.to_existing_atom(key), {:array, :string})
 
         _ ->
           acc
@@ -164,8 +190,7 @@ defmodule HousingApp.Utils.JsonSchema do
   def cast_params(%{"properties" => properties} = schema, params) when is_map(properties) do
     types = extract_properties(schema)
 
-    changeset =
-      Ecto.Changeset.cast({%{}, types}, params, Map.keys(types))
+    changeset = Ecto.Changeset.cast({%{}, types}, params, Map.keys(types))
 
     converted =
       Enum.reduce(changeset.changes, %{}, fn {key, value}, acc -> Map.put(acc, Atom.to_string(key), value) end)
@@ -313,7 +338,7 @@ defmodule HousingApp.Utils.JsonSchema do
       Enum.reduce(schema["properties"], %{}, fn {key, value}, acc ->
         case Map.get(value, "type") do
           type when type == "string" or type == "integer" or type == "boolean" ->
-            Map.put(acc, String.to_atom(key), String.to_atom(type))
+            Map.put(acc, String.to_existing_atom(key), String.to_existing_atom(type))
 
           _ ->
             acc
@@ -324,7 +349,7 @@ defmodule HousingApp.Utils.JsonSchema do
 
     required =
       (schema["required"] || [])
-      |> Enum.map(&String.to_atom/1)
+      |> Enum.map(&String.to_existing_atom/1)
       |> Enum.reject(fn key -> !Map.has_key?(types, key) end)
 
     # types = %{name: :string, email: :string, age: :integer}
