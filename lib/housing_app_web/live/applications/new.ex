@@ -7,6 +7,7 @@ defmodule HousingAppWeb.Live.Applications.New do
     <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Application</h2>
       <.input field={@ash_form[:name]} label="Name" />
+      <.input field={@ash_form[:description]} label="Description" />
       <.input type="select" field={@ash_form[:form_id]} options={@forms} label="Form" prompt="Select a form..." />
       <.input type="select" options={@time_periods} field={@ash_form[:time_period_id]} label="Time Period" />
       <.input type="select" options={@status_options} field={@ash_form[:status]} label="Status" />
@@ -53,6 +54,7 @@ defmodule HousingAppWeb.Live.Applications.New do
          |> push_navigate(to: ~p"/applications")}
 
       {:error, ash_form} ->
+        dbg(ash_form)
         {:noreply, assign(socket, ash_form: ash_form)}
     end
   end

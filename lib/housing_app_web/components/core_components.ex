@@ -404,9 +404,11 @@ defmodule HousingAppWeb.CoreComponents do
           >
             <%= definition.title %>
           </h3>
-          <%= Phoenix.HTML.Form.inputs_for @form, definition.key, fn fp -> %>
-            <%= render_schema(%{definitions: definition.definitions, form: fp}) %>
-          <% end %>
+          <div class="pl-4">
+            <%= Phoenix.HTML.Form.inputs_for @form, definition.key, fn fp -> %>
+              <%= render_schema(%{definitions: definition.definitions, form: fp}) %>
+            <% end %>
+          </div>
         <% _ -> %>
           <.input field={@form[definition.key]} data-lpignore="true" {definition |> Map.delete(:key)} />
       <% end %>
