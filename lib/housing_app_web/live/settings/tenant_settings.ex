@@ -18,51 +18,6 @@ defmodule HousingAppWeb.Live.Settings.TenantSettings do
       >
         <li role="presentation">
           <.link
-            patch={~p"/settings/account?#{%{tab: "forms"}}"}
-            class="inline-flex items-center px-4 py-3 rounded-lg hover:text-gray-900 bg-gray-50 hover:bg-gray-100 w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
-            aria-current="page"
-            id="forms-tab"
-            data-tabs-target="#forms"
-            type="button"
-            role="tab"
-            aria-controls="forms"
-            aria-selected={if(@tab == "forms", do: "true", else: "false")}
-          >
-            <.icon name="hero-document-text-solid" class="w-4 h-4 me-2 text-white" /> Forms
-          </.link>
-        </li>
-        <li role="presentation">
-          <.link
-            patch={~p"/settings/account?#{%{tab: "roles"}}"}
-            class="inline-flex items-center px-4 py-3 rounded-lg hover:text-gray-900 bg-gray-50 hover:bg-gray-100 w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
-            aria-current="page"
-            id="roles-tab"
-            data-tabs-target="#roles"
-            type="button"
-            role="tab"
-            aria-controls="roles"
-            aria-selected={if(@tab == "roles", do: "true", else: "false")}
-          >
-            <.icon name="hero-bolt-solid" class="w-4 h-4 me-2 text-white" /> Roles
-          </.link>
-        </li>
-        <li role="presentation">
-          <.link
-            patch={~p"/settings/account?#{%{tab: "users"}}"}
-            class="inline-flex items-center px-4 py-3 rounded-lg hover:text-gray-900 bg-gray-50 hover:bg-gray-100 w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
-            aria-current="page"
-            id="users-tab"
-            data-tabs-target="#users"
-            type="button"
-            role="tab"
-            aria-controls="users"
-            aria-selected={if(@tab == "users", do: "true", else: "false")}
-          >
-            <.icon name="hero-user-solid" class="w-4 h-4 me-2 text-white" /> Users
-          </.link>
-        </li>
-        <li role="presentation">
-          <.link
             patch={~p"/settings/account?#{%{tab: "time-periods"}}"}
             class="inline-flex items-center px-4 py-3 rounded-lg hover:text-gray-900 bg-gray-50 hover:bg-gray-100 w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
             id="time-periods-tab"
@@ -105,6 +60,51 @@ defmodule HousingAppWeb.Live.Settings.TenantSettings do
               <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
             </svg>
             Common Queries
+          </.link>
+        </li>
+        <li role="presentation">
+          <.link
+            patch={~p"/settings/account?#{%{tab: "forms"}}"}
+            class="inline-flex items-center px-4 py-3 rounded-lg hover:text-gray-900 bg-gray-50 hover:bg-gray-100 w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
+            aria-current="page"
+            id="forms-tab"
+            data-tabs-target="#forms"
+            type="button"
+            role="tab"
+            aria-controls="forms"
+            aria-selected={if(@tab == "forms", do: "true", else: "false")}
+          >
+            <.icon name="hero-document-text-solid" class="w-4 h-4 me-2 text-white" /> Forms
+          </.link>
+        </li>
+        <li role="presentation">
+          <.link
+            patch={~p"/settings/account?#{%{tab: "roles"}}"}
+            class="inline-flex items-center px-4 py-3 rounded-lg hover:text-gray-900 bg-gray-50 hover:bg-gray-100 w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
+            aria-current="page"
+            id="roles-tab"
+            data-tabs-target="#roles"
+            type="button"
+            role="tab"
+            aria-controls="roles"
+            aria-selected={if(@tab == "roles", do: "true", else: "false")}
+          >
+            <.icon name="hero-bolt-solid" class="w-4 h-4 me-2 text-white" /> Roles
+          </.link>
+        </li>
+        <li role="presentation">
+          <.link
+            patch={~p"/settings/account?#{%{tab: "users"}}"}
+            class="inline-flex items-center px-4 py-3 rounded-lg hover:text-gray-900 bg-gray-50 hover:bg-gray-100 w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white"
+            aria-current="page"
+            id="users-tab"
+            data-tabs-target="#users"
+            type="button"
+            role="tab"
+            aria-controls="users"
+            aria-selected={if(@tab == "users", do: "true", else: "false")}
+          >
+            <.icon name="hero-user-solid" class="w-4 h-4 me-2 text-white" /> Users
           </.link>
         </li>
       </ul>
@@ -189,7 +189,7 @@ defmodule HousingAppWeb.Live.Settings.TenantSettings do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, page_title: "Account Settings")}
+    {:ok, assign(socket, sidebar: :setup, page_title: "Account Settings")}
   end
 
   def handle_params(params, _url, socket) do

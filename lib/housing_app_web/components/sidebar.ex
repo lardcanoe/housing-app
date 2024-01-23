@@ -240,22 +240,22 @@ defmodule HousingAppWeb.Components.Sidebar do
               <% end %>
             </ul>
           </li>
-          <!-- Assignments -->
+          <!-- Inventory -->
           <li>
             <button
               type="button"
               class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-              aria-controls="dropdown-assignments"
-              data-collapse-toggle="dropdown-assignments"
+              aria-controls="dropdown-inventory"
+              data-collapse-toggle="dropdown-inventory"
             >
               <.icon
                 name="hero-building-office-2-solid"
                 class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
               />
-              <span class="flex-1 ml-3 text-left whitespace-nowrap">Assignments</span>
+              <span class="flex-1 ml-3 text-left whitespace-nowrap">Inventory</span>
               <.svg_dropdown />
             </button>
-            <ul id="dropdown-assignments" class={["py-2 space-y-2", @section != :assignments && "hidden"]}>
+            <ul id="dropdown-inventory" class={["py-2 space-y-2", @section != :assignments && "hidden"]}>
               <li>
                 <.link
                   navigate={~p"/assignments/buildings"}
@@ -278,22 +278,6 @@ defmodule HousingAppWeb.Components.Sidebar do
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Beds
-                </.link>
-              </li>
-              <li>
-                <.link
-                  navigate={~p"/assignments/bookings"}
-                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  Bookings
-                </.link>
-              </li>
-              <li>
-                <.link
-                  navigate={~p"/assignments/roles/staff"}
-                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
-                  Staff Roles
                 </.link>
               </li>
             </ul>
@@ -328,6 +312,14 @@ defmodule HousingAppWeb.Components.Sidebar do
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   Student Staff
+                </.link>
+              </li>
+              <li>
+                <.link
+                  navigate={~p"/assignments/bookings"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Bookings
                 </.link>
               </li>
               <li>
@@ -432,6 +424,72 @@ defmodule HousingAppWeb.Components.Sidebar do
                   class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 >
                   New Profile
+                </.link>
+              </li>
+            </ul>
+          </li>
+          <!-- Setup -->
+          <li>
+            <button
+              type="button"
+              class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              aria-controls="dropdown-setup"
+              data-collapse-toggle="dropdown-setup"
+            >
+              <.icon
+                name="hero-cog-6-tooth-solid"
+                class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
+              />
+              <span class="flex-1 ml-3 text-left whitespace-nowrap">Setup</span>
+              <.svg_dropdown />
+            </button>
+            <ul id="dropdown-setup" class={["py-2 space-y-2", @section != :setup && "hidden"]}>
+              <li>
+                <.link
+                  navigate={~p"/settings/account?tab=time-periods"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Time Periods
+                </.link>
+              </li>
+              <li>
+                <.link
+                  navigate={~p"/settings/account?tab=queries"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Common Queries
+                </.link>
+              </li>
+              <li>
+                <.link
+                  navigate={~p"/settings/account?tab=forms"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Form Types
+                </.link>
+              </li>
+              <li>
+                <.link
+                  navigate={~p"/settings/account?tab=roles"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Roles
+                </.link>
+              </li>
+              <li>
+                <.link
+                  navigate={~p"/settings/account?tab=users"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Staff Users
+                </.link>
+              </li>
+              <li>
+                <.link
+                  navigate={~p"/assignments/roles/staff"}
+                  class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  Staff Queries
                 </.link>
               </li>
             </ul>

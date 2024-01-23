@@ -40,7 +40,7 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(query_id: nil, loading: true, count: 0, sidebar: :assignments, page_title: "Bookings")
+     |> assign(query_id: nil, loading: true, count: 0, sidebar: :residents, page_title: "Bookings")
      |> load_async_assigns()}
   end
 

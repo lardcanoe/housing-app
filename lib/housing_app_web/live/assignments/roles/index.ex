@@ -42,7 +42,7 @@ defmodule HousingAppWeb.Live.Assignments.Roles.Index do
   end
 
   def mount(_params, _session, %{assigns: %{live_action: :staff_index}} = socket) do
-    {:ok, assign(socket, loading: true, count: 0, sidebar: :assignments, page_title: "Staff Assignments")}
+    {:ok, assign(socket, loading: true, count: 0, sidebar: :setup, page_title: "Staff Assignments")}
   end
 
   def handle_event("view-row", %{"id" => _id}, socket) do
