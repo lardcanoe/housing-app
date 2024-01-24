@@ -39,6 +39,11 @@ defmodule HousingApp.Management.Form do
       allow_nil? false
     end
 
+    attribute :variables, {:array, HousingApp.Management.FormVariable} do
+      default []
+      allow_nil? false
+    end
+
     create_timestamp :created_at
     update_timestamp :updated_at
 
@@ -86,13 +91,8 @@ defmodule HousingApp.Management.Form do
     defaults [:create, :read, :update]
 
     create :new do
-      accept [:name, :description, :json_schema, :type]
-
-      argument :tenant_id, :uuid do
-        allow_nil? false
-      end
-
-      change manage_relationship(:tenant_id, :tenant, type: :append_and_remove)
+      accept [:name, :description, :json_schema, :type, :status, :variables]
+      change set_attribute(:tenant_id, actor(:tenant_id))
     end
 
     read :list do

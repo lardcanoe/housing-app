@@ -332,6 +332,7 @@ defmodule HousingAppWeb.CoreComponents do
   attr :json_schema, :map, required: true, doc: "the json schema"
   attr :embed, :boolean, default: false
   attr :add_custom_root, :boolean, default: true
+  attr :variables, :map, default: %{}
   attr :prefix, :string, default: ""
   attr :autowidth, :boolean, default: true, doc: "the autowidth flag"
   attr :class, :string, default: nil
@@ -342,7 +343,8 @@ defmodule HousingAppWeb.CoreComponents do
     ~H"""
     <%= render_schema(%{
       definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema, @prefix),
-      form: @form
+      form: @form,
+      variables: @variables
     }) %>
     """
   end
@@ -359,6 +361,7 @@ defmodule HousingAppWeb.CoreComponents do
           },
           @prefix
         ),
+      variables: @variables,
       form: @form
     }) %>
     """
@@ -384,7 +387,11 @@ defmodule HousingAppWeb.CoreComponents do
         <%= @json_schema["title"] %>
       </h1>
 
-      <%= render_schema(%{definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema, @prefix), form: @form}) %>
+      <%= render_schema(%{
+        definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema, @prefix),
+        variables: @variables,
+        form: @form
+      }) %>
 
       <:actions>
         <.button><%= @button_text %></.button>
@@ -402,15 +409,20 @@ defmodule HousingAppWeb.CoreComponents do
             :if={!is_nil(definition.title) && definition.title != ""}
             class="mb-4 text-base font-bold text-gray-900 dark:text-white"
           >
-            <%= definition.title %>
+            <.render_mustache content={definition.title} variables={@variables} />
           </h3>
           <div class="pl-4">
             <%= Phoenix.HTML.Form.inputs_for @form, definition.key, fn fp -> %>
-              <%= render_schema(%{definitions: definition.definitions, form: fp}) %>
+              <%= render_schema(%{definitions: definition.definitions, form: fp, variables: @variables}) %>
             <% end %>
           </div>
         <% _ -> %>
-          <.input field={@form[definition.key]} data-lpignore="true" {definition |> Map.delete(:key)} />
+          <.input
+            field={@form[definition.key]}
+            data-lpignore="true"
+            variables={@variables}
+            {definition |> Map.delete(:key)}
+          />
       <% end %>
     <% end %>
     """
@@ -464,6 +476,15 @@ defmodule HousingAppWeb.CoreComponents do
           </dd>
       <% end %>
     <% end %>
+    """
+  end
+
+  attr :content, :string, required: true
+  attr :variables, :map, default: %{}
+
+  def render_mustache(assigns) do
+    ~H"""
+    <%= Phoenix.HTML.raw(Mustache.render(@content, @variables)) %>
     """
   end
 
@@ -565,6 +586,7 @@ defmodule HousingAppWeb.CoreComponents do
   attr :name, :any
   attr :label, :string, default: nil
   attr :value, :any
+  attr :variables, :map, default: %{}
 
   attr :type, :string,
     default: "text",
@@ -613,7 +635,7 @@ defmodule HousingAppWeb.CoreComponents do
           {@rest}
         />
         <label for={@id} class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-          <%= @label %>
+          <.render_mustache content={@label} variables={@variables} />
         </label>
         <.error :for={msg <- @errors}><%= msg %></.error>
       </div>
@@ -624,7 +646,7 @@ defmodule HousingAppWeb.CoreComponents do
   def input(%{type: "select"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name} class="mb-5">
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id}><.render_mustache content={@label} variables={@variables} /></.label>
       <div class="relative">
         <select
           id={@id}
@@ -646,7 +668,7 @@ defmodule HousingAppWeb.CoreComponents do
   def input(%{type: "textarea"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name} class="mb-5">
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id}><.render_mustache content={@label} variables={@variables} /></.label>
       <textarea
         id={@id}
         name={@name}
@@ -666,7 +688,7 @@ defmodule HousingAppWeb.CoreComponents do
   def input(%{type: "json"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name} class="mb-5">
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id}><.render_mustache content={@label} variables={@variables} /></.label>
 
       <div
         phx-hook="JsonEditor"
@@ -694,14 +716,15 @@ defmodule HousingAppWeb.CoreComponents do
     """
   end
 
+  # FUTURE: Do we really want to use Phoenix.HTML.raw? So we can show symbols like "&"
   def input(%{type: "message"} = assigns) do
     ~H"""
     <div class="mb-5">
       <p :if={!is_nil(@label) and @label != ""} class="text-lg text-gray-500 dark:text-gray-400">
-        <%= @label %>
+        <.render_mustache content={@label} variables={@variables} />
       </p>
-      <p class="text-gray-500 dark:text-gray-400">
-        <%= @value %>
+      <p :if={not is_nil(@value)} class="text-gray-500 dark:text-gray-400">
+        <.render_mustache content={@value} variables={@variables} />
       </p>
     </div>
     """
@@ -711,7 +734,7 @@ defmodule HousingAppWeb.CoreComponents do
   def input(assigns) do
     ~H"""
     <div phx-feedback-for={@name} class="mb-5">
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id}><.render_mustache content={@label} variables={@variables} /></.label>
       <input
         type={@type}
         name={@name}

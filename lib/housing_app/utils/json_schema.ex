@@ -119,6 +119,7 @@ defmodule HousingApp.Utils.JsonSchema do
         }
 
       %{"type" => "string", "format" => "message"} ->
+        # NOTE: Use `value["title"]` for label instead of `title` like all others since it isn't actually an input field
         %{
           type: "message",
           key: key,

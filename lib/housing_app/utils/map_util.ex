@@ -24,6 +24,26 @@ defmodule HousingApp.Utils.MapUtil do
     Map.new(json, &reduce_keys_to_atoms/1)
   end
 
+  def array_to_map(nil), do: %{}
+
+  def array_to_map(variables) when is_list(variables) do
+    Enum.reduce(variables, %{}, fn %{name: key, value: value}, acc ->
+      Map.put(acc, key, value)
+    end)
+  end
+
+  def array_to_map(variables) when is_map(variables) do
+    Enum.reduce(variables, %{}, fn {_index, variable}, acc ->
+      case variable do
+        %{"name" => key, "value" => value} ->
+          Map.put(acc, key, value)
+
+        _ ->
+          acc
+      end
+    end)
+  end
+
   defp reduce_keys_to_atoms({key, val}) when is_map(val), do: {String.to_atom(key), keys_to_atoms(val)}
 
   defp reduce_keys_to_atoms({key, val}) when is_list(val), do: {String.to_atom(key), Enum.map(val, &keys_to_atoms(&1))}

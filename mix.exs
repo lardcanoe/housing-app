@@ -70,6 +70,7 @@ defmodule HousingApp.MixProject do
       {:remote_ip, "~> 1.1"},
       {:timex, "~> 3.7.11"},
       {:ex_cldr_dates_times, "~> 2.16"},
+      {:mustache, "~> 0.5.0"},
       {:credo, "~> 1.7.1", only: [:dev, :test], runtime: false},
       {:styler, "~> 0.11.1", only: [:dev, :test], runtime: false}
     ]

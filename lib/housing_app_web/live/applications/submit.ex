@@ -78,7 +78,14 @@ defmodule HousingAppWeb.Live.Applications.Submit do
       </.live_component>
 
       <.simple_form :if={@json_schema} autowidth={false} for={@form} phx-change="validate" phx-submit="submit-next">
-        <.json_form form={@data_form} json_schema={@json_schema} embed={true} prefix="form" />
+        <.json_form
+          form={@data_form}
+          json_schema={@json_schema}
+          embed={true}
+          prefix="form"
+          add_custom_root={true}
+          variables={HousingApp.Utils.MapUtil.array_to_map(@current_step.form.variables)}
+        />
         <:actions>
           <.button :if={@current_step.id == @last_step_id}>Submit</.button>
           <.button :if={@current_step.id != @last_step_id}>Next</.button>
@@ -330,14 +337,19 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     completed? = MapSet.member?(completed_steps, id)
     step = Enum.find(application.steps, &(&1.id == id))
     prev_step = Enum.find(application.steps, &(&1.step == step.step - 1))
-    prev_completed? = MapSet.member?(completed_steps, prev_step.id)
 
-    if completed? or prev_completed? do
-      {:noreply,
-       socket
-       |> assign(current_step: step)
-       |> load_current_step()
-       |> load_step_submission()}
+    if prev_step do
+      prev_completed? = MapSet.member?(completed_steps, prev_step.id)
+
+      if completed? or prev_completed? do
+        {:noreply,
+         socket
+         |> assign(current_step: step)
+         |> load_current_step()
+         |> load_step_submission()}
+      else
+        {:noreply, socket}
+      end
     else
       {:noreply, socket}
     end
