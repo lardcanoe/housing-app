@@ -30,6 +30,12 @@ defmodule HousingAppWeb.PlatformTypes do
     {"Profile", :profile}
   ]
 
+  @application_step_component_options [
+    {"-None-", nil},
+    {"Select Bed", :assignments_select_bed},
+    {"Update Profile", :management_update_profile}
+  ]
+
   @empty_option {"-- Select a default --", nil}
 
   def time_periods(actor, tenant) do
@@ -54,6 +60,8 @@ defmodule HousingAppWeb.PlatformTypes do
   def resource_options, do: @resource_options
 
   def role_resource_options, do: @role_resource_options
+
+  def application_step_component_options, do: @application_step_component_options
 
   def all_forms(actor, tenant) do
     HousingApp.Management.Form.list!(actor: actor, tenant: tenant)

@@ -24,6 +24,10 @@ defmodule HousingApp.Utils.MapUtil do
     Map.new(json, &reduce_keys_to_atoms/1)
   end
 
+  def keys_to_strings(json) when is_map(json) do
+    Map.new(json, &reduce_keys_to_strings/1)
+  end
+
   def array_to_map(nil), do: %{}
 
   def array_to_map(variables) when is_list(variables) do
@@ -49,4 +53,11 @@ defmodule HousingApp.Utils.MapUtil do
   defp reduce_keys_to_atoms({key, val}) when is_list(val), do: {String.to_atom(key), Enum.map(val, &keys_to_atoms(&1))}
 
   defp reduce_keys_to_atoms({key, val}), do: {String.to_atom(key), val}
+
+  defp reduce_keys_to_strings({key, val}) when is_map(val), do: {Atom.to_string(key), keys_to_strings(val)}
+
+  defp reduce_keys_to_strings({key, val}) when is_list(val),
+    do: {Atom.to_string(key), Enum.map(val, &keys_to_strings(&1))}
+
+  defp reduce_keys_to_strings({key, val}), do: {Atom.to_string(key), val}
 end

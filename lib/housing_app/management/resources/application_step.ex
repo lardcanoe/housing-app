@@ -37,4 +37,8 @@ defmodule HousingApp.Management.ApplicationStep do
   identities do
     identity :unique_by_step, [:step]
   end
+
+  preparations do
+    prepare build(sort: [:step])
+  end
 end

@@ -27,6 +27,7 @@ import QueryBuilder from "./hooks/query-builder"
 import JsonViewHook from "./hooks/json_view"
 import JsonEditorHook from "./hooks/json_editor"
 import JsonEditorSourceHook from "./hooks/json_editor_source"
+import SortableHook from "./hooks/sortable_list"
 import './darkmode'
 
 window.json_editors = {};
@@ -38,6 +39,7 @@ Hooks.QueryBuilder = QueryBuilder
 Hooks.JsonEditor = JsonEditorHook
 Hooks.JsonEditorSource = JsonEditorSourceHook
 Hooks.JsonView = JsonViewHook
+Hooks.SortableList = SortableHook
 
 let localeCache = {
     locale: Intl.NumberFormat().resolvedOptions().locale,
