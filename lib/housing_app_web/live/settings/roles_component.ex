@@ -99,8 +99,8 @@ defmodule HousingAppWeb.Components.Settings.Roles do
             phx-target={@myself}
             phx-value-path={@role_form[:permissions].name}
           >
-            <span :if={@role_form[:permissions].value |> Enum.any?()}>Add Additional Permission</span>
-            <span :if={@role_form[:permissions].value |> Enum.empty?()}>Add Permission</span>
+            <span :if={Enum.any?(AshPhoenix.Form.value(@role_form, :permissions))}>Add Additional Permission</span>
+            <span :if={Enum.empty?(AshPhoenix.Form.value(@role_form, :permissions))}>Add Permission</span>
           </.button>
           <.button>
             <span :if={@role_form.source.action == :update}>Update Role</span>

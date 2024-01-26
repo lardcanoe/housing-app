@@ -41,8 +41,8 @@ defmodule HousingAppWeb.Live.Forms.Edit do
 
         <:actions>
           <.button type="button" phx-click="add-variable" phx-value-path={@ash_form[:variables].name}>
-            <span :if={@ash_form[:variables].value |> Enum.any?()}>Add Additional Variable</span>
-            <span :if={@ash_form[:variables].value |> Enum.empty?()}>Add Variable</span>
+            <span :if={Enum.any?(AshPhoenix.Form.value(@ash_form, :variables))}>Add Additional Variable</span>
+            <span :if={Enum.empty?(AshPhoenix.Form.value(@ash_form, :variables))}>Add Variable</span>
           </.button>
 
           <.button :if={@live_action == :edit}>Save</.button>
@@ -58,7 +58,7 @@ defmodule HousingAppWeb.Live.Forms.Edit do
             json_schema={@json_schema}
             embed={true}
             add_custom_root={false}
-            variables={HousingApp.Utils.MapUtil.array_to_map(@ash_form[:variables].value)}
+            variables={HousingApp.Utils.MapUtil.array_to_map(AshPhoenix.Form.value(@ash_form, :variables))}
           />
         </div>
       </div>
