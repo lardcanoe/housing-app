@@ -117,7 +117,7 @@ defmodule HousingApp.Management.Application do
     defaults [:create, :read, :update]
 
     create :new do
-      accept [:name, :description, :form_id, :time_period_id, :status, :type, :submission_type]
+      accept [:name, :description, :form_id, :time_period_id, :status, :type, :submission_type, :steps, :conditions]
 
       change set_attribute(:tenant_id, actor(:tenant_id))
     end

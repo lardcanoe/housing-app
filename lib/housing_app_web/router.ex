@@ -65,7 +65,7 @@ defmodule HousingAppWeb.Router do
 
       scope "/applications", Live.Applications do
         live "/", Index, :index
-        live "/new", New, :new
+        live "/new", Edit, :new
         live "/:id/edit", Edit, :edit
         live "/:id", Submit, :submit
         live "/:id/submissions", Submissions, :submissions

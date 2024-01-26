@@ -2,10 +2,13 @@ defmodule HousingAppWeb.Live.Applications.Edit do
   @moduledoc false
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
-  def render(%{live_action: :edit} = assigns) do
+  def render(assigns) do
     ~H"""
     <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit" autowidth={false} class="max-w-4xl mx-auto">
-      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update application</h2>
+      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">
+        <span :if={@live_action == :edit}>Update application</span>
+        <span :if={@live_action == :new}>New application</span>
+      </h2>
       <.input field={@ash_form[:name]} label="Name" />
       <.input field={@ash_form[:description]} label="Description" />
       <.input type="select" options={@forms} field={@ash_form[:form_id]} label="Form" prompt="Select a form..." />
@@ -63,24 +66,25 @@ defmodule HousingAppWeb.Live.Applications.Edit do
         <span :if={Enum.empty?(AshPhoenix.Form.value(@ash_form, :steps))}>Add Workflow Step</span>
       </.button>
 
-      <p
-        :if={Enum.any?(AshPhoenix.Form.value(@ash_form, :conditions))}
-        class="required block mb-2 text-lg font-medium text-gray-900 dark:text-white"
-      >
+      <p class="required block mb-2 text-lg font-medium text-gray-900 dark:text-white">
         Profile Eligibility Conditions
       </p>
 
       <.inputs_for :let={cond_form} field={@ash_form[:conditions]}>
-        <.input type="select" options={@common_query_options} field={cond_form[:common_query_id]} label="Condition">
+        <div class="flex w-full space-x-4">
+          <div class="grow">
+            <.input type="select" options={@common_query_options} field={cond_form[:common_query_id]} label="Condition">
+            </.input>
+          </div>
           <.button
             type="button"
-            class="text-white absolute right-8 bottom-2.5 px-3 py-0.5 bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-xs dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+            class="h-8 mt-8 text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-xs dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
             phx-click="remove-form"
             phx-value-path={cond_form.name}
           >
             Remove
           </.button>
-        </.input>
+        </div>
       </.inputs_for>
 
       <.button
@@ -95,7 +99,8 @@ defmodule HousingAppWeb.Live.Applications.Edit do
       </.button>
 
       <:actions>
-        <.button>Save Application</.button>
+        <.button :if={@live_action == :edit}>Save Application</.button>
+        <.button :if={@live_action == :new}>Create Application</.button>
         <.button :if={false} type="delete">Delete</.button>
       </:actions>
     </.simple_form>
@@ -114,23 +119,17 @@ defmodule HousingAppWeb.Live.Applications.Edit do
          |> push_navigate(to: ~p"/applications")}
 
       {:ok, app} ->
-        ash_form =
-          app
-          |> AshPhoenix.Form.for_update(:update,
-            api: HousingApp.Management,
-            forms: [
-              auto?: true
-            ],
-            actor: current_user_tenant,
-            tenant: tenant
-          )
-          |> to_form()
-
-        common_query_options =
-          [actor: current_user_tenant, tenant: tenant]
-          |> HousingApp.Management.CommonQuery.list!()
-          |> Enum.filter(&(&1.resource == :profile))
-          |> Enum.map(fn cq -> {cq.name, cq.id} end)
+        ash_form = management_form_for_update(app, :update, actor: current_user_tenant, tenant: tenant)
+        # app
+        # |> AshPhoenix.Form.for_update(:update,
+        #   api: HousingApp.Management,
+        #   forms: [
+        #     auto?: true
+        #   ],
+        #   actor: current_user_tenant,
+        #   tenant: tenant
+        # )
+        # |> to_form()
 
         {:ok,
          assign(socket,
@@ -140,11 +139,39 @@ defmodule HousingAppWeb.Live.Applications.Edit do
            status_options: status_options(),
            submission_types: submission_type_options(),
            application_step_component_options: application_step_component_options(),
-           common_query_options: common_query_options,
+           common_query_options: common_query_options(current_user_tenant, tenant),
            sidebar: :applications,
            page_title: "Edit Application"
          )}
     end
+  end
+
+  def mount(_params, _session, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    {:ok,
+     assign(socket,
+       ash_form:
+         management_form_for_create(HousingApp.Management.Application, :new,
+           actor: current_user_tenant,
+           tenant: tenant
+         ),
+       forms: all_form_options(current_user_tenant, tenant),
+       time_periods: time_period_options(current_user_tenant, tenant),
+       status_options: status_options(),
+       submission_types: submission_type_options(),
+       application_step_component_options: application_step_component_options(),
+       common_query_options: common_query_options(current_user_tenant, tenant),
+       sidebar: :applications,
+       page_title: "New Application"
+     )}
+  end
+
+  defp common_query_options(current_user_tenant, tenant) do
+    [actor: current_user_tenant, tenant: tenant]
+    |> HousingApp.Management.CommonQuery.list!()
+    |> Enum.filter(&(&1.resource == :profile))
+    |> Enum.map(fn cq -> {cq.name, cq.id} end)
   end
 
   # https://hexdocs.pm/ash_phoenix/AshPhoenix.Form.html
@@ -188,50 +215,11 @@ defmodule HousingAppWeb.Live.Applications.Edit do
     updated_step_params =
       ash_form.source.forms[:steps]
       |> Enum.map(fn step_form ->
-        current_step = AshPhoenix.Form.value(step_form, :step)
-
-        current_step =
-          if is_binary(current_step) do
-            String.to_integer(current_step)
-          else
-            current_step
-          end
-
-        updated_step =
-          cond do
-            current_step == old_position ->
-              new_position
-
-            new_position > old_position and current_step > old_position and current_step <= new_position ->
-              current_step - 1
-
-            new_position < old_position and current_step >= new_position and current_step < old_position ->
-              current_step + 1
-
-            true ->
-              current_step
-          end
-
-        required = AshPhoenix.Form.value(step_form, :required)
-        component = AshPhoenix.Form.value(step_form, :component)
-        component = if not is_nil(component) and is_atom(component), do: Atom.to_string(component), else: component
-
-        Map.merge(AshPhoenix.Form.params(step_form), %{
-          "step" => Integer.to_string(updated_step),
-          "title" => AshPhoenix.Form.value(step_form, :title) || "",
-          "component" =>
-            if(is_nil(component) or component == "",
-              do: "",
-              else: component
-            ),
-          "required" => if(required == false or required == "false", do: "false", else: "true"),
-          "form_id" => AshPhoenix.Form.value(step_form, :form_id) || "",
-          "_touched" => "_form_type,_persistent_id,component,form_id,id,required,step,title"
-        })
+        remap_step_form(step_form, new_position, old_position)
       end)
-      |> Enum.sort_by(&String.to_integer(&1["step"]))
+      |> Enum.sort_by(& &1["step"])
       |> Enum.reduce(%{}, fn step, acc ->
-        Map.put(acc, Integer.to_string(String.to_integer(step["step"]) - 1), step)
+        Map.put(acc, Integer.to_string(step["step"] - 1), step)
       end)
 
     params =
@@ -254,12 +242,57 @@ defmodule HousingAppWeb.Live.Applications.Edit do
       {:ok, _app} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Successfully updated the application.")
+         |> put_flash(:info, "Successfully saved the application.")
          |> push_navigate(to: ~p"/applications")}
 
       {:error, ash_form} ->
         IO.inspect(ash_form.source)
         {:noreply, assign(socket, ash_form: ash_form)}
+    end
+  end
+
+  defp remap_step_form(step_form, new_position, old_position) do
+    updated_step = calculate_updated_step(step_form, new_position, old_position)
+    required = AshPhoenix.Form.value(step_form, :required)
+    component = AshPhoenix.Form.value(step_form, :component)
+    component = if not is_nil(component) and is_atom(component), do: Atom.to_string(component), else: component
+
+    Map.merge(AshPhoenix.Form.params(step_form), %{
+      "step" => updated_step,
+      "title" => AshPhoenix.Form.value(step_form, :title) || "",
+      "component" =>
+        if(is_nil(component) or component == "",
+          do: "",
+          else: component
+        ),
+      "required" => if(required == false or required == "false", do: "false", else: "true"),
+      "form_id" => AshPhoenix.Form.value(step_form, :form_id) || "",
+      "_touched" => "_form_type,_persistent_id,component,form_id,id,required,step,title"
+    })
+  end
+
+  defp calculate_updated_step(step_form, new_position, old_position) do
+    current_step = AshPhoenix.Form.value(step_form, :step)
+
+    current_step =
+      if is_binary(current_step) do
+        String.to_integer(current_step)
+      else
+        current_step
+      end
+
+    cond do
+      current_step == old_position ->
+        new_position
+
+      new_position > old_position and current_step > old_position and current_step <= new_position ->
+        current_step - 1
+
+      new_position < old_position and current_step >= new_position and current_step < old_position ->
+        current_step + 1
+
+      true ->
+        current_step
     end
   end
 end
