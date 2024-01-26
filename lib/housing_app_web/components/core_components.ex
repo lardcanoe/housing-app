@@ -486,6 +486,11 @@ defmodule HousingAppWeb.CoreComponents do
   attr :content, :string, required: true
   attr :variables, :map, default: %{}
 
+  def render_mustache(%{content: nil} = assigns),
+    do: ~H"""
+
+    """
+
   def render_mustache(assigns) do
     ~H"""
     <%= Phoenix.HTML.raw(Mustache.render(@content, @variables)) %>
