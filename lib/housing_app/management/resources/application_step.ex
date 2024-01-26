@@ -41,4 +41,8 @@ defmodule HousingApp.Management.ApplicationStep do
   preparations do
     prepare build(sort: [:step])
   end
+
+  validations do
+    validate present([:component, :form_id], exactly: 1)
+  end
 end
