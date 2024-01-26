@@ -12,5 +12,6 @@ defmodule HousingApp.Assignments.Registry do
     entry HousingApp.Assignments.Roommate
     entry HousingApp.Assignments.RoommateInvite
     entry HousingApp.Assignments.RoleQuery
+    entry HousingApp.Assignments.InventoryCriteria
   end
 end
