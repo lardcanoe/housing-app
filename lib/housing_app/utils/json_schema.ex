@@ -110,14 +110,14 @@ defmodule HousingApp.Utils.JsonSchema do
 
       %{"type" => "string", "enum" => enum} when is_list(enum) ->
         options =
-          if Map.get(value, "blank", false) do
+          if Map.get(value, "blank", false) and value["format"] != "choice" do
             [{"", nil}] ++ Enum.map(enum, &{&1, &1})
           else
             Enum.map(enum, &{&1, &1})
           end
 
         %{
-          type: "select",
+          type: value["format"] || "select",
           key: key,
           name: name,
           id: id,
@@ -217,7 +217,7 @@ defmodule HousingApp.Utils.JsonSchema do
 
   def extract_properties(%{}), do: []
 
-  def cast_params(%{"properties" => properties} = schema, params) when is_map(properties) do
+  def cast_params(%{"properties" => properties} = schema, params) when is_map(properties) and not is_nil(params) do
     types = extract_properties(schema)
 
     changeset = Ecto.Changeset.cast({%{}, types}, params, Map.keys(types))

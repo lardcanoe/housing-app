@@ -595,7 +595,7 @@ defmodule HousingAppWeb.CoreComponents do
   attr :type, :string,
     default: "text",
     values: ~w(checkbox color date datetime-local email file hidden month number password
-               range radio search select tel text textarea time url week message json)
+               range radio choice search select tel text textarea time url week message json)
 
   attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
@@ -662,6 +662,48 @@ defmodule HousingAppWeb.CoreComponents do
           <option :if={@prompt} value=""><%= @prompt %></option>
           <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
         </select>
+        <%= if @inner_block, do: render_slot(@inner_block) %>
+      </div>
+      <.error :for={msg <- @errors}><%= msg %></.error>
+    </div>
+    """
+  end
+
+  def input(%{type: "choice"} = assigns) do
+    assigns =
+      assign_new(assigns, :checked, fn ->
+        Phoenix.HTML.Form.normalize_value("checkbox", assigns[:value])
+      end)
+
+    ~H"""
+    <div phx-feedback-for={@name} class="mb-5">
+      <.label for={@id}><.render_mustache content={@label} variables={@variables} /></.label>
+      <div class="relative">
+        <ul class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          <li
+            :for={{name, choice} <- @options}
+            class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600"
+          >
+            <div class="flex items-center ps-3">
+              <input
+                id={@id <> "-" <> choice}
+                type="radio"
+                value={choice}
+                name={@name}
+                checked={@checked}
+                {@rest}
+                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+              />
+              <label
+                for={@id <> "-" <> choice}
+                class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+              >
+                <%= name %>
+              </label>
+            </div>
+          </li>
+        </ul>
+
         <%= if @inner_block, do: render_slot(@inner_block) %>
       </div>
       <.error :for={msg <- @errors}><%= msg %></.error>
