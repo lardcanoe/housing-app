@@ -337,12 +337,14 @@ defmodule HousingAppWeb.CoreComponents do
   attr :autowidth, :boolean, default: true, doc: "the autowidth flag"
   attr :class, :string, default: nil
   attr :button_text, :string, default: "Submit"
+  attr :actor, :any, default: nil
+  attr :tenant, :any, default: nil
   attr(:rest, :global, include: ~w(phx-target phx-submit phx-change))
 
   def json_form(%{embed: true, add_custom_root: false} = assigns) do
     ~H"""
     <%= render_schema(%{
-      definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema, @prefix),
+      definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema, @prefix, actor: @actor, tenant: @tenant),
       form: @form,
       variables: @variables
     }) %>
@@ -359,7 +361,9 @@ defmodule HousingAppWeb.CoreComponents do
               "data" => Map.merge(%{"type" => "object", "title" => "Custom Fields", "properties" => %{}}, @json_schema)
             }
           },
-          @prefix
+          @prefix,
+          actor: @actor,
+          tenant: @tenant
         ),
       variables: @variables,
       form: @form
@@ -388,7 +392,7 @@ defmodule HousingAppWeb.CoreComponents do
       </h1>
 
       <%= render_schema(%{
-        definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema, @prefix),
+        definitions: HousingApp.Utils.JsonSchema.to_html_form_inputs(@json_schema, @prefix, actor: @actor, tenant: @tenant),
         variables: @variables,
         form: @form
       }) %>

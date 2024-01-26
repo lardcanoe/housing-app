@@ -61,15 +61,15 @@ defmodule HousingApp.Utils.JsonSchema do
 
   def schema_to_aggrid_columns(%{}, _prefix), do: []
 
-  def to_html_form_inputs(schema, name_prefix \\ "")
+  def to_html_form_inputs(schema, name_prefix \\ "", opts \\ [])
 
-  def to_html_form_inputs(%{"properties" => properties} = schema, name_prefix) when not is_nil(properties) do
+  def to_html_form_inputs(%{"properties" => properties} = schema, name_prefix, opts) when not is_nil(properties) do
     required = MapSet.new(schema["required"] || [])
 
     properties
     |> Enum.sort_by(fn {_, prop} -> prop["propertyOrder"] || 1000 end)
     |> Enum.map(fn {key, value} ->
-      prop = to_html_input(key, value, name_prefix)
+      prop = to_html_input(key, value, name_prefix, opts)
 
       cond do
         is_nil(prop) -> nil
@@ -80,9 +80,9 @@ defmodule HousingApp.Utils.JsonSchema do
     |> Enum.reject(&is_nil/1)
   end
 
-  def to_html_form_inputs(%{}, _name_prefix), do: []
+  def to_html_form_inputs(%{}, _name_prefix, _opts), do: []
 
-  defp to_html_input(key, value, name_prefix) do
+  defp to_html_input(key, value, name_prefix, opts) do
     title =
       HousingApp.Utils.String.titlize(value["title"]) || value["description"] || HousingApp.Utils.String.titlize(key)
 
@@ -109,13 +109,42 @@ defmodule HousingApp.Utils.JsonSchema do
         nil
 
       %{"type" => "string", "enum" => enum} when is_list(enum) ->
+        options =
+          if Map.get(value, "blank", false) do
+            [{"", nil}] ++ Enum.map(enum, &{&1, &1})
+          else
+            Enum.map(enum, &{&1, &1})
+          end
+
         %{
           type: "select",
           key: key,
           name: name,
           id: id,
           label: title,
-          options: Enum.map(enum, fn v -> {v, v} end)
+          options: options
+        }
+
+      %{"type" => "string", "format" => "uuid", "reference" => reference} ->
+        # FUTURE: Limit scope of which rooms they can see
+        options =
+          case reference do
+            "inventory/rooms" ->
+              opts
+              |> HousingApp.Assignments.Room.list!()
+              |> Enum.map(&{"#{&1.building.name} #{&1.name}", &1.id})
+
+            _ ->
+              []
+          end
+
+        %{
+          type: "select",
+          key: key,
+          name: name,
+          id: id,
+          label: title,
+          options: options
         }
 
       %{"type" => "string", "format" => "message"} ->

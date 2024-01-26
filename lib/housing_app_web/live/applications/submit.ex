@@ -85,6 +85,8 @@ defmodule HousingAppWeb.Live.Applications.Submit do
           prefix="form"
           add_custom_root={true}
           variables={HousingApp.Utils.MapUtil.array_to_map(@current_step.form.variables)}
+          actor={@current_user_tenant}
+          tenant={@current_tenant}
         />
         <:actions>
           <.button :if={@current_step.id == @last_step_id}>Submit</.button>
@@ -302,7 +304,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     case ExJsonSchema.Validator.validate(ref_schema, json_data) do
       :ok ->
         case HousingApp.Management.ApplicationSubmission.submit(
-               %{application_id: application.id, data: json_data},
+               %{application_id: application.id, status: :completed, data: json_data},
                actor: actor,
                tenant: tenant
              ) do
