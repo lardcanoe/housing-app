@@ -93,7 +93,7 @@ defmodule HousingApp.Assignments.Room do
     defaults [:create, :read, :update]
 
     create :new do
-      accept [:name, :floor, :block, :max_capacity, :building_id, :product_id]
+      accept [:name, :floor, :block, :max_capacity, :building_id, :product_id, :data]
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
 
@@ -119,7 +119,6 @@ defmodule HousingApp.Assignments.Room do
       soft? true
       change set_attribute(:archived_at, &DateTime.utc_now/0)
     end
-
   end
 
   code_interface do

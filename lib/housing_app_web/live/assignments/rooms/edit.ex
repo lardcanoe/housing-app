@@ -3,17 +3,17 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
-  def render(%{live_action: :edit} = assigns) do
+  def render(assigns) do
     ~H"""
     <.simple_form :let={f} for={@ash_form} phx-change="validate" phx-submit="submit">
-      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Update room</h2>
+      <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Room</h2>
       <.input
         type="select"
         field={@ash_form[:building_id]}
         options={@buildings}
         label="Building"
         prompt="Select a building..."
-        disabled
+        {if(@ash_form.source.action == :update, do: [{"disabled", ""}], else: [])}
       />
       <.input field={@ash_form[:name]} label="Name" />
       <.input field={@ash_form[:block]} label="Block" />
@@ -29,7 +29,7 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
 
       <.json_form
         :if={@json_schema}
-        form={%{"data" => f.data.data} |> to_form(as: "data")}
+        form={%{"data" => if(is_nil(f.data), do: %{}, else: f.data.data)} |> to_form(as: "data")}
         json_schema={@json_schema}
         embed={true}
       />
@@ -63,32 +63,64 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
           )
           |> to_form(as: "room")
 
-        buildings =
-          [actor: current_user_tenant, tenant: tenant]
-          |> HousingApp.Assignments.Building.list!()
-          |> Enum.map(&{&1.name, &1.id})
-
-        products =
-          [actor: current_user_tenant, tenant: tenant]
-          |> HousingApp.Accounting.Product.list!()
-          |> Enum.map(&{&1.name, &1.id})
-
-        json_schema =
-          case HousingApp.Management.Service.get_room_form(actor: current_user_tenant, tenant: tenant) do
-            {:ok, room_form} -> Jason.decode!(room_form.json_schema)
-            {:error, _} -> nil
-          end
-
         {:ok,
-         assign(socket,
-           json_schema: json_schema,
+         socket
+         |> assign(
            ash_form: ash_form,
-           buildings: buildings,
-           products: products,
            sidebar: :assignments,
            page_title: "Edit Room"
-         )}
+         )
+         |> load_assigns()}
     end
+  end
+
+  def mount(_params, _session, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    ash_form =
+      HousingApp.Assignments.Room
+      |> AshPhoenix.Form.for_create(:new,
+        api: HousingApp.Assignments,
+        forms: [auto?: true],
+        actor: current_user_tenant,
+        tenant: tenant
+      )
+      |> to_form()
+
+    {:ok,
+     socket
+     |> assign(
+       ash_form: ash_form,
+       sidebar: :assignments,
+       page_title: "New Room"
+     )
+     |> load_assigns()}
+  end
+
+  defp load_assigns(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    buildings =
+      [actor: current_user_tenant, tenant: tenant]
+      |> HousingApp.Assignments.Building.list!()
+      |> Enum.map(&{&1.name, &1.id})
+
+    products =
+      [actor: current_user_tenant, tenant: tenant]
+      |> HousingApp.Accounting.Product.list!()
+      |> Enum.map(&{&1.name, &1.id})
+
+    json_schema =
+      case HousingApp.Management.Service.get_room_form(actor: current_user_tenant, tenant: tenant) do
+        {:ok, room_form} -> Jason.decode!(room_form.json_schema)
+        {:error, _} -> nil
+      end
+
+    assign(socket,
+      buildings: buildings,
+      products: products,
+      json_schema: json_schema
+    )
   end
 
   def handle_event("validate", %{"form" => params}, socket) do
@@ -104,7 +136,7 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
       {:ok, _app} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Successfully updated the room.")
+         |> put_flash(:info, "Successfully saved the room.")
          |> push_navigate(to: ~p"/assignments/rooms")}
 
       {:error, ash_form} ->
