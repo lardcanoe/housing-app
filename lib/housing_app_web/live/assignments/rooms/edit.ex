@@ -108,6 +108,7 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Edit do
          |> push_navigate(to: ~p"/assignments/rooms")}
 
       {:error, ash_form} ->
+        dbg(ash_form)
         {:noreply, assign(socket, ash_form: ash_form)}
     end
   end
