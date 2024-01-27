@@ -61,6 +61,28 @@ defmodule HousingApp.Utils.JsonSchema do
 
   def schema_to_aggrid_columns(%{}, _prefix), do: []
 
+  # """
+  # iex(8)> HousingApp.Utils.JsonSchema.schema_to_resource_fields(%{"properties" => %{"x" => %{}, "y" => %{"type" => "object", "properties" => %{"z" => %{}}} }})
+  # [%{label: "X", name: "x"}, %{label: "Y / Z", name: "y.z"}]
+  # """
+
+  def schema_to_resource_fields(schema, prefix \\ "", label_prefix \\ "") do
+    schema
+    |> Map.get("properties")
+    |> Enum.flat_map(fn {k, v} ->
+      name = "#{prefix}#{k}"
+      label = label_prefix <> (v["title"] || String.capitalize(k))
+
+      case v do
+        %{"type" => "object"} ->
+          schema_to_resource_fields(v, "#{name}.", label <> " / ")
+
+        _ ->
+          [%{name: name, label: label}]
+      end
+    end)
+  end
+
   def to_html_form_inputs(schema, name_prefix \\ "", opts \\ [])
 
   def to_html_form_inputs(%{"properties" => properties} = schema, name_prefix, opts) when not is_nil(properties) do

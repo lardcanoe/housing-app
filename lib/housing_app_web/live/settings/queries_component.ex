@@ -193,10 +193,7 @@ defmodule HousingAppWeb.Components.Settings.Queries do
         fields =
           profile_form.json_schema
           |> Jason.decode!()
-          |> Map.get("properties")
-          |> Enum.map(fn {k, v} ->
-            %{name: k, label: v["title"] || String.capitalize(k)}
-          end)
+          |> HousingApp.Utils.JsonSchema.schema_to_resource_fields()
 
         assign(socket, resource_fields: fields)
 
@@ -206,31 +203,81 @@ defmodule HousingAppWeb.Components.Settings.Queries do
   end
 
   defp load_resource_fields(socket, "booking") do
-    fields =
-      resource_fields(HousingApp.Assignments.Booking)
+    fields = resource_fields(socket, HousingApp.Assignments.Booking)
 
     assign(socket, resource_fields: fields)
   end
 
-  defp resource_fields(resource, path \\ []) do
+  defp load_resource_fields(socket, "room") do
+    fields = resource_fields(socket, HousingApp.Assignments.Room)
+
+    assign(socket, resource_fields: fields)
+  end
+
+  defp resource_fields(socket, resource, path \\ []) do
     resource_fields =
       resource
       |> Ash.Resource.Info.public_aggregates()
       |> Enum.concat(Ash.Resource.Info.public_calculations(resource))
       |> Enum.concat(Ash.Resource.Info.public_attributes(resource))
-      |> Enum.map(&%{name: Enum.join(path ++ [&1.name], "."), label: Enum.join(path ++ [&1.name], " / ")})
+      |> Enum.reject(&(&1.name == :tenant_id || &1.name == :user_tenant_id))
+      |> Enum.flat_map(fn field ->
+        if field.name == :data and field.type == Ash.Type.Map do
+          form_to_resource_fields(
+            resource,
+            Enum.join(path ++ [field.name], "."),
+            Enum.join(path ++ ["Custom Data / "], " / "),
+            socket
+          )
+        else
+          [%{name: Enum.join(path ++ [field.name], "."), label: Enum.join(path ++ [field.name], " / ")}]
+        end
+      end)
 
     relations =
       resource
       |> Ash.Resource.Info.public_relationships()
       |> Enum.filter(&(&1.type == :belongs_to && &1.name != :tenant && &1.name != :user_tenant))
-      |> Enum.flat_map(&resource_fields(&1.destination, path ++ [&1.name]))
+      |> Enum.flat_map(&resource_fields(socket, &1.destination, path ++ [&1.name]))
 
     # IO.inspect(resource)
     # IO.inspect(Enum.concat(relations, resource_fields))
     # IO.puts("--------")
 
     Enum.concat(relations, resource_fields)
+  end
+
+  defp form_to_resource_fields(HousingApp.Assignments.Building, path, label, socket) do
+    form_type_to_resource_fields("building", path, label, socket)
+  end
+
+  defp form_to_resource_fields(HousingApp.Assignments.Room, path, label, socket) do
+    form_type_to_resource_fields("room", path, label, socket)
+  end
+
+  defp form_to_resource_fields(HousingApp.Assignments.Bed, path, label, socket) do
+    form_type_to_resource_fields("bed", path, label, socket)
+  end
+
+  defp form_to_resource_fields(_type, _path, _label, _socket) do
+    []
+  end
+
+  defp form_type_to_resource_fields(form_type, path, label, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    case HousingApp.Management.Service.get_form_for(:system, String.to_atom("#{form_type}_form_id"),
+           actor: current_user_tenant,
+           tenant: tenant
+         ) do
+      {:ok, form} ->
+        form.json_schema
+        |> Jason.decode!()
+        |> HousingApp.Utils.JsonSchema.schema_to_resource_fields(path, label)
+
+      _ ->
+        []
+    end
   end
 
   defp reset_query_fields(socket) do
