@@ -1,4 +1,4 @@
-defmodule HousingApp.Assignments.InventoryCriteria do
+defmodule HousingApp.Assignments.SelectionCriteria do
   @moduledoc false
 
   use Ash.Resource,
@@ -20,12 +20,12 @@ defmodule HousingApp.Assignments.InventoryCriteria do
       default ""
     end
 
-    attribute :conditions, {:array, HousingApp.Assignments.InventoryCondition} do
+    attribute :conditions, {:array, HousingApp.Assignments.SelectionCondition} do
       default []
       allow_nil? false
     end
 
-    attribute :filters, {:array, HousingApp.Assignments.InventoryFilter} do
+    attribute :filters, {:array, HousingApp.Assignments.SelectionFilter} do
       default []
       allow_nil? false
     end
@@ -60,7 +60,7 @@ defmodule HousingApp.Assignments.InventoryCriteria do
   end
 
   postgres do
-    table "inventory_criteria"
+    table "selection_criteria"
     repo HousingApp.Repo
   end
 

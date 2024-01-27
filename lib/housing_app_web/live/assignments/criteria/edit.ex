@@ -75,7 +75,7 @@ defmodule HousingAppWeb.Live.Assignments.Criteria.Form do
   def mount(%{"id" => id}, _session, socket) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
-    case HousingApp.Assignments.InventoryCriteria.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
+    case HousingApp.Assignments.SelectionCriteria.get_by_id(id, actor: current_user_tenant, tenant: tenant) do
       {:error, _} ->
         {:ok,
          socket
@@ -108,7 +108,7 @@ defmodule HousingAppWeb.Live.Assignments.Criteria.Form do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     ash_form =
-      HousingApp.Assignments.InventoryCriteria
+      HousingApp.Assignments.SelectionCriteria
       |> AshPhoenix.Form.for_create(:new,
         api: HousingApp.Assignments,
         forms: [auto?: true],

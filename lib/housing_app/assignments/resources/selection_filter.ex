@@ -1,4 +1,4 @@
-defmodule HousingApp.Assignments.InventoryCondition do
+defmodule HousingApp.Assignments.SelectionFilter do
   @moduledoc false
 
   use Ash.Resource,

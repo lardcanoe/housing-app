@@ -47,7 +47,7 @@ defmodule HousingAppWeb.Live.Assignments.Criteria.Index do
 
     criteria =
       [actor: current_user_tenant, tenant: tenant]
-      |> HousingApp.Assignments.InventoryCriteria.list!()
+      |> HousingApp.Assignments.SelectionCriteria.list!()
       |> Enum.sort_by(& &1.name)
 
     {:ok, assign(socket, criteria: criteria, sidebar: :assignments, page_title: "Criteria")}
