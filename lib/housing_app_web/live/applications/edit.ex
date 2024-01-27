@@ -44,7 +44,13 @@ defmodule HousingAppWeb.Live.Applications.Edit do
                 field={step_form[:component]}
                 label="Component"
               />
-              <.input type="select" options={[{"-None-", nil}] ++ @forms} field={step_form[:form_id]} label="Form" />
+              <div class={
+                if(AshPhoenix.Form.value(step_form, :component) && AshPhoenix.Form.value(step_form, :component) != "",
+                  do: "hidden"
+                )
+              }>
+                <.input type="select" options={[{"-None-", nil}] ++ @forms} field={step_form[:form_id]} label="Form" />
+              </div>
               <div class="mt-8">
                 <.input type="checkbox" field={step_form[:required]} label="Required" />
               </div>

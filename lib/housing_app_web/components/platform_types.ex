@@ -32,7 +32,7 @@ defmodule HousingAppWeb.PlatformTypes do
   ]
 
   @application_step_component_options [
-    {"-None-", nil},
+    {"Form", nil},
     {"Select Bed", :assignments_select_bed},
     {"Update Profile", :management_update_profile}
   ]
