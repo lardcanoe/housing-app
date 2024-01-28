@@ -99,7 +99,7 @@ defmodule HousingAppWeb.Live.Assignments.Criteria.Form do
            ash_form: ash_form,
            common_query_options: common_query_options(current_user_tenant, tenant),
            sidebar: :assignments,
-           page_title: "Edit Inventory Criteria"
+           page_title: "Edit Selection Criteria"
          )}
     end
   end
@@ -122,7 +122,7 @@ defmodule HousingAppWeb.Live.Assignments.Criteria.Form do
        ash_form: ash_form,
        common_query_options: common_query_options(current_user_tenant, tenant),
        sidebar: :assignments,
-       page_title: "New Inventory Criteria"
+       page_title: "New Selection Criteria"
      )}
   end
 
@@ -165,6 +165,7 @@ defmodule HousingAppWeb.Live.Assignments.Criteria.Form do
   defp common_query_options(current_user_tenant, tenant) do
     [actor: current_user_tenant, tenant: tenant]
     |> HousingApp.Management.CommonQuery.list!()
-    |> Enum.map(fn cq -> {cq.name, cq.id} end)
+    |> Enum.map(fn cq -> {"#{cq.resource} - #{cq.name}", cq.id} end)
+    |> Enum.sort_by(fn {name, _} -> name end)
   end
 end

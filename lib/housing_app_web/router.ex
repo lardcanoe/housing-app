@@ -133,6 +133,12 @@ defmodule HousingAppWeb.Router do
           live "/:id/edit", Form, :edit
         end
 
+        scope "/processes", Process do
+          live "/", Index, :index
+          live "/new", Form, :new
+          live "/:id/edit", Form, :edit
+        end
+
         scope "/roommates", Roommates do
           live "/", Index, :index
         end

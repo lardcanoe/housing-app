@@ -258,7 +258,9 @@ defmodule HousingAppWeb.Live.Applications.Edit do
   end
 
   defp remap_step_form(step_form, new_position, old_position) do
-    updated_step = calculate_updated_step(step_form, new_position, old_position)
+    updated_step =
+      HousingApp.Utils.Forms.update_position(AshPhoenix.Form.value(step_form, :step), new_position, old_position)
+
     required = AshPhoenix.Form.value(step_form, :required)
     component = AshPhoenix.Form.value(step_form, :component)
     component = if not is_nil(component) and is_atom(component), do: Atom.to_string(component), else: component
@@ -275,30 +277,5 @@ defmodule HousingAppWeb.Live.Applications.Edit do
       "form_id" => AshPhoenix.Form.value(step_form, :form_id) || "",
       "_touched" => "_form_type,_persistent_id,component,form_id,id,required,step,title"
     })
-  end
-
-  defp calculate_updated_step(step_form, new_position, old_position) do
-    current_step = AshPhoenix.Form.value(step_form, :step)
-
-    current_step =
-      if is_binary(current_step) do
-        String.to_integer(current_step)
-      else
-        current_step
-      end
-
-    cond do
-      current_step == old_position ->
-        new_position
-
-      new_position > old_position and current_step > old_position and current_step <= new_position ->
-        current_step - 1
-
-      new_position < old_position and current_step >= new_position and current_step < old_position ->
-        current_step + 1
-
-      true ->
-        current_step
-    end
   end
 end
