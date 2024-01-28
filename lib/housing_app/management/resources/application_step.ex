@@ -32,6 +32,11 @@ defmodule HousingApp.Management.ApplicationStep do
       attribute_writable? true
       allow_nil? true
     end
+
+    belongs_to :selection_process, HousingApp.Assignments.SelectionProcess do
+      attribute_writable? true
+      allow_nil? true
+    end
   end
 
   identities do

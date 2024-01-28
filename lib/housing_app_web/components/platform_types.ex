@@ -98,6 +98,13 @@ defmodule HousingAppWeb.PlatformTypes do
     [@empty_option] ++ approved_form_options(actor, tenant)
   end
 
+  def selection_process_options(type, actor, tenant) do
+    [actor: actor, tenant: tenant]
+    |> HousingApp.Assignments.SelectionProcess.list!()
+    |> Enum.filter(&(&1.process == type))
+    |> Enum.map(&{&1.name, &1.id})
+  end
+
   def management_form_for_create(resource, action, opts \\ []) do
     opts =
       Keyword.merge(

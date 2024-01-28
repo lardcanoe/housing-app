@@ -51,6 +51,14 @@ defmodule HousingAppWeb.Live.Applications.Edit do
               }>
                 <.input type="select" options={[{"-None-", nil}] ++ @forms} field={step_form[:form_id]} label="Form" />
               </div>
+              <.input
+                :if={AshPhoenix.Form.value(step_form, :component) == :assignments_select_bed}
+                type="select"
+                options={@selection_processes}
+                field={step_form[:selection_process_id]}
+                label="Process"
+                required
+              />
               <div class="mt-8">
                 <.input type="checkbox" field={step_form[:required]} label="Required" />
               </div>
@@ -126,21 +134,12 @@ defmodule HousingAppWeb.Live.Applications.Edit do
 
       {:ok, app} ->
         ash_form = management_form_for_update(app, :update, actor: current_user_tenant, tenant: tenant)
-        # app
-        # |> AshPhoenix.Form.for_update(:update,
-        #   api: HousingApp.Management,
-        #   forms: [
-        #     auto?: true
-        #   ],
-        #   actor: current_user_tenant,
-        #   tenant: tenant
-        # )
-        # |> to_form()
 
         {:ok,
          assign(socket,
            ash_form: ash_form,
            forms: all_form_options(current_user_tenant, tenant),
+           selection_processes: selection_process_options(:assignments_select_bed, current_user_tenant, tenant),
            time_periods: time_period_options(current_user_tenant, tenant),
            status_options: status_options(),
            submission_types: submission_type_options(),
@@ -163,6 +162,7 @@ defmodule HousingAppWeb.Live.Applications.Edit do
            tenant: tenant
          ),
        forms: all_form_options(current_user_tenant, tenant),
+       selection_processes: selection_process_options(:assignments_select_bed, current_user_tenant, tenant),
        time_periods: time_period_options(current_user_tenant, tenant),
        status_options: status_options(),
        submission_types: submission_type_options(),
