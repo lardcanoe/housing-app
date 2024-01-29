@@ -122,6 +122,27 @@ defmodule HousingApp.Management.Application do
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
 
+    create :copy do
+      argument :source, :map do
+        allow_nil? false
+      end
+
+      change fn changeset, context ->
+        Ash.Changeset.change_attributes(changeset, %{
+          name: "#{changeset.arguments.source.name} (Copy)",
+          description: changeset.arguments.source.description,
+          status: changeset.arguments.source.status,
+          type: changeset.arguments.source.type,
+          submission_type: changeset.arguments.source.submission_type,
+          steps: changeset.arguments.source.steps,
+          conditions: changeset.arguments.source.conditions,
+          tenant_id: changeset.arguments.source.tenant_id,
+          form_id: changeset.arguments.source.form_id,
+          time_period_id: changeset.arguments.source.time_period_id
+        })
+      end
+    end
+
     read :list do
       prepare build(
                 select: [:id, :name, :type, :submission_type, :description, :status, :form_id],
@@ -212,6 +233,7 @@ defmodule HousingApp.Management.Application do
     define :list_by_type, args: [:type, {:optional, :status}]
     define :get_by_id, args: [:id]
     define :get_types
+    define :copy, args: [:source]
   end
 
   aggregates do

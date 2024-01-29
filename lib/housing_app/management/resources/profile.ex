@@ -167,8 +167,8 @@ defmodule HousingApp.Management.Profile do
     update :submit do
       accept [:sanitized_data]
 
-      change fn changset, _context ->
-        changset
+      change fn changeset, _context ->
+        changeset
         |> Ash.Changeset.before_action(&HousingApp.Checks.FilterData.merge_sanitized_data/1)
         |> Ash.Changeset.after_action(fn _changeset, record ->
           {:ok, HousingApp.Checks.FilterData.filter_record(record)}

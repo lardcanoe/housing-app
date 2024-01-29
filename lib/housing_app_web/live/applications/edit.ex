@@ -52,7 +52,7 @@ defmodule HousingAppWeb.Live.Applications.Edit do
                 <.input type="select" options={[{"-None-", nil}] ++ @forms} field={step_form[:form_id]} label="Form" />
               </div>
               <.input
-                :if={AshPhoenix.Form.value(step_form, :component) == :assignments_select_bed}
+                :if={AshPhoenix.Form.value(step_form, :component) in [:assignments_select_bed, "assignments_select_bed"]}
                 type="select"
                 options={@selection_processes}
                 field={step_form[:selection_process_id]}
@@ -264,6 +264,7 @@ defmodule HousingAppWeb.Live.Applications.Edit do
     required = AshPhoenix.Form.value(step_form, :required)
     component = AshPhoenix.Form.value(step_form, :component)
     component = if not is_nil(component) and is_atom(component), do: Atom.to_string(component), else: component
+    selection_process_id = AshPhoenix.Form.value(step_form, :selection_process_id)
 
     Map.merge(AshPhoenix.Form.params(step_form), %{
       "step" => updated_step,
@@ -273,9 +274,14 @@ defmodule HousingAppWeb.Live.Applications.Edit do
           do: "",
           else: component
         ),
+      "selection_process_id" =>
+        if(is_nil(component) or component == "",
+          do: "",
+          else: selection_process_id || ""
+        ),
       "required" => if(required == false or required == "false", do: "false", else: "true"),
       "form_id" => AshPhoenix.Form.value(step_form, :form_id) || "",
-      "_touched" => "_form_type,_persistent_id,component,form_id,id,required,step,title"
+      "_touched" => "_form_type,_persistent_id,component,form_id,selection_process_id,id,required,step,title"
     })
   end
 end

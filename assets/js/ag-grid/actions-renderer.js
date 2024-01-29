@@ -2,6 +2,8 @@ class ActionsValueRenderer {
     eGui;
     vButton;
     vListener;
+    cButton;
+    cListener;
     eButton;
     eventListener;
 
@@ -23,6 +25,19 @@ class ActionsValueRenderer {
             };
 
             this.eButton.addEventListener('click', this.eListener);
+        }
+
+        this.cButton = this.eGui.querySelector('a[name=\'Copy\']');
+
+        if (this.cButton) {
+            this.cListener = () => {
+                const event = new Event('copy:clicked');
+                event.id = params.data.id
+                window.dispatchEvent(event);
+                return false;
+            };
+
+            this.cButton.addEventListener('click', this.cListener);
         }
 
         this.vButton = this.eGui.querySelector('a[name=\'View\']');
@@ -60,6 +75,9 @@ class ActionsValueRenderer {
         }
         if (this.vButton) {
             this.vButton.removeEventListener('click', this.vListener);
+        }
+        if (this.cButton) {
+            this.cButton.removeEventListener('click', this.cListener);
         }
     }
 }

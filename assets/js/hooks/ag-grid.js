@@ -77,6 +77,7 @@ export default {
 
         this.handleViewClick = (e) => { this.pushEvent("view-row", { id: e.id }) };
         this.handleEditClick = (e) => { this.pushEvent("edit-row", { id: e.id }) };
+        this.handleCopyClick = (e) => { this.pushEvent("copy-row", { id: e.id }) };
         this.handleLinkClick = (e) => { this.pushEvent("redirect", { url: e.url }) };
         this.handleRefreshData = (e) => {
             this.pushEvent("load-data", {}, (reply, ref) => {
@@ -116,6 +117,7 @@ export default {
 
         window.addEventListener("view:clicked", this.handleViewClick);
         window.addEventListener("edit:clicked", this.handleEditClick);
+        window.addEventListener("copy:clicked", this.handleCopyClick);
         window.addEventListener("link:clicked", this.handleLinkClick);
         window.addEventListener("phx:page-loading-stop", this.handleRefreshData)
         window.addEventListener("phx:ag-grid:refresh", this.handleRefreshData)
@@ -159,6 +161,7 @@ export default {
     destroy() {
         window.removeEventListener("view:clicked", this.handleViewClick);
         window.removeEventListener("edit:clicked", this.handleEditClick);
+        window.removeEventListener("copy:clicked", this.handleCopyClick);
         window.removeEventListener("link:clicked", this.handleLinkClick);
         window.removeEventListener("phx:page-loading-stop", this.handleRefreshData)
 

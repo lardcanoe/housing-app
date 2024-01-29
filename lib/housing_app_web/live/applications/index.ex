@@ -171,6 +171,24 @@ defmodule HousingAppWeb.Live.Applications.Index do
     {:noreply, push_navigate(socket, to: ~p"/applications/#{id}/edit")}
   end
 
+  def handle_event("copy-row", %{"id" => id}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    with {:get, {:ok, application}} <-
+           {:get, HousingApp.Management.Application.get_by_id(id, actor: current_user_tenant, tenant: tenant)},
+         {:copy, {:ok, copied_app}} <-
+           {:copy, HousingApp.Management.Application.copy(application, actor: current_user_tenant, tenant: tenant)} do
+      {:noreply,
+       socket |> put_flash(:info, "Copied application") |> push_navigate(to: ~p"/applications/#{copied_app.id}/edit")}
+    else
+      {:copy, {:error, _}} ->
+        {:noreply, put_flash(socket, :error, "Failed to copy")}
+
+      {:get, {:error, _}} ->
+        {:noreply, put_flash(socket, :error, "Not found")}
+    end
+  end
+
   def handle_event("redirect", %{"url" => url}, socket) do
     {:noreply, push_navigate(socket, to: url)}
   end
@@ -184,7 +202,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
     columns =
       [
-        %{field: "name", minWidth: 200, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+        %{field: "name", minWidth: 300, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
         %{field: "id", minWidth: 120, pinned: "left", hide: true},
         %{field: "status", maxWidth: 140, cellRenderer: "draftStatus"},
         %{field: "type"},
@@ -195,8 +213,8 @@ defmodule HousingAppWeb.Live.Applications.Index do
         %{
           field: "actions",
           pinned: "right",
-          minWidth: 120,
-          maxWidth: 120,
+          minWidth: 180,
+          maxWidth: 180,
           filter: false,
           editable: false,
           sortable: false,
@@ -235,7 +253,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
         "time_period" => if(b.time_period, do: b.time_period.name, else: ""),
         "form" => b.form.name,
         "form_link" => ~p"/forms/#{b.form.id}/edit",
-        "actions" => [["Edit"], ["View"]]
+        "actions" => [["Edit"], ["Copy"], ["View"]]
       }
     end)
   end
