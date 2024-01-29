@@ -3,10 +3,7 @@ defmodule HousingApp.Assignments.SelectionCriteria do
 
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer],
-    notifiers: [Ash.Notifier.PubSub]
-
-  require Ash.Query
+    authorizers: [Ash.Policy.Authorizer]
 
   attributes do
     uuid_primary_key :id
@@ -93,7 +90,7 @@ defmodule HousingApp.Assignments.SelectionCriteria do
   end
 
   code_interface do
-    define_for HousingApp.Management
+    define_for HousingApp.Assignments
 
     define :list
     define :get_by_id, args: [:id]

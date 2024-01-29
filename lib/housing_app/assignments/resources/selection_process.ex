@@ -5,8 +5,6 @@ defmodule HousingApp.Assignments.SelectionProcess do
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer]
 
-  require Ash.Query
-
   attributes do
     uuid_primary_key :id
 
@@ -80,6 +78,7 @@ defmodule HousingApp.Assignments.SelectionProcess do
         allow_nil? false
       end
 
+      prepare build(load: [criterion: [criteria: [conditions: :common_query, filters: :common_query]]])
       get? true
       filter expr(id == ^arg(:id) and is_nil(archived_at))
     end
@@ -92,7 +91,7 @@ defmodule HousingApp.Assignments.SelectionProcess do
   end
 
   code_interface do
-    define_for HousingApp.Management
+    define_for HousingApp.Assignments
 
     define :list
     define :get_by_id, args: [:id]

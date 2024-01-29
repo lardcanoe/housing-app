@@ -3,6 +3,46 @@ defmodule HousingApp.Assignments.Service do
 
   require Logger
 
+  def available_rooms_for(selection_process_id, actor: actor, tenant: tenant) do
+    profile =
+      HousingApp.Management.Profile
+      |> Ash.Query.for_read(:get_mine_for_matching, %{}, actor: actor, tenant: tenant)
+      |> HousingApp.Management.read!()
+
+    selection_process =
+      HousingApp.Assignments.SelectionProcess.get_by_id!(selection_process_id, actor: actor, tenant: tenant)
+
+    pc =
+      Enum.find(selection_process.criterion, fn pc ->
+        profile_matches_selection_criteria?(profile, pc.criteria)
+      end)
+
+    if pc do
+      find_rooms_matching_criteria(pc.criteria, actor: actor, tenant: tenant)
+    else
+      # TODO: How to handle/display that there are no matching rooms?
+      {:ok, []}
+    end
+  end
+
+  defp profile_matches_selection_criteria?(_profile, _criteria) do
+    # FUTURE: Implement
+    true
+  end
+
+  defp find_rooms_matching_criteria(criteria, actor: actor, tenant: tenant) do
+    # TODO: Is merging the correct approach?
+    merged_filter =
+      Enum.reduce(criteria.filters, %{}, fn f, acc ->
+        Map.merge(acc, f.common_query.filter)
+      end)
+
+    filter_resource(HousingApp.Assignments.Room, :list, %{filter: merged_filter},
+      actor: actor,
+      tenant: tenant
+    )
+  end
+
   def upsert_bed_booking(application_submission, bed_id, actor: actor, tenant: tenant) do
     case get_booking(application_submission, actor: actor, tenant: tenant) do
       {:ok, %HousingApp.Assignments.Booking{} = booking} ->
@@ -11,6 +51,14 @@ defmodule HousingApp.Assignments.Service do
       _ ->
         create_bed_booking(application_submission, nil, bed_id, actor.id, actor: actor, tenant: tenant)
     end
+  end
+
+  def upsert_room_booking(application_submission, room_id, actor: actor, tenant: tenant) do
+    {:ok, room} = get_room(room_id, actor: actor, tenant: tenant)
+
+    # FUTURE: Get the bed that is available, not just the first one
+    first_bed = hd(room.beds)
+    upsert_bed_booking(application_submission, first_bed.id, actor: actor, tenant: tenant)
   end
 
   def upsert_roommate_booking(application_submission, roommate_group_id, room_id, actor: actor, tenant: tenant) do

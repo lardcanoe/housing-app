@@ -7,6 +7,7 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
 
   attr :current_user_tenant, :any, required: true
   attr :current_tenant, :string, required: true
+  attr :application_step, :any, required: true
   attr :data, :any, required: true
   attr :submission, :any, required: true
 
@@ -15,6 +16,7 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
     <div>
       <.simple_form for={@form} phx-change="validate" phx-submit="submit" phx-target={@myself}>
         <.input
+          :if={@roommate_groups != [] || @booking}
           type="select"
           field={@form[:roommate_group_id]}
           options={@roommate_group_options}
@@ -195,19 +197,48 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
     find_beds_for_group(socket, selected)
   end
 
+  defp available_rooms_for(socket) do
+    %{application_step: application_step, current_user_tenant: actor, current_tenant: tenant} = socket.assigns
+
+    HousingApp.Assignments.Service.available_rooms_for(application_step.selection_process_id,
+      actor: actor,
+      tenant: tenant
+    )
+  end
+
+  # FUTURE: Pipe `available_rooms_for` here to get individual beds
+  # defp find_beds_for_group(socket, nil) do
+  #   %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+  #   socket
+  #   |> assign(selection: :bed)
+  #   |> assign_async([:beds], fn ->
+  #     beds =
+  #       [actor: current_user_tenant, tenant: tenant]
+  #       |> HousingApp.Assignments.Bed.list!()
+  #       |> Enum.map(&{"#{&1.room.building.name} / #{&1.room.name} / #{&1.name}", &1.id})
+  #       |> Enum.sort_by(fn {name, _} -> name end)
+
+  #     {:ok, %{beds: beds}}
+  #   end)
+  # end
+
   defp find_beds_for_group(socket, nil) do
-    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+    %{current_tenant: tenant} = socket.assigns
 
     socket
-    |> assign(selection: :bed)
-    |> assign_async([:beds], fn ->
-      beds =
-        [actor: current_user_tenant, tenant: tenant]
-        |> HousingApp.Assignments.Bed.list!()
-        |> Enum.map(&{"#{&1.room.building.name} / #{&1.room.name} / #{&1.name}", &1.id})
+    |> assign(selection: :room)
+    |> assign_async([:rooms], fn ->
+      Ash.set_tenant(tenant)
+
+      # FUTURE: Load :beds so we can show the count in the name
+      rooms =
+        socket
+        |> available_rooms_for()
+        |> Enum.map(&{"#{&1.building.name} / #{&1.name}", &1.id})
         |> Enum.sort_by(fn {name, _} -> name end)
 
-      {:ok, %{beds: beds}}
+      {:ok, %{rooms: rooms}}
     end)
   end
 
@@ -248,6 +279,17 @@ defmodule HousingAppWeb.Components.Assignments.SelectBed do
     HousingApp.Assignments.Service.upsert_roommate_booking(
       submission,
       roommate_group_id,
+      room_id,
+      actor: current_user_tenant,
+      tenant: tenant
+    )
+  end
+
+  defp create_booking(%{"room_id" => room_id}, socket) when is_binary(room_id) and room_id != "" do
+    %{submission: submission, current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    HousingApp.Assignments.Service.upsert_room_booking(
+      submission,
       room_id,
       actor: current_user_tenant,
       tenant: tenant

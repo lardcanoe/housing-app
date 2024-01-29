@@ -98,6 +98,10 @@ defmodule HousingApp.Management.Profile do
     # No :update because we need :submit logic to deal with merging santized data
     defaults [:create]
 
+    create :new do
+      change set_attribute(:tenant_id, actor(:tenant_id))
+    end
+
     read :read do
       primary? true
       prepare &HousingApp.Checks.FilterData.filter_records/2
@@ -145,6 +149,12 @@ defmodule HousingApp.Management.Profile do
     read :get_mine do
       get? true
       prepare &HousingApp.Checks.FilterData.filter_records/2
+      filter expr(user_tenant_id == ^actor(:id) and is_nil(archived_at))
+    end
+
+    read :get_mine_for_matching do
+      get? true
+      # Matching requires all data, so do not filter
       filter expr(user_tenant_id == ^actor(:id) and is_nil(archived_at))
     end
 

@@ -72,6 +72,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
         id="step-component"
         data={@step_data}
         submission={@submission}
+        application_step={@current_step}
         current_user_tenant={@current_user_tenant}
         current_tenant={@current_tenant}
       >

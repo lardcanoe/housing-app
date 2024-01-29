@@ -6,7 +6,28 @@ defmodule HousingAppWeb.Live.Profiles.New do
     ~H"""
     <.simple_form for={@ash_form} phx-change="validate" phx-submit="submit">
       <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">New Profile</h2>
-      <.input field={@ash_form[:name]} label="Name" />
+      <.async_result :let={user_tenants} assign={@user_tenants}>
+        <:loading>
+          <.input
+            type="select"
+            field={@ash_form[:user_tenant_id]}
+            options={[]}
+            label="Student"
+            prompt="Loading students..."
+            disabled
+          />
+        </:loading>
+        <:failed :let={reason}><%= reason %></:failed>
+        <.input
+          type="select"
+          field={@ash_form[:user_tenant_id]}
+          options={user_tenants}
+          label="Student"
+          prompt="Select a student..."
+          required
+        />
+      </.async_result>
+
       <:actions>
         <.button>Create</.button>
       </:actions>
@@ -27,7 +48,7 @@ defmodule HousingAppWeb.Live.Profiles.New do
       )
       |> to_form()
 
-    {:ok, assign(socket, ash_form: ash_form, sidebar: :residents, page_title: "New Profile")}
+    {:ok, socket |> assign(ash_form: ash_form, sidebar: :residents, page_title: "New Profile") |> load_async_assigns()}
   end
 
   def handle_event("validate", %{"form" => params}, socket) do
@@ -46,5 +67,21 @@ defmodule HousingAppWeb.Live.Profiles.New do
       {:error, ash_form} ->
         {:noreply, assign(socket, ash_form: ash_form)}
     end
+  end
+
+  def load_async_assigns(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    assign_async(socket, [:user_tenants], fn ->
+      user_tenants =
+        [actor: current_user_tenant, tenant: tenant]
+        |> HousingApp.Accounts.UserTenant.list_students!()
+        |> Enum.sort_by(& &1.user.name)
+        |> Enum.map(fn ut ->
+          {"#{ut.user.name} (#{ut.user.email})", ut.id}
+        end)
+
+      {:ok, %{user_tenants: user_tenants}}
+    end)
   end
 end
