@@ -186,20 +186,9 @@ defmodule HousingAppWeb.Components.Settings.Queries do
   end
 
   defp load_resource_fields(socket, "profile") do
-    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+    fields = resource_fields(socket, HousingApp.Management.Profile)
 
-    case HousingApp.Management.Service.get_profile_form(actor: current_user_tenant, tenant: tenant) do
-      {:ok, profile_form} ->
-        fields =
-          profile_form.json_schema
-          |> Jason.decode!()
-          |> HousingApp.Utils.JsonSchema.schema_to_resource_fields()
-
-        assign(socket, resource_fields: fields)
-
-      _ ->
-        socket
-    end
+    assign(socket, resource_fields: fields)
   end
 
   defp load_resource_fields(socket, "booking") do
@@ -222,10 +211,10 @@ defmodule HousingAppWeb.Components.Settings.Queries do
       |> Enum.concat(Ash.Resource.Info.public_attributes(resource))
       |> Enum.reject(&(&1.name == :tenant_id || &1.name == :user_tenant_id))
       |> Enum.flat_map(fn field ->
-        if field.name == :data and field.type == Ash.Type.Map do
+        if field.name in [:data, :sanitized_data] and field.type == Ash.Type.Map do
           form_to_resource_fields(
             resource,
-            Enum.join(path ++ [field.name, ""], "."),
+            Enum.join(path ++ ["data", ""], "."),
             Enum.join(path ++ ["Custom Data", ""], " / "),
             socket
           )
@@ -257,6 +246,10 @@ defmodule HousingAppWeb.Components.Settings.Queries do
 
   defp form_to_resource_fields(HousingApp.Assignments.Bed, path, label, socket) do
     form_type_to_resource_fields("bed", path, label, socket)
+  end
+
+  defp form_to_resource_fields(HousingApp.Management.Profile, path, label, socket) do
+    form_type_to_resource_fields("profile", path, label, socket)
   end
 
   defp form_to_resource_fields(_type, _path, _label, _socket) do

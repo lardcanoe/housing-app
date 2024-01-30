@@ -62,21 +62,8 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
     {:noreply, push_navigate(socket, to: ~p"/assignments/rooms/#{id}/edit")}
   end
 
-  def handle_event("change-query", %{"query-id" => "default"}, %{assigns: %{query_id: nil}} = socket) do
-    {:noreply, socket}
-  end
-
-  def handle_event("change-query", %{"query-id" => "default"}, socket) do
-    {:noreply, socket |> assign(query_id: nil) |> push_event("ag-grid:refresh", %{})}
-  end
-
-  def handle_event("change-query", %{"query-id" => value}, %{assigns: %{query_id: query_id}} = socket)
-      when query_id == value do
-    {:noreply, socket}
-  end
-
-  def handle_event("change-query", %{"query-id" => value}, socket) do
-    {:noreply, socket |> assign(query_id: value) |> push_event("ag-grid:refresh", %{})}
+  def handle_event("change-query", params, socket) do
+    {:noreply, HousingAppWeb.Components.FilteredResource.handle_change_query(socket, params)}
   end
 
   def handle_event("load-data", %{}, socket) do
