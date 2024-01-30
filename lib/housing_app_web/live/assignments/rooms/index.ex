@@ -17,6 +17,9 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
       current_tenant={@current_tenant}
     >
       <:actions>
+        <.common_query_filter queries={@queries} query_id={@query_id} />
+      </:actions>
+      <:actions>
         <.link navigate={~p"/assignments/rooms/new"}>
           <button
             type="button"
@@ -31,7 +34,23 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, loading: true, count: 0, sidebar: :assignments, page_title: "Rooms")}
+    {:ok,
+     socket
+     |> assign(query_id: nil, loading: true, count: 0, sidebar: :assignments, page_title: "Rooms")
+     |> load_async_assigns()}
+  end
+
+  defp load_async_assigns(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    assign_async(socket, [:queries], fn ->
+      queries =
+        [actor: current_user_tenant, tenant: tenant]
+        |> HousingApp.Management.CommonQuery.list!()
+        |> Enum.filter(&(&1.resource == :room))
+
+      {:ok, %{queries: [%{id: nil, name: "Default"}] ++ queries}}
+    end)
   end
 
   def handle_event("view-row", %{"id" => id}, socket) do
@@ -43,12 +62,29 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
     {:noreply, push_navigate(socket, to: ~p"/assignments/rooms/#{id}/edit")}
   end
 
+  def handle_event("change-query", %{"query-id" => "default"}, %{assigns: %{query_id: nil}} = socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("change-query", %{"query-id" => "default"}, socket) do
+    {:noreply, socket |> assign(query_id: nil) |> push_event("ag-grid:refresh", %{})}
+  end
+
+  def handle_event("change-query", %{"query-id" => value}, %{assigns: %{query_id: query_id}} = socket)
+      when query_id == value do
+    {:noreply, socket}
+  end
+
+  def handle_event("change-query", %{"query-id" => value}, socket) do
+    {:noreply, socket |> assign(query_id: value) |> push_event("ag-grid:refresh", %{})}
+  end
+
   def handle_event("load-data", %{}, socket) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     rooms =
-      [actor: current_user_tenant, tenant: tenant]
-      |> HousingApp.Assignments.Room.list!()
+      socket
+      |> filter_rooms()
       |> Enum.sort_by(&{&1.building.name, &1.name})
       |> Enum.map(fn p ->
         %{
@@ -102,5 +138,32 @@ defmodule HousingAppWeb.Live.Assignments.Rooms.Index do
        columns: columns,
        data: rooms
      }, assign(socket, loading: false, count: length(rooms))}
+  end
+
+  defp filter_rooms(%{assigns: %{query_id: nil}} = socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+    HousingApp.Assignments.Room.list!(actor: current_user_tenant, tenant: tenant)
+  end
+
+  defp filter_rooms(%{assigns: %{queries: %{ok?: false}}} = socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+    # TODO: Handle still loading?
+    HousingApp.Assignments.Room.list!(actor: current_user_tenant, tenant: tenant)
+  end
+
+  defp filter_rooms(%{assigns: %{query_id: query_id, queries: %{ok?: true, result: queries}}} = socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    query = Enum.find(queries, &(&1.id == query_id))
+
+    if query do
+      HousingApp.Assignments.Service.filter_resource(HousingApp.Assignments.Room, :list, query,
+        actor: current_user_tenant,
+        tenant: tenant
+      )
+    else
+      # TODO: Not found
+      HousingApp.Assignments.Room.list!(actor: current_user_tenant, tenant: tenant)
+    end
   end
 end

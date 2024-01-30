@@ -66,37 +66,14 @@ defmodule HousingApp.Management.Service do
     # .exists?() has a bug that queries wrong
 
     resource
-    |> Ash.Query.for_read(:match_by_id, %{id: id}, actor: actor, tenant: tenant, authorize?: false)
-    |> filter_to_fragments(common_query.filter)
+    |> HousingApp.Utils.Filters.match_resource(id, common_query, actor: actor, tenant: tenant)
     |> HousingApp.Management.read!()
     |> Enum.any?()
   end
 
-  def filter_resource(resource, read_action, nil, actor: actor, tenant: tenant) do
-    resource
-    |> Ash.Query.for_read(read_action, %{}, actor: actor, tenant: tenant)
-    |> HousingApp.Management.read!()
-  end
-
-  # TODO: Should only do filter_to_fragments for profile data field
   def filter_resource(resource, read_action, common_query, actor: actor, tenant: tenant) do
     resource
-    |> Ash.Query.for_read(read_action, %{}, actor: actor, tenant: tenant)
-    |> filter_to_fragments(common_query.filter)
+    |> HousingApp.Utils.Filters.filter_resource(read_action, common_query, actor: actor, tenant: tenant)
     |> HousingApp.Management.read!()
-  end
-
-  defp filter_to_fragments(query, %{"and" => %{} = predicate_map}) do
-    frags =
-      Enum.map(predicate_map, fn {k, v} ->
-        create_fragment(k, v)
-      end)
-
-    Ash.Query.do_filter(query, frags)
-  end
-
-  defp create_fragment(field, value) when is_binary(value) do
-    {:ok, frag} = AshPostgres.Functions.Fragment.casted_new(["data->>? = ?", field, value])
-    frag
   end
 end

@@ -225,8 +225,8 @@ defmodule HousingAppWeb.Components.Settings.Queries do
         if field.name == :data and field.type == Ash.Type.Map do
           form_to_resource_fields(
             resource,
-            Enum.join(path ++ [field.name], "."),
-            Enum.join(path ++ ["Custom Data / "], " / "),
+            Enum.join(path ++ [field.name, ""], "."),
+            Enum.join(path ++ ["Custom Data", ""], " / "),
             socket
           )
         else

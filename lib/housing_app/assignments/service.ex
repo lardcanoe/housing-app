@@ -3,6 +3,12 @@ defmodule HousingApp.Assignments.Service do
 
   require Logger
 
+  def filter_resource(resource, read_action, common_query, actor: actor, tenant: tenant) do
+    resource
+    |> HousingApp.Utils.Filters.filter_resource(read_action, common_query, actor: actor, tenant: tenant)
+    |> HousingApp.Assignments.read!()
+  end
+
   def available_rooms_for(selection_process_id, actor: actor, tenant: tenant) do
     profile =
       HousingApp.Management.Profile
@@ -198,28 +204,5 @@ defmodule HousingApp.Assignments.Service do
 
   defp get_room(room_id, actor: actor, tenant: tenant) do
     HousingApp.Assignments.Room.get_by_id(room_id, actor: actor, tenant: tenant, load: [:beds])
-  end
-
-  def filter_resource(resource, read_action, nil, actor: actor, tenant: tenant) do
-    resource
-    |> Ash.Query.for_read(read_action, %{}, actor: actor, tenant: tenant)
-    |> HousingApp.Assignments.read!()
-  end
-
-  def filter_resource(resource, read_action, common_query, actor: actor, tenant: tenant) do
-    {_combinator, statement} =
-      case common_query.filter do
-        %{"" => predicates} -> {"and", predicates}
-        %{"and" => predicates} -> {"and", predicates}
-        %{"or" => predicates} -> {"or", [or: predicates]}
-      end
-
-    # TODO: I think "or" is handled wrong, might need an array of arrays, see: https://hexdocs.pm/ash/2.17.17/Ash.Filter.html#module-keyword-list-syntax
-    {:ok, filter} = Ash.Filter.parse_input(resource, statement)
-
-    resource
-    |> Ash.Query.for_read(read_action, %{}, actor: actor, tenant: tenant)
-    |> Ash.Query.filter_input(filter)
-    |> HousingApp.Assignments.read!()
   end
 end

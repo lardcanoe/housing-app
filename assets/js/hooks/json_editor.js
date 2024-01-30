@@ -33,4 +33,7 @@ export default {
 
         window.json_editors[this.el.id] = this.editor;
     },
+    destroyed() {
+        delete window.json_editors[this.el.id];
+    }
 }
