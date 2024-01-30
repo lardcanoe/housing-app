@@ -197,8 +197,20 @@ defmodule HousingAppWeb.Components.Settings.Queries do
     assign(socket, resource_fields: fields)
   end
 
+  defp load_resource_fields(socket, "building") do
+    fields = resource_fields(socket, HousingApp.Assignments.Building)
+
+    assign(socket, resource_fields: fields)
+  end
+
   defp load_resource_fields(socket, "room") do
     fields = resource_fields(socket, HousingApp.Assignments.Room)
+
+    assign(socket, resource_fields: fields)
+  end
+
+  defp load_resource_fields(socket, "bed") do
+    fields = resource_fields(socket, HousingApp.Assignments.Bed)
 
     assign(socket, resource_fields: fields)
   end
