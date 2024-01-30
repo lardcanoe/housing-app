@@ -176,7 +176,7 @@ export default {
         }
     },
 
-    destroy() {
+    destroyed() {
         if (this.gridInstance) {
             this.gridInstance.destroy();
             this.gridInstance = null;

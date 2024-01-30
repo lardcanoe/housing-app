@@ -17,7 +17,7 @@ export default {
             }
         })
     },
-    destroy() {
+    destroyed() {
         if (this.sorter) {
             this.sorter.destroy()
         }
