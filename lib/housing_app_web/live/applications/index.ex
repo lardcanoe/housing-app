@@ -4,6 +4,8 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
   import HousingAppWeb.Components.DataGrid
 
+  require Ash.Query
+
   def render(%{live_action: :index, current_user_tenant: %{user_type: :user}} = assigns) do
     ~H"""
     <p :if={@applications.loading || @submissions.loading}>Loading...</p>
@@ -69,6 +71,16 @@ defmodule HousingAppWeb.Live.Applications.Index do
       current_tenant={@current_tenant}
     >
       <:actions>
+        <.button
+          id="delete-button"
+          data-selected={JS.remove_class("hidden", to: "#delete-button")}
+          data-empty={JS.add_class("hidden", to: "#delete-button")}
+          type="delete"
+          class="hidden"
+          phx-click="delete-selected"
+        >
+          Delete selected
+        </.button>
         <.link navigate={~p"/applications/new"}>
           <button
             type="button"
@@ -90,12 +102,20 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
     {:ok,
      socket
-     |> assign(sidebar: :applications, page_title: "Applications")
+     |> assign(selected_ids: [], sidebar: :applications, page_title: "Applications")
      |> load_async_assigns()}
   end
 
   def mount(params, _session, socket) do
-    {:ok, assign(socket, params: params, loading: true, count: 0, sidebar: :applications, page_title: "Applications")}
+    {:ok,
+     assign(socket,
+       params: params,
+       selected_ids: [],
+       loading: true,
+       count: 0,
+       sidebar: :applications,
+       page_title: "Applications"
+     )}
   end
 
   # Need for "link patch" to work
@@ -140,7 +160,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
           Map.new()
         end
 
-      {:ok, %{applications: applications, submissions: submissions}}
+      {:ok, %{selected_ids: [], applications: applications, submissions: submissions}}
     end)
   end
 
@@ -176,10 +196,12 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
     with {:get, {:ok, application}} <-
            {:get, HousingApp.Management.Application.get_by_id(id, actor: current_user_tenant, tenant: tenant)},
-         {:copy, {:ok, copied_app}} <-
+         {:copy, {:ok, _copied_app}} <-
            {:copy, HousingApp.Management.Application.copy(application, actor: current_user_tenant, tenant: tenant)} do
       {:noreply,
-       socket |> put_flash(:info, "Copied application") |> push_navigate(to: ~p"/applications/#{copied_app.id}/edit")}
+       socket
+       |> put_flash(:info, "Copied application")
+       |> push_event("ag-grid:refresh", %{})}
     else
       {:copy, {:error, _}} ->
         {:noreply, put_flash(socket, :error, "Failed to copy")}
@@ -191,6 +213,44 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
   def handle_event("redirect", %{"url" => url}, socket) do
     {:noreply, push_navigate(socket, to: url)}
+  end
+
+  def handle_event("selection-changed", %{"ids" => []}, socket) do
+    {:noreply,
+     socket
+     |> assign(selected_ids: [])
+     |> push_event("js-exec", %{to: "#delete-button", attr: "data-empty"})}
+  end
+
+  def handle_event("selection-changed", %{"ids" => ids}, socket) do
+    {:noreply,
+     socket
+     |> assign(selected_ids: ids)
+     |> push_event("js-exec", %{to: "#delete-button", attr: "data-selected"})}
+  end
+
+  def handle_event("delete-selected", %{}, %{assigns: %{selected_ids: []}} = socket) do
+    {:noreply, assign(socket, selected_ids: [])}
+  end
+
+  def handle_event("delete-selected", %{}, %{assigns: %{selected_ids: selected_ids}} = socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    HousingApp.Management.Application
+    |> Ash.Query.for_read(:read, actor: current_user_tenant, tenant: tenant)
+    |> Ash.Query.filter(id in ^selected_ids and is_nil(archived_at))
+    |> HousingApp.Management.read!()
+    |> Enum.each(fn app ->
+      app
+      |> Ash.Changeset.for_destroy(:archive)
+      |> HousingApp.Management.destroy!(actor: current_user_tenant, tenant: tenant)
+    end)
+
+    {:noreply,
+     socket
+     |> assign(selected_ids: [])
+     |> push_event("js-exec", %{to: "#delete-button", attr: "data-empty"})
+     |> push_event("ag-grid:refresh", %{})}
   end
 
   def handle_event("load-data", %{}, socket) do
@@ -226,7 +286,7 @@ defmodule HousingAppWeb.Live.Applications.Index do
      %{
        columns: columns,
        data: applications
-     }, assign(socket, loading: false, count: length(applications))}
+     }, assign(socket, selected_ids: [], loading: false, count: length(applications))}
   end
 
   defp fetch_applications(%{assigns: %{params: %{"type" => app_type}}} = socket)

@@ -22,4 +22,17 @@ defmodule HousingApp.Utils.Forms do
         current_pos
     end
   end
+
+  def copy_resource(resource, source) do
+    resource
+    |> Ash.Resource.Info.public_attributes()
+    |> Enum.reject(&(&1.name in [:id, :created_at, :updated_at, :archived_at]))
+    |> Enum.reduce(%{}, fn %{name: name}, acc ->
+      if name == :name do
+        Map.put(acc, name, "#{Map.get(source, name)} (Copy)")
+      else
+        Map.put(acc, name, Map.get(source, name))
+      end
+    end)
+  end
 end

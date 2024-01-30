@@ -8,6 +8,7 @@ import { LinkValueRenderer } from '../ag-grid/link-renderer';
 export default {
     mounted() {
         let selectElements = document.querySelectorAll('[name="table-settings-size"]');
+        this.selected_ids = [];
 
         // https://www.ag-grid.com/javascript-data-grid/global-style-customisation-compactness/
 
@@ -61,8 +62,19 @@ export default {
 
             onFilterChanged: (e) => {
                 if (this.el.dataset.filterChanges == "true") {
-                    this.pushEvent("filter-changed", { filter: this.gridInstance.getFilterModel() })
+                    this.pushEventTo(this.el, "filter-changed", { filter: this.gridInstance.getFilterModel() })
                 }
+            },
+
+            onSelectionChanged: (e) => {
+                const ids = this.gridInstance.getSelectedRows().map(row => row.id)
+                const arraysAreEqual = ids.length === this.selected_ids.length && ids.every((value, index) => value === this.selected_ids[index]);
+                if (arraysAreEqual) {
+                    return;
+                }
+
+                this.pushEventTo(this.el, "selection-changed", { ids: ids });
+                this.selected_ids = ids;
             },
 
             // FUTURE:
@@ -75,12 +87,12 @@ export default {
             rowData: []
         };
 
-        this.handleViewClick = (e) => { this.pushEvent("view-row", { id: e.id }) };
-        this.handleEditClick = (e) => { this.pushEvent("edit-row", { id: e.id }) };
-        this.handleCopyClick = (e) => { this.pushEvent("copy-row", { id: e.id }) };
-        this.handleLinkClick = (e) => { this.pushEvent("redirect", { url: e.url }) };
-        this.handleRefreshData = (e) => {
-            this.pushEvent("load-data", {}, (reply, ref) => {
+        this.handleViewClick = (e) => { this.pushEventTo(this.el, "view-row", { id: e.id }) };
+        this.handleEditClick = (e) => { this.pushEventTo(this.el, "edit-row", { id: e.id }) };
+        this.handleCopyClick = (e) => { this.pushEventTo(this.el, "copy-row", { id: e.id }) };
+        this.handleLinkClick = (e) => { this.pushEventTo(this.el, "redirect", { url: e.url }) };
+        this.handleRefreshData = (_e) => {
+            this.pushEventTo(this.el, "load-data", {}, (reply, ref) => {
                 reply.columns.forEach(c => {
                     if (c.field === 'actions') {
                         c.cellRenderer = ActionsValueRenderer
@@ -98,6 +110,7 @@ export default {
                 this.gridOptions.rowData = reply.data
                 this.gridInstance = agGrid.createGrid(this.el, this.gridOptions);
                 this.addTableSettingListeners(this.gridInstance);
+                this.selected_ids = [];
 
                 let quickfilter = document.getElementById('datagrid-quickfilter');
                 if (quickfilter) {
@@ -114,6 +127,10 @@ export default {
                 // this.gridInstance.updateGridOptions({ columnDefs: reply.columns, rowData: reply.data });
             });
         };
+        this.handleUnselect = (_e) => {
+            this.gridInstance.deselectAll();
+            this.selected_ids = [];
+        };
 
         window.addEventListener("view:clicked", this.handleViewClick);
         window.addEventListener("edit:clicked", this.handleEditClick);
@@ -121,6 +138,7 @@ export default {
         window.addEventListener("link:clicked", this.handleLinkClick);
         window.addEventListener("phx:page-loading-stop", this.handleRefreshData)
         window.addEventListener("phx:ag-grid:refresh", this.handleRefreshData)
+        window.addEventListener("phx:ag-grid:unselect", this.handleUnselect)
     },
 
     // TODO: This is broken when switching page params
@@ -159,14 +177,17 @@ export default {
     },
 
     destroy() {
+        if (this.gridInstance) {
+            this.gridInstance.destroy();
+            this.gridInstance = null;
+        }
+
         window.removeEventListener("view:clicked", this.handleViewClick);
         window.removeEventListener("edit:clicked", this.handleEditClick);
         window.removeEventListener("copy:clicked", this.handleCopyClick);
         window.removeEventListener("link:clicked", this.handleLinkClick);
         window.removeEventListener("phx:page-loading-stop", this.handleRefreshData)
-
-        if (this.gridInstance) {
-            this.gridInstance.destroy();
-        }
+        window.removeEventListener("phx:ag-grid:refresh", this.handleRefreshData)
+        window.removeEventListener("phx:ag-grid:unselect", this.handleUnselect)
     }
 };

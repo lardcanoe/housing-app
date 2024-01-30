@@ -7,8 +7,8 @@ defmodule HousingApp.Checks.IsPlatformAdmin do
     "actor is platform admin"
   end
 
-  def match?(%HousingApp.Accounts.UserTenant{user: %HousingApp.Accounts.User{role: role}}, _context, _opts) do
-    role == :platform_admin
+  def match?(%HousingApp.Accounts.UserTenant{user: %HousingApp.Accounts.User{role: :platform_admin}}, _context, _opts) do
+    true
   end
 
   def match?(_, _, _), do: false

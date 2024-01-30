@@ -128,18 +128,10 @@ defmodule HousingApp.Management.Application do
       end
 
       change fn changeset, context ->
-        Ash.Changeset.change_attributes(changeset, %{
-          name: "#{changeset.arguments.source.name} (Copy)",
-          description: changeset.arguments.source.description,
-          status: changeset.arguments.source.status,
-          type: changeset.arguments.source.type,
-          submission_type: changeset.arguments.source.submission_type,
-          steps: changeset.arguments.source.steps,
-          conditions: changeset.arguments.source.conditions,
-          tenant_id: changeset.arguments.source.tenant_id,
-          form_id: changeset.arguments.source.form_id,
-          time_period_id: changeset.arguments.source.time_period_id
-        })
+        Ash.Changeset.change_attributes(
+          changeset,
+          HousingApp.Utils.Forms.copy_resource(__MODULE__, changeset.arguments.source)
+        )
       end
     end
 
