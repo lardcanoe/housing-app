@@ -55,10 +55,7 @@ defmodule HousingApp.Management.Service do
   def profile_meets_application_conditions?(profile, application, actor: actor, tenant: tenant) do
     Enum.all?(application.conditions, fn condition ->
       condition = HousingApp.Management.load!(condition, :common_query, actor: actor, tenant: tenant)
-
-      HousingApp.Management.Profile
-      |> match_resource(profile.id, condition.common_query, actor: actor, tenant: tenant)
-      |> tap(fn x -> IO.inspect(x, label: "App '#{application.name}', CQ '#{condition.common_query.name}'") end)
+      match_resource(HousingApp.Management.Profile, profile.id, condition.common_query, actor: actor, tenant: tenant)
     end)
   end
 

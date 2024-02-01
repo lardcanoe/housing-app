@@ -1,5 +1,7 @@
 defmodule HousingApp.Utils.Filters do
   @moduledoc false
+  require Ash.Expr
+  require Ash.Query
 
   # alias HousingApp.Utils.Random.Token
 
@@ -8,25 +10,20 @@ defmodule HousingApp.Utils.Filters do
 
     resource
     |> Ash.Query.for_read(:match_by_id, %{id: id}, actor: actor, tenant: tenant, authorize?: false)
-    |> filter_to_fragments(common_query.filter)
+    |> parse_common_query(resource, common_query)
   end
 
   def filter_resource(resource, read_action, nil, actor: actor, tenant: tenant) do
     Ash.Query.for_read(resource, read_action, %{}, actor: actor, tenant: tenant)
   end
 
-  # TODO: Should only do filter_to_fragments for profile data field
-  # HousingApp.Utils.Filters.filter_resource(HousingApp.Assignments.Room, :list, %{filter: %{"and" => %{"data" => %{"programmatic" => %{"quiet" => true}}}}}, actor: nil, tenant: nil)
-  def filter_resource(resource, read_action, %{filter: %{"and" => %{"data" => _data}}} = common_query,
-        actor: actor,
-        tenant: tenant
-      ) do
+  def filter_resource(resource, read_action, common_query, actor: actor, tenant: tenant) do
     resource
     |> Ash.Query.for_read(read_action, %{}, actor: actor, tenant: tenant)
-    |> filter_to_fragments(common_query.filter)
+    |> parse_common_query(resource, common_query)
   end
 
-  def filter_resource(resource, read_action, common_query, actor: actor, tenant: tenant) do
+  defp parse_common_query(query, resource, common_query) do
     {_combinator, statement} =
       case common_query.filter do
         %{"" => predicates} -> {"and", predicates}
@@ -34,58 +31,65 @@ defmodule HousingApp.Utils.Filters do
         %{"or" => predicates} -> {"or", [or: predicates]}
       end
 
+    statement = convert_data_filters_to_paths(statement)
+
+    # Example:
+    # statement = %{
+    #   "room" => %{"building" => %{"name" => "Daniels", "data" => %{"at_path" => ["size"], "eq" => "King"}}},
+    #   "data" => %{"at_path" => ["size"], "eq" => "King"}
+    # }
+
+    # FUTURE: Currently, due to Ash implementation of at_path, `data` can't be an array
+    #         If someone has multiple "data" filters, then each needs to have its own `Ash.Query.filter_input` call
+    statement =
+      if HousingApp.Management.Profile == resource and Map.has_key?(statement, "data") do
+        statement
+        |> Map.put("sanitized_data", Map.get(statement, "data"))
+        |> Map.delete("data")
+      else
+        statement
+      end
+
     # TODO: I think "or" is handled wrong, might need an array of arrays, see: https://hexdocs.pm/ash/2.17.17/Ash.Filter.html#module-keyword-list-syntax
-    {:ok, filter} = Ash.Filter.parse_input(resource, statement)
+    case Ash.Filter.parse_input(resource, statement) do
+      {:ok, filter} ->
+        Ash.Query.filter_input(query, filter)
 
-    resource
-    |> Ash.Query.for_read(read_action, %{}, actor: actor, tenant: tenant)
-    |> Ash.Query.filter_input(filter)
+      {:error, e} ->
+        Ash.Query.add_error(query, e)
+    end
   end
 
-  def filter_to_fragments(query, %{"and" => %{"data" => predicate_map}}) do
-    frags =
-      Enum.flat_map(predicate_map, fn {k, v} ->
-        create_fragment(k, v)
-      end)
+  defp convert_data_filters_to_paths(query) when is_map(query) do
+    Enum.reduce(query, %{}, fn {k, v}, acc ->
+      value =
+        case k do
+          "data" ->
+            data_filter_to_path(v)
 
-    Ash.Query.do_filter(query, frags)
-  end
+          _ ->
+            # Need to traverse the entire depth, since we don't know how deep the data filters are
+            convert_data_filters_to_paths(v)
+        end
 
-  # %{"and" => %{"data" => %{"programmatic" => %{"quiet" => true}}}}
-
-  # #Ash.Query<
-  #   resource: HousingApp.Assignments.Room,
-  #   filter: #Ash.Filter<fragment(
-  #     {:raw, ""},
-  #     {:casted_expr, "data"},
-  #     {:raw, "->"},
-  #     {:casted_expr, "programmatic"},
-  #     {:raw, "->>"},
-  #     {:casted_expr, "quiet"},
-  #     {:raw, " = "},
-  #     {:casted_expr, true},
-  #     {:raw, ""}
-  #   )>
-  # >
-
-  defp create_fragment(field, value, path \\ [])
-
-  defp create_fragment(field, value, path) when is_map(value) do
-    Enum.flat_map(value, fn {k, v} ->
-      create_fragment(k, v, path ++ [field])
+      Map.put(acc, k, value)
     end)
   end
 
-  defp create_fragment(field, value, []) do
-    {:ok, frag} = AshPostgres.Functions.Fragment.casted_new(["data->>? = ?", field, value])
-    [frag]
+  defp convert_data_filters_to_paths(query) do
+    query
   end
 
-  defp create_fragment(field, value, path) do
-    query = Enum.map_join(path, "->", fn _ -> "?" end)
-    query = Enum.join([query, "?"], "->>")
-    {:ok, frag} = AshPostgres.Functions.Fragment.casted_new(["data->#{query} = ?"] ++ path ++ [field, value])
-    [frag]
+  defp data_filter_to_path(value, path \\ [])
+
+  defp data_filter_to_path(value, path) when is_map(value) do
+    Enum.flat_map(value, fn {k, v} ->
+      data_filter_to_path(v, path ++ [k])
+    end)
+  end
+
+  defp data_filter_to_path(value, path) do
+    %{at_path: path, eq: value}
   end
 
   def ash_filter_to_react_query(%{} = filter) do
