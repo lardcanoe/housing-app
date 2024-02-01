@@ -1166,6 +1166,21 @@ defmodule HousingAppWeb.CoreComponents do
   attr(:class, :string, default: nil)
   attr(:rest, :global)
 
+  def gravatar(%{email: email} = assigns)
+      when email in ["student@example.com", "student2@example.com", "student3@example.com"] do
+    ~H"""
+    <img
+      class={[
+        "h-8 w-8 rounded-full",
+        @class
+      ]}
+      src="/images/lego.jpg"
+      title={@alt}
+      {@rest}
+    />
+    """
+  end
+
   def gravatar(assigns) do
     src =
       cond do

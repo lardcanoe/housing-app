@@ -52,7 +52,7 @@ defmodule HousingAppWeb.Components.Navbar do
             <span class="sr-only">Toggle sidebar</span>
           </button>
           <.link navigate={~p"/"} class="flex items-center justify-between mr-4">
-            <img src="https://flowbite.s3.amazonaws.com/logo.svg" class="mr-3 h-8" alt="Flowbite Logo" />
+            <img src="https://flowbite.s3.amazonaws.com/logo.svg" class="mr-3 h-8" alt="Housing App" />
             <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
               Housing App
             </span>
@@ -203,7 +203,10 @@ defmodule HousingAppWeb.Components.Navbar do
                 </svg>
                 <div class="text-sm text-gray-900 dark:text-white">Applications</div>
               </.link>
-              <.link navigate={~p"/"} class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
+              <.link
+                navigate={~p"/"}
+                class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group"
+              >
                 <svg
                   aria-hidden="true"
                   class="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
@@ -243,7 +246,10 @@ defmodule HousingAppWeb.Components.Navbar do
                   Account Settings
                 </div>
               </.link>
-              <.link navigate={~p"/"} class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
+              <.link
+                navigate={~p"/"}
+                class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group"
+              >
                 <svg
                   aria-hidden="true"
                   class="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
@@ -263,7 +269,10 @@ defmodule HousingAppWeb.Components.Navbar do
                   Maintenance
                 </div>
               </.link>
-              <.link navigate={~p"/"} class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group">
+              <.link
+                navigate={~p"/"}
+                class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 group"
+              >
                 <svg
                   aria-hidden="true"
                   class="mx-auto mb-1 w-7 h-7 text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-400"
