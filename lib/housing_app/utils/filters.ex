@@ -32,6 +32,7 @@ defmodule HousingApp.Utils.Filters do
       end
 
     statement = convert_data_filters_to_paths(statement)
+    statement = adjust_path_of_filter(resource, common_query, statement)
 
     # Example:
     # statement = %{
@@ -41,14 +42,6 @@ defmodule HousingApp.Utils.Filters do
 
     # FUTURE: Currently, due to Ash implementation of at_path, `data` can't be an array
     #         If someone has multiple "data" filters, then each needs to have its own `Ash.Query.filter_input` call
-    statement =
-      if HousingApp.Management.Profile == resource and Map.has_key?(statement, "data") do
-        statement
-        |> Map.put("sanitized_data", Map.get(statement, "data"))
-        |> Map.delete("data")
-      else
-        statement
-      end
 
     # TODO: I think "or" is handled wrong, might need an array of arrays, see: https://hexdocs.pm/ash/2.17.17/Ash.Filter.html#module-keyword-list-syntax
     case Ash.Filter.parse_input(resource, statement) do
@@ -90,6 +83,49 @@ defmodule HousingApp.Utils.Filters do
 
   defp data_filter_to_path(value, path) do
     %{at_path: path, eq: value}
+  end
+
+  defp adjust_path_of_filter(HousingApp.Assignments.Booking, %{resource: :profile}, statement) do
+    statement =
+      statement
+      |> Map.put("sanitized_data", Map.get(statement, "data"))
+      |> Map.delete("data")
+
+    %{"profile" => statement}
+  end
+
+  defp adjust_path_of_filter(HousingApp.Assignments.Booking, %{resource: :bed}, statement) do
+    %{"bed" => statement}
+  end
+
+  defp adjust_path_of_filter(HousingApp.Assignments.Booking, %{resource: :room}, statement) do
+    %{"bed" => %{"room" => statement}}
+  end
+
+  defp adjust_path_of_filter(HousingApp.Assignments.Booking, %{resource: :building}, statement) do
+    %{"bed" => %{"room" => %{"building" => statement}}}
+  end
+
+  defp adjust_path_of_filter(HousingApp.Assignments.Bed, %{resource: :room}, statement) do
+    %{"room" => statement}
+  end
+
+  defp adjust_path_of_filter(HousingApp.Assignments.Bed, %{resource: :building}, statement) do
+    %{"room" => %{"building" => statement}}
+  end
+
+  defp adjust_path_of_filter(HousingApp.Assignments.Room, %{resource: :building}, statement) do
+    %{"building" => statement}
+  end
+
+  defp adjust_path_of_filter(HousingApp.Management.Profile, %{resource: :profile}, statement) do
+    statement
+    |> Map.put("sanitized_data", Map.get(statement, "data"))
+    |> Map.delete("data")
+  end
+
+  defp adjust_path_of_filter(_resource, _common_query, statement) do
+    statement
   end
 
   def ash_filter_to_react_query(%{} = filter) do

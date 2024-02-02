@@ -59,7 +59,8 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
       queries =
         [actor: current_user_tenant, tenant: tenant]
         |> HousingApp.Management.CommonQuery.list!()
-        |> Enum.filter(&(&1.resource == :booking))
+        |> Enum.filter(&(&1.resource in [:booking, :room, :bed, :building, :profile]))
+        |> Enum.sort_by(&{&1.resource, &1.name})
 
       {:ok, %{queries: [%{id: nil, name: "Default"}] ++ queries}}
     end)
