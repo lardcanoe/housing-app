@@ -30,6 +30,7 @@ export default {
         }
 
         this.gridOptions = {
+            rowHeight: 30,
             defaultColDef: {
                 wrapText: true,
                 autoHeight: true,
