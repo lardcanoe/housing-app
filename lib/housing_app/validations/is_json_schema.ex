@@ -1,5 +1,9 @@
 defmodule HousingApp.Validations.IsJsonSchema do
   @moduledoc false
+
+  use Ash.Resource.Validation
+
+  @impl true
   def init(opts) do
     if is_atom(opts[:attribute]) do
       {:ok, opts}
@@ -8,6 +12,7 @@ defmodule HousingApp.Validations.IsJsonSchema do
     end
   end
 
+  @impl true
   def validate(changeset, opts) do
     value = Ash.Changeset.get_attribute(changeset, opts[:attribute])
 

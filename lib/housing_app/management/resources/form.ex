@@ -95,6 +95,19 @@ defmodule HousingApp.Management.Form do
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
 
+    create :copy do
+      argument :source, :map do
+        allow_nil? false
+      end
+
+      change fn changeset, context ->
+        Ash.Changeset.change_attributes(
+          changeset,
+          HousingApp.Utils.Forms.copy_resource(__MODULE__, changeset.arguments.source)
+        )
+      end
+    end
+
     read :list do
       prepare build(
                 select: [:id, :name, :type, :description, :status],
@@ -171,6 +184,7 @@ defmodule HousingApp.Management.Form do
     define :list_by_type, args: [:type]
     define :get_by_id, args: [:id]
     define :get_types
+    define :copy, args: [:source]
   end
 
   validations do

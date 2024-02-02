@@ -4,6 +4,10 @@ defmodule HousingAppWeb.Live.Forms.Index do
 
   import HousingAppWeb.Components.DataGrid
 
+  alias HousingAppWeb.Components.FilteredResource
+
+  require Ash.Query
+
   def render(%{live_action: :index} = assigns) do
     ~H"""
     <.data_grid
@@ -16,6 +20,17 @@ defmodule HousingAppWeb.Live.Forms.Index do
       current_tenant={@current_tenant}
     >
       <:actions>
+        <.button
+          id="delete-button"
+          data-selected={JS.remove_class("hidden", to: "#delete-button")}
+          data-empty={JS.add_class("hidden", to: "#delete-button")}
+          type="delete"
+          class="hidden"
+          phx-click="delete-selected"
+        >
+          Delete selected
+        </.button>
+
         <.link navigate={~p"/forms/new"}>
           <button
             type="button"
@@ -31,7 +46,8 @@ defmodule HousingAppWeb.Live.Forms.Index do
 
   # Need for "link patch" to work
   def handle_params(params, _url, socket) do
-    {:noreply, assign(socket, params: params, loading: true, count: 0, sidebar: :forms, page_title: "Forms")}
+    {:noreply,
+     assign(socket, params: params, selected_ids: [], loading: true, count: 0, sidebar: :forms, page_title: "Forms")}
   end
 
   def handle_event("view-row", %{"id" => id}, socket) do
@@ -43,8 +59,56 @@ defmodule HousingAppWeb.Live.Forms.Index do
     {:noreply, push_navigate(socket, to: ~p"/forms/#{id}/edit")}
   end
 
+  def handle_event("copy-row", %{"id" => id}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    with {:get, {:ok, form}} <-
+           {:get, HousingApp.Management.Form.get_by_id(id, actor: current_user_tenant, tenant: tenant)},
+         {:copy, {:ok, _copied_app}} <-
+           {:copy, HousingApp.Management.Form.copy(form, actor: current_user_tenant, tenant: tenant)} do
+      {:noreply,
+       socket
+       |> put_flash(:info, "Copied form")
+       |> push_event("ag-grid:refresh", %{})}
+    else
+      {:copy, {:error, _}} ->
+        {:noreply, put_flash(socket, :error, "Failed to copy")}
+
+      {:get, {:error, _}} ->
+        {:noreply, put_flash(socket, :error, "Not found")}
+    end
+  end
+
   def handle_event("redirect", %{"url" => url}, socket) do
     {:noreply, push_navigate(socket, to: url)}
+  end
+
+  def handle_event("selection-changed", params, socket) do
+    {:noreply, FilteredResource.handle_selection_changed(socket, params)}
+  end
+
+  def handle_event("delete-selected", %{}, %{assigns: %{selected_ids: []}} = socket) do
+    {:noreply, assign(socket, selected_ids: [])}
+  end
+
+  def handle_event("delete-selected", %{}, %{assigns: %{selected_ids: selected_ids}} = socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    HousingApp.Management.Form
+    |> Ash.Query.for_read(:read, actor: current_user_tenant, tenant: tenant)
+    |> Ash.Query.filter(id in ^selected_ids and is_nil(archived_at))
+    |> HousingApp.Management.read!()
+    |> Enum.each(fn app ->
+      app
+      |> Ash.Changeset.for_destroy(:archive)
+      |> HousingApp.Management.destroy!(actor: current_user_tenant, tenant: tenant)
+    end)
+
+    {:noreply,
+     socket
+     |> assign(selected_ids: [])
+     |> push_event("js-exec", %{to: "#delete-button", attr: "data-empty"})
+     |> push_event("ag-grid:refresh", %{})}
   end
 
   def handle_event("load-data", %{}, socket) do
@@ -64,8 +128,8 @@ defmodule HousingAppWeb.Live.Forms.Index do
         %{
           field: "actions",
           pinned: "right",
-          minWidth: 120,
-          maxWidth: 120,
+          minWidth: 180,
+          maxWidth: 180,
           filter: false,
           editable: false,
           sortable: false,
@@ -99,7 +163,7 @@ defmodule HousingAppWeb.Live.Forms.Index do
         "type" => b.type,
         "submissions" => b.count_of_submissions,
         "submissions_link" => ~p"/forms/#{b.id}/submissions",
-        "actions" => [["Edit"], ["View"]]
+        "actions" => [["Edit"], ["Copy"], ["View"]]
       }
     end)
   end

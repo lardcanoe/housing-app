@@ -4,6 +4,8 @@ defmodule HousingAppWeb.Live.Applications.Index do
 
   import HousingAppWeb.Components.DataGrid
 
+  alias HousingAppWeb.Components.FilteredResource
+
   require Ash.Query
 
   def render(%{live_action: :index, current_user_tenant: %{user_type: :user}} = assigns) do
@@ -215,18 +217,8 @@ defmodule HousingAppWeb.Live.Applications.Index do
     {:noreply, push_navigate(socket, to: url)}
   end
 
-  def handle_event("selection-changed", %{"ids" => []}, socket) do
-    {:noreply,
-     socket
-     |> assign(selected_ids: [])
-     |> push_event("js-exec", %{to: "#delete-button", attr: "data-empty"})}
-  end
-
-  def handle_event("selection-changed", %{"ids" => ids}, socket) do
-    {:noreply,
-     socket
-     |> assign(selected_ids: ids)
-     |> push_event("js-exec", %{to: "#delete-button", attr: "data-selected"})}
+  def handle_event("selection-changed", params, socket) do
+    {:noreply, FilteredResource.handle_selection_changed(socket, params)}
   end
 
   def handle_event("delete-selected", %{}, %{assigns: %{selected_ids: []}} = socket) do
