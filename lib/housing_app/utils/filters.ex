@@ -121,21 +121,7 @@ defmodule HousingApp.Utils.Filters do
     [%{field: field, operator: "=", value: value}]
   end
 
-  def react_query_to_ash_filter("profile", query) do
-    predicates =
-      query
-      |> Map.get("rules")
-      |> Enum.reduce(%{}, fn rule, acc ->
-        case rule["operator"] do
-          "=" -> Map.put(acc, rule["field"], parse_value(rule["value"]))
-          _ -> acc
-        end
-      end)
-
-    Map.put(%{}, query["combinator"], predicates)
-  end
-
-  def react_query_to_ash_filter(_resource, query) do
+  def react_query_to_ash_filter(query) do
     predicates =
       query
       |> Map.get("rules")
@@ -146,7 +132,14 @@ defmodule HousingApp.Utils.Filters do
         end
       end)
 
-    Map.put(%{}, query["combinator"], predicates)
+    combinator =
+      if not is_nil(query["combinator"]) && query["combinator"] != "" do
+        query["combinator"]
+      else
+        "and"
+      end
+
+    Map.put(%{}, combinator, predicates)
   end
 
   defp parse_value(val) when is_integer(val), do: val

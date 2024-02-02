@@ -42,77 +42,62 @@ defmodule HousingApp.Util.FilterTests do
   describe "Utils.Filters.react_query_to_ash_filter Profile" do
     test "One filter" do
       filter =
-        HousingApp.Utils.Filters.react_query_to_ash_filter(
-          "profile",
-          %{
-            "rules" => [%{"value" => "EE", "operator" => "=", "field" => "major"}],
-            "combinator" => "and"
-          }
-        )
+        HousingApp.Utils.Filters.react_query_to_ash_filter(%{
+          "rules" => [%{"value" => "EE", "operator" => "=", "field" => "data.major"}],
+          "combinator" => "and"
+        })
 
-      assert %{"and" => %{"major" => "EE"}} == filter
+      assert %{"and" => %{"data" => %{"major" => "EE"}}} == filter
     end
 
     test "Two filters" do
       filter =
-        HousingApp.Utils.Filters.react_query_to_ash_filter(
-          "profile",
-          %{
-            "rules" => [
-              %{"value" => "EE", "operator" => "=", "field" => "major"},
-              %{"value" => 42, "operator" => "=", "field" => "age"}
-            ],
-            "combinator" => "or"
-          }
-        )
+        HousingApp.Utils.Filters.react_query_to_ash_filter(%{
+          "rules" => [
+            %{"value" => "EE", "operator" => "=", "field" => "data.major"},
+            %{"value" => 42, "operator" => "=", "field" => "data.age"}
+          ],
+          "combinator" => "or"
+        })
 
-      assert %{"or" => %{"age" => 42, "major" => "EE"}} == filter
+      assert %{"or" => %{"data" => %{"age" => 42, "major" => "EE"}}} == filter
     end
   end
 
   describe "Utils.Filters.react_query_to_ash_filter Booking" do
     test "One filter" do
       filter =
-        HousingApp.Utils.Filters.react_query_to_ash_filter(
-          "booking",
-          %{
-            "rules" => [%{"value" => "EE", "operator" => "=", "field" => "major"}],
-            "combinator" => "and"
-          }
-        )
+        HousingApp.Utils.Filters.react_query_to_ash_filter(%{
+          "rules" => [%{"value" => "EE", "operator" => "=", "field" => "major"}],
+          "combinator" => "and"
+        })
 
       assert %{"and" => %{"major" => "EE"}} == filter
     end
 
     test "Two filters" do
       filter =
-        HousingApp.Utils.Filters.react_query_to_ash_filter(
-          "booking",
-          %{
-            "rules" => [
-              %{"value" => "EE", "operator" => "=", "field" => "major"},
-              %{"value" => 42, "operator" => "=", "field" => "age"}
-            ],
-            "combinator" => "or"
-          }
-        )
+        HousingApp.Utils.Filters.react_query_to_ash_filter(%{
+          "rules" => [
+            %{"value" => "EE", "operator" => "=", "field" => "major"},
+            %{"value" => 42, "operator" => "=", "field" => "age"}
+          ],
+          "combinator" => "or"
+        })
 
       assert %{"or" => %{"age" => 42, "major" => "EE"}} == filter
     end
 
     test "Nested filters" do
       filter =
-        HousingApp.Utils.Filters.react_query_to_ash_filter(
-          "booking",
-          %{
-            "rules" => [
-              %{"value" => "Boston", "operator" => "=", "field" => "location.city"},
-              %{"value" => "222-333-4444", "operator" => "=", "field" => "location.phone.cell"},
-              %{"value" => 42, "operator" => "=", "field" => "age"}
-            ],
-            "combinator" => "and"
-          }
-        )
+        HousingApp.Utils.Filters.react_query_to_ash_filter(%{
+          "rules" => [
+            %{"value" => "Boston", "operator" => "=", "field" => "location.city"},
+            %{"value" => "222-333-4444", "operator" => "=", "field" => "location.phone.cell"},
+            %{"value" => 42, "operator" => "=", "field" => "age"}
+          ],
+          "combinator" => "and"
+        })
 
       assert %{
                "and" => %{
