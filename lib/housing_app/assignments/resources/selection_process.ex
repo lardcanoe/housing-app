@@ -68,6 +68,19 @@ defmodule HousingApp.Assignments.SelectionProcess do
       change set_attribute(:tenant_id, actor(:tenant_id))
     end
 
+    create :copy do
+      argument :source, :map do
+        allow_nil? false
+      end
+
+      change fn changeset, context ->
+        Ash.Changeset.change_attributes(
+          changeset,
+          HousingApp.Utils.Forms.copy_resource(__MODULE__, changeset.arguments.source)
+        )
+      end
+    end
+
     read :list do
       prepare build(sort: [:name])
       filter expr(is_nil(archived_at))
@@ -95,6 +108,7 @@ defmodule HousingApp.Assignments.SelectionProcess do
 
     define :list
     define :get_by_id, args: [:id]
+    define :copy, args: [:source]
   end
 
   multitenancy do

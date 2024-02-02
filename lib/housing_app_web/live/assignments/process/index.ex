@@ -3,6 +3,8 @@ defmodule HousingAppWeb.Live.Assignments.Process.Index do
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
+  require Ash.Query
+
   def render(%{live_action: :index} = assigns) do
     ~H"""
     <div class="relative overflow-hidden bg-white dark:bg-gray-900 sm:rounded-lg">
@@ -21,20 +23,49 @@ defmodule HousingAppWeb.Live.Assignments.Process.Index do
         </div>
       </div>
 
-      <div class="dashboard-area-height mt-2">
-        <.table id="processes-table" rows={@processes} pagination={false} row_id={fn row -> "processes-row-#{row.id}" end}>
+      <div :if={@processes.ok? && @processes.result} class="dashboard-area-height mt-2">
+        <.table
+          id="processes-table"
+          rows={@processes.result}
+          pagination={false}
+          row_id={fn row -> "processes-row-#{row.id}" end}
+        >
           <:col :let={r} label="name">
             <%= r.name %>
           </:col>
           <:col :let={r} label="description">
             <%= r.description %>
           </:col>
-          <:col :let={r} label="edit">
-            <.link navigate={~p"/assignments/processes/#{r.id}/edit"}>
-              <.button type="button">
-                Edit
+          <:col :let={r} label="">
+            <div class="flex">
+              <div class="grow" />
+              <.link class="mr-4" navigate={~p"/assignments/processes/#{r.id}/edit"}>
+                <.button type="button">
+                  Edit
+                </.button>
+              </.link>
+              <.button type="button" class="mr-4" phx-click="copy" phx-value-id={r.id}>
+                Copy
               </.button>
-            </.link>
+              <.button type="delete" phx-click={show_modal("delete-modal-#{r.id}")}>
+                Delete
+              </.button>
+              <.modal id={"delete-modal-#{r.id}"}>
+                <h1 class="text-lg font-semibold leading-8 mb-4 text-zinc-800 dark:text-gray-100">
+                  Delete <%= r.name %>?
+                </h1>
+
+                <.button
+                  type="delete"
+                  phx-click={
+                    JS.push("delete", value: %{id: r.id})
+                    |> hide_modal("delete-modal-#{r.id}")
+                  }
+                >
+                  Delete
+                </.button>
+              </.modal>
+            </div>
           </:col>
         </.table>
       </div>
@@ -43,13 +74,61 @@ defmodule HousingAppWeb.Live.Assignments.Process.Index do
   end
 
   def mount(_params, _session, socket) do
+    {:ok,
+     socket
+     |> assign(sidebar: :assignments, page_title: "Selection Processes")
+     |> load_async_assigns()}
+  end
+
+  defp load_async_assigns(socket) do
     %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
-    processes =
-      [actor: current_user_tenant, tenant: tenant]
-      |> HousingApp.Assignments.SelectionProcess.list!()
-      |> Enum.sort_by(& &1.name)
+    assign_async(socket, [:processes], fn ->
+      processes =
+        [actor: current_user_tenant, tenant: tenant]
+        |> HousingApp.Assignments.SelectionProcess.list!()
+        |> Enum.sort_by(& &1.name)
 
-    {:ok, assign(socket, processes: processes, sidebar: :assignments, page_title: "Selection Processes")}
+      {:ok, %{processes: processes}}
+    end)
+  end
+
+  def handle_event("copy", %{"id" => id}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    with {:get, {:ok, process}} <-
+           {:get, HousingApp.Assignments.SelectionProcess.get_by_id(id, actor: current_user_tenant, tenant: tenant)},
+         {:copy, {:ok, _copied}} <-
+           {:copy, HousingApp.Assignments.SelectionProcess.copy(process, actor: current_user_tenant, tenant: tenant)} do
+      {:noreply,
+       socket
+       |> put_flash(:info, "Copied process")
+       |> load_async_assigns()}
+    else
+      {:copy, {:error, _}} ->
+        {:noreply, put_flash(socket, :error, "Failed to copy")}
+
+      {:get, {:error, _}} ->
+        {:noreply, put_flash(socket, :error, "Not found")}
+    end
+  end
+
+  def handle_event("delete", %{"id" => id}, socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    HousingApp.Assignments.SelectionProcess
+    |> Ash.Query.for_read(:read, actor: current_user_tenant, tenant: tenant)
+    |> Ash.Query.filter(id == ^id and is_nil(archived_at))
+    |> HousingApp.Assignments.read!()
+    |> Enum.each(fn app ->
+      app
+      |> Ash.Changeset.for_destroy(:archive)
+      |> HousingApp.Assignments.destroy!(actor: current_user_tenant, tenant: tenant)
+    end)
+
+    {:noreply,
+     socket
+     |> put_flash(:info, "Process deleted")
+     |> load_async_assigns()}
   end
 end
