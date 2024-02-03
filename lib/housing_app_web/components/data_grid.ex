@@ -19,6 +19,7 @@ defmodule HousingAppWeb.Components.DataGrid do
   attr :filter_changes, :boolean, default: false
 
   slot :actions, doc: "the slot for showing user actions in the last table column"
+  slot :pills
 
   def data_grid(assigns) do
     ~H"""
@@ -115,6 +116,17 @@ defmodule HousingAppWeb.Components.DataGrid do
                   </ul>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div
+            :if={@pills != []}
+            class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-2"
+          >
+            <div class="w-full flex items-center space-x-3">
+              <%= for pill <- @pills do %>
+                <%= render_slot(pill) %>
+              <% end %>
             </div>
           </div>
 

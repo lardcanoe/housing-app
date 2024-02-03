@@ -113,9 +113,20 @@ defmodule HousingApp.Management.ApplicationSubmission do
         allow_nil? false
       end
 
+      argument :status, :atom do
+        constraints one_of: [:started, :completed, :rejected]
+        allow_nil? true
+      end
+
       prepare build(load: [user_tenant: [:user]])
 
-      filter expr(application_id == ^arg(:application_id) and is_nil(archived_at))
+      filter expr(
+               if is_nil(^arg(:status)) do
+                 application_id == ^arg(:application_id) and is_nil(archived_at)
+               else
+                 application_id == ^arg(:application_id) and status == ^arg(:status) and is_nil(archived_at)
+               end
+             )
     end
 
     read :list_by_user_tenant do
@@ -124,6 +135,15 @@ defmodule HousingApp.Management.ApplicationSubmission do
       end
 
       filter expr(user_tenant_id == ^arg(:user_tenant_id) and is_nil(archived_at))
+    end
+
+    read :get_statuses do
+      argument :application_id, :uuid do
+        allow_nil? false
+      end
+
+      prepare build(select: [:status])
+      filter expr(application_id == ^arg(:application_id) and is_nil(archived_at))
     end
 
     read :get_submission do
@@ -156,7 +176,8 @@ defmodule HousingApp.Management.ApplicationSubmission do
     define :start
     define :submit
     define :resubmit
-    define :list_by_application, args: [:application_id]
+    define :get_statuses, args: [:application_id]
+    define :list_by_application, args: [:application_id, {:optional, :status}]
     define :list_by_user_tenant, args: [:user_tenant_id]
     define :get_submission, args: [:application_id, :user_tenant_id]
   end
