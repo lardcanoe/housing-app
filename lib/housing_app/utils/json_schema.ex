@@ -6,7 +6,9 @@ defmodule HousingApp.Utils.JsonSchema do
   def schema_to_aggrid_columns(scheman, prefix \\ "")
 
   def schema_to_aggrid_columns(%{"properties" => properties}, prefix) when not is_nil(properties) do
-    Enum.map(properties, fn {key, value} ->
+    properties
+    |> Enum.sort_by(fn {_, prop} -> prop["propertyOrder"] || 1000 end)
+    |> Enum.map(fn {key, value} ->
       header_name = HousingApp.Utils.String.titlize(key)
 
       case value do

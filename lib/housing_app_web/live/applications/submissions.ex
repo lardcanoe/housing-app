@@ -3,7 +3,10 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
 
   use HousingAppWeb, {:live_view, layout: {HousingAppWeb.Layouts, :dashboard}}
 
+  import HousingApp.Cldr, only: [format_time: 2]
   import HousingAppWeb.Components.DataGrid
+
+  on_mount HousingAppWeb.LiveLocale
 
   def render(%{live_action: :submissions} = assigns) do
     ~H"""
@@ -103,9 +106,23 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
   end
 
   def handle_event("load-data", %{}, %{assigns: %{application: application}} = socket) do
-    %{status: status, current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+    %{
+      status: status,
+      locale: locale,
+      timezone: timezone,
+      current_user_tenant: current_user_tenant,
+      current_tenant: tenant
+    } = socket.assigns
 
     schema = Jason.decode!(application.form.json_schema)
+
+    # FUTURE: convert a reference object to a name/link tuple
+    # "room" => %{
+    #   "format" => "uuid",
+    #   "propertyOrder" => 0,
+    #   "reference" => "inventory/rooms",
+    #   "type" => "string"
+    # }
 
     columns =
       [
@@ -127,11 +144,15 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
         data =
           Enum.map(
             submissions,
-            &Enum.into(&1.data, %{
+            &Enum.into(dbg(&1.data), %{
               "id" => &1.id,
               "status" => &1.status,
               "metadata" => %{
-                "created_at" => if(application.submission_type == :once, do: &1.updated_at, else: &1.created_at),
+                "created_at" =>
+                  if(application.submission_type == :once,
+                    do: format_time(&1.updated_at, locale: locale, timezone: timezone, format: :short),
+                    else: format_time(&1.created_at, locale: locale, timezone: timezone, format: :short)
+                  ),
                 "user" => &1.user_tenant.user.name
               }
             })
