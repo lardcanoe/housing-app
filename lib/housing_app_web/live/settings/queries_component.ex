@@ -24,14 +24,14 @@ defmodule HousingAppWeb.Components.Settings.Queries do
         pagination={false}
         row_id={fn row -> "query-row-#{row.id}" end}
       >
+        <:col :let={q} label="resource">
+          <%= q.resource %>
+        </:col>
         <:col :let={q} label="name">
           <%= q.name %>
         </:col>
         <:col :let={q} label="description">
           <%= q.description %>
-        </:col>
-        <:col :let={q} label="resource">
-          <%= q.resource %>
         </:col>
         <:col :let={q} label="edit">
           <.button phx-click="edit" phx-value-id={q.id} phx-target={@myself} type="button">
@@ -338,7 +338,12 @@ defmodule HousingAppWeb.Components.Settings.Queries do
 
   def handle_event("validate", %{"_target" => ["cq_form", "resource"], "cq_form" => params}, socket) do
     query_form = AshPhoenix.Form.validate(socket.assigns.query_form, params)
-    {:noreply, socket |> assign(query_form: query_form) |> load_resource_fields(params["resource"])}
+
+    {:noreply,
+     socket
+     |> assign(query_form: query_form)
+     |> load_resource_fields(params["resource"])
+     |> push_event("query-builder:refresh", %{})}
   end
 
   def handle_event("validate", %{"cq_form" => params}, socket) do
@@ -424,6 +429,8 @@ defmodule HousingAppWeb.Components.Settings.Queries do
   # end
 
   defp load_queries(current_user_tenant, tenant) do
-    HousingApp.Management.CommonQuery.list!(actor: current_user_tenant, tenant: tenant)
+    [actor: current_user_tenant, tenant: tenant]
+    |> HousingApp.Management.CommonQuery.list!()
+    |> Enum.sort_by(&{&1.resource, &1.name})
   end
 end
