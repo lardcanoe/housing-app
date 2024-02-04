@@ -85,7 +85,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
           embed={true}
           prefix="form"
           add_custom_root={true}
-          variables={HousingApp.Utils.MapUtil.array_to_map(@current_step.form.variables)}
+          variables={@variables}
           actor={@current_user_tenant}
           tenant={@current_tenant}
         />
@@ -183,13 +183,14 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     end
   end
 
-  def load_form(%{assigns: %{application: %{submission_type: :many}}} = socket) do
+  def load_form(%{assigns: %{application: %{submission_type: :many} = application}} = socket) do
     # FUTURE: Should really find most recent, and if :started, then continue it
-    assign(socket,
-      submission: nil,
+    socket
+    |> assign(
       step_data: %{},
       data_form: to_form(%{"profile_id" => "", "data" => %{}}, as: "data")
     )
+    |> stub_new_submission(application)
   end
 
   def load_form(%{assigns: %{application: application}} = socket) do
@@ -204,16 +205,18 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
       {:error, _} ->
         socket
-        |> stub_new_submission(application, current_user_tenant, tenant)
+        |> stub_new_submission(application)
         |> assign(data_form: to_form(%{"profile_id" => "", "data" => %{}}, as: "data"))
     end
   end
 
-  defp stub_new_submission(socket, application, actor, tenant) do
+  defp stub_new_submission(socket, application) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
     {:ok, submission} =
       HousingApp.Management.ApplicationSubmission.start(
         %{application_id: application.id},
-        actor: actor,
+        actor: current_user_tenant,
         tenant: tenant
       )
 
@@ -420,25 +423,40 @@ defmodule HousingAppWeb.Live.Applications.Submit do
 
     cond do
       current_step.form ->
-        assign(socket,
+        socket
+        |> assign(
           json_schema: Jason.decode!(current_step.form.json_schema),
           component: nil
         )
+        |> load_step_variables()
 
       current_step.component ->
-        assign(socket,
-          component: component_to_module(current_step.component),
-          json_schema: nil
-        )
+        assign(socket, component: component_to_module(current_step.component), json_schema: nil, variables: nil)
 
       true ->
         Logger.error("Step has no form or component")
-        assign(socket, component: nil, json_schema: nil)
+        assign(socket, component: nil, json_schema: nil, variables: nil)
     end
   end
 
   defp component_to_module(:assignments_select_bed), do: HousingAppWeb.Components.Assignments.SelectBed
   defp component_to_module(:management_update_profile), do: HousingAppWeb.Components.Management.UpdateProfile
+
+  defp load_step_variables(socket) do
+    %{current_step: current_step} = socket.assigns
+
+    # TODO: Only load profile if the form needs it for mustache display
+    profile = get_latest_profile(socket)
+
+    variables =
+      Map.put(
+        HousingApp.Utils.MapUtil.array_to_map(current_step.form.variables),
+        "profile",
+        profile.sanitized_data
+      )
+
+    assign(socket, variables: variables)
+  end
 
   defp load_step_submission(socket) do
     %{
@@ -534,5 +552,14 @@ defmodule HousingAppWeb.Live.Applications.Submit do
         )
         |> then(& &1.user_tenant)
     end
+  end
+
+  defp get_latest_profile(socket) do
+    %{current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
+
+    HousingApp.Management.Profile.get_mine!(
+      actor: current_user_tenant,
+      tenant: tenant
+    )
   end
 end

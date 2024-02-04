@@ -24,6 +24,10 @@ defmodule HousingApp.Utils.MapUtil do
     Map.new(json, &reduce_keys_to_atoms/1)
   end
 
+  def keys_to_atoms(json) do
+    json
+  end
+
   def keys_to_strings(json) when is_map(json) do
     Map.new(json, &reduce_keys_to_strings/1)
   end

@@ -71,6 +71,7 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
       {:ok, application} ->
         {:ok,
          assign(socket,
+           statuses: nil,
            application: application,
            count: 0,
            loading: true,
@@ -81,14 +82,18 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
   end
 
   def handle_params(%{"status" => status}, _uri, socket) when status in ["started", "completed", "rejected"] do
-    {:noreply, socket |> assign(status: String.to_atom(status)) |> load_statuses()}
+    {:noreply,
+     socket
+     |> assign(status: String.to_atom(status))
+     |> load_statuses()
+     |> push_event("ag-grid:refresh", %{})}
   end
 
   def handle_params(_params, _uri, socket) do
     {:noreply, socket |> assign(status: nil) |> load_statuses()}
   end
 
-  defp load_statuses(socket) do
+  defp load_statuses(%{assigns: %{statuses: statuses}} = socket) when is_nil(statuses) do
     %{application: application, current_user_tenant: current_user_tenant, current_tenant: tenant} = socket.assigns
 
     statuses =
@@ -104,6 +109,8 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
 
     assign(socket, statuses: statuses)
   end
+
+  defp load_statuses(socket), do: socket
 
   def handle_event("load-data", %{}, %{assigns: %{application: application}} = socket) do
     %{
@@ -144,7 +151,7 @@ defmodule HousingAppWeb.Live.Applications.Submissions do
         data =
           Enum.map(
             submissions,
-            &Enum.into(dbg(&1.data), %{
+            &Enum.into(&1.data, %{
               "id" => &1.id,
               "status" => &1.status,
               "metadata" => %{
