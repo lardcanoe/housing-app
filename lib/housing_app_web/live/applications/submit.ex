@@ -10,7 +10,7 @@ defmodule HousingAppWeb.Live.Applications.Submit do
     <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white"><%= @application.name %></h1>
     <div class="md:flex">
       <ol class="space-y-4 w-72 flex-column pr-8">
-        <li :for={step <- @application.steps}>
+        <li :for={step <- @application.steps |> Enum.sort_by(& &1.step)}>
           <div
             class={[
               @current_step.id == step.id &&
