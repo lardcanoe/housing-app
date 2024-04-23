@@ -156,15 +156,15 @@ defmodule HousingAppWeb.Live.Assignments.Bookings.Index do
       end
 
     [
-      %{field: "profile", minWidth: 160, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
+      %{field: "profile", minWidth: 240, pinned: "left", checkboxSelection: true, headerCheckboxSelection: true},
       %{field: "id", minWidth: 120, pinned: "left", hide: true},
       %{field: "building"},
       %{field: "room"},
-      %{field: "bed"},
-      %{field: "rate"},
+      %{field: "bed", hide: true},
+      %{field: "rate", minWidth: 220},
       %{field: "start_at", headerName: "Start", type: "dateColumn"},
       %{field: "end_at", headerName: "End", type: "dateColumn"},
-      %{field: "submission", headerName: "Submission", cellRenderer: "link"}
+      %{field: "submission", headerName: "Submission", cellRenderer: "link", hide: true}
     ] ++
       form_columns ++
       [
